@@ -16,7 +16,7 @@ This is a natural language processing project utilising curated conversation dat
 
 ## technicolor
 
-    - [technicolor](https://github.com/wdbm/technicolor)
+- [technicolor](https://github.com/wdbm/technicolor)
 
 ## PRAW
 
