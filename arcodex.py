@@ -39,22 +39,36 @@ Options:
     -h, --help                    Show this help message.
     --version                     Show the version and exit.
     -v, --verbose                 Show verbose logging.
+    -u, --username=USERNAME       username
     -r, --subreddits=SUBREDDITS   subreddits [default: changemyview]
     -n, --numberOfUtterances=N    number of utterances to access [default: 10]
     -d, --database=DATABASE       database [default: database.db]
 """
 
 programName    = "arcodex"
-programVersion = "2014-10-20T1727Z"
+programVersion = "2014-11-06T1851Z"
+programLogo = (
+"    ___    ____  __________  ____  _______  __\n"
+"   /   |  / __ \/ ____/ __ \/ __ \/ ____/ |/ /\n"
+"  / /| | / /_/ / /   / / / / / / / __/  |   / \n"
+" / ___ |/ _, _/ /___/ /_/ / /_/ / /___ /   |  \n"
+"/_/  |_/_/ |_|\____/\____/_____/_____//_/|_|  \n"
+"                                              "
+)
 
 import os
 import sys
+import subprocess
 import time
+import datetime as datetime
 import logging
+import technicolor as technicolor
 from   docopt import docopt
+#import pyrecon as pyrecon
+import pyprel as pyprel
+import shijian as shijian
 import dataset
 import praw as praw
-import technicolor as technicolor
 
 def main(options):
 
@@ -66,9 +80,7 @@ def main(options):
     logger.info("saving exchanges to database")
     save_exchanges_to_database(exchangesReddit)
 
-    logger.info("terminating {programName}".format(
-        programName = program.name
-    ))
+    program.terminate()
 
 class Exchange(object):
 
@@ -209,11 +221,20 @@ class Program(object):
         options = None
         ):
 
-        # name
-        self.name               = programName
+        # time
+        self.__startTime        = datetime.datetime.utcnow()
+
+        # name, version, logo
+        if programName:
+            self.name           = programName
+        if programVersion:
+            self.version        = programVersion
+        if programLogo:
+            self.logo           = programLogo
 
         # options
         self.options            = options
+        self.userName           = self.options["--username"]
         self.subreddits         = self.options["--subreddits"]
         self.numberOfUtterances = self.options["--numberOfUtterances"]
         self.database           = self.options["--database"]
@@ -223,6 +244,8 @@ class Program(object):
             self.verbose        = False
 
         # default values
+        if self.userName is None:
+            self.userName = os.getenv("USER")
         # Create a list of subreddits from the comma-delimited list of
         # subreddits.
         self.subreddits = self.subreddits.split(",")
@@ -246,8 +269,65 @@ class Program(object):
         else:
             logger.setLevel(logging.INFO)
 
-        # run alert
-        logger.info("running {name}".format(name = self.name))
+        self.engage()
+
+    def engage(
+        self
+        ):
+        pyprel.printLine()
+        # logo
+        if self.logo:
+            logger.info(pyprel.centerString(text = self.logo))
+        pyprel.printLine()
+        # engage alert
+        if self.name:
+            logger.info("engage {programName}".format(
+                programName = self.name
+            ))
+        # version
+        if self.version:
+            logger.info("version: {version}".format(
+                version = self.version
+            ))
+        logger.info("time: {time}".format(
+            time = shijian.time_UTC()
+        ))
+
+    def terminate(
+        self
+        ):
+        logger.info("time: {time}".format(
+            time = shijian.time_UTC()
+        ))
+        logger.info("run time: {time} s".format(
+            time = self.runTime()
+        ))
+        logger.info("terminate {programName}".format(
+            programName = self.name
+        ))
+        pyprel.printLine()
+
+    def startTime(
+        self,
+        style = None
+        ):
+        return(
+            shijian.style_datetime_object(
+                datetimeObject = self.__startTime,
+                style = style
+            )
+        )
+        return(
+            shijian.style_datetime_object(
+                datetimeObject = self.__startTime,
+                style = ""
+            )
+        )
+
+    def runTime(
+        self
+        ):
+        return((datetime.datetime.utcnow() - self.__startTime).total_seconds())
 
 if __name__ == "__main__":
 
