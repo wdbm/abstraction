@@ -45,39 +45,39 @@ Options:
     -d, --database=DATABASE       database [default: database.db]
 """
 
-programName    = "arcodex"
-programVersion = "2014-11-06T1851Z"
-programLogo = (
-"    ___    ____  __________  ____  _______  __\n"
-"   /   |  / __ \/ ____/ __ \/ __ \/ ____/ |/ /\n"
-"  / /| | / /_/ / /   / / / / / / / __/  |   / \n"
-" / ___ |/ _, _/ /___/ /_/ / /_/ / /___ /   |  \n"
-"/_/  |_/_/ |_|\____/\____/_____/_____//_/|_|  \n"
-"                                              "
-)
+name    = "arcodex"
+version = "2015-01-05T1454Z"
+#logo = (
+#"    ___    ____  __________  ____  _______  __\n"
+#"   /   |  / __ \/ ____/ __ \/ __ \/ ____/ |/ /\n"
+#"  / /| | / /_/ / /   / / / / / / / __/  |   / \n"
+#" / ___ |/ _, _/ /___/ /_/ / /_/ / /___ /   |  \n"
+#"/_/  |_/_/ |_|\____/\____/_____/_____//_/|_|  \n"
+#"                                              "
+#)
 
 import os
 import sys
 import subprocess
 import time
-import datetime as datetime
+import datetime
 import logging
-import technicolor as technicolor
-from   docopt import docopt
-#import pyrecon as pyrecon
-import pyprel as pyprel
-import shijian as shijian
+import technicolor
+import inspect
+import docopt
+import pyprel
+import shijian
 import dataset
-import praw as praw
+import praw
 
 def main(options):
 
     global program
     program = Program(options = options)
 
-    logger.info("accessing exchanges")
+    log.info("accessing exchanges")
     exchangesReddit = access_exchanges_Reddit()
-    logger.info("saving exchanges to database")
+    log.info("saving exchanges to database")
     save_exchanges_to_database(exchangesReddit)
 
     program.terminate()
@@ -104,14 +104,14 @@ class Exchange(object):
 
 def access_exchanges_Reddit():
     # Access Reddit.
-    logger.info("accessing Reddit API")
-    r = praw.Reddit(user_agent = programName)
+    log.info("accessing Reddit API")
+    r = praw.Reddit(user_agent = name)
     # Access each subreddit.
-    logger.info("accessing subreddits {subreddits}".format(
+    log.info("accessing subreddits {subreddits}".format(
         subreddits = program.subreddits
     ))
     for subreddit in program.subreddits:
-        logger.info("accessing subreddit \"{subreddit}\"".format(
+        log.info("accessing subreddit \"{subreddit}\"".format(
             subreddit = subreddit
         ))
         submissions = r.get_subreddit(
@@ -137,7 +137,7 @@ def access_exchanges_Reddit():
                 "ascii",
                 "ignore"
             )
-            logger.debug(
+            log.debug(
                 "accessing submission \"{submissionTitle}\"".format(
                 subreddit = subreddit,
                 submissionTitle = submissionTitle
@@ -171,6 +171,8 @@ def access_exchanges_Reddit():
                 exchangeReference  = subreddit
             )
             exchanges.append(exchange)
+            # Pause to avoid overtaxing Reddit.
+            #time.sleep(2)
     return(exchanges)
 
 def create_database(
@@ -187,15 +189,15 @@ def save_exchanges_to_database(
     ):
     # Check for the database. If it does not exist, create it.
     if not os.path.isfile(program.database):
-        logger.info("database {database} nonexistent".format(
+        log.info("database {database} nonexistent".format(
             database = program.database
         ))
-        logger.info("creating database {database}".format(
+        log.info("creating database {database}".format(
             database = program.database
         ))
         create_database(fileName = program.database)
     # Access the database.
-    logger.info("accessing database {database}".format(
+    log.info("accessing database {database}".format(
         database = program.database
     ))
     database = dataset.connect("sqlite:///" + program.database)
@@ -221,16 +223,31 @@ class Program(object):
         options = None
         ):
 
-        # time
-        self.__startTime        = datetime.datetime.utcnow()
+        # internal options
+        self.displayLogo           = True
+
+        # clock
+        global clock
+        clock = shijian.Clock(name = "program run time")
 
         # name, version, logo
-        if programName:
-            self.name           = programName
-        if programVersion:
-            self.version        = programVersion
-        if programLogo:
-            self.logo           = programLogo
+        if "name" in globals():
+            self.name              = name
+        else:
+            self.name              = None
+        if "version" in globals():
+            self.version           = version
+        else:
+            self.version           = None
+        if "logo" in globals():
+            self.logo              = logo
+        elif "logo" not in globals() and hasattr(self, "name"):
+            self.logo              = pyprel.renderBanner(
+                                         text = self.name.upper()
+                                     )
+        else:
+            self.displayLogo       = False
+            self.logo              = None
 
         # options
         self.options            = options
@@ -251,23 +268,23 @@ class Program(object):
         self.subreddits = self.subreddits.split(",")
 
         ## standard logging
-        #global logger
-        #logger = logging.getLogger(__name__)
-        ##logger = logging.getLogger()
+        #global log
+        #log = logging.getLogger(__name__)
+        ##log = logging.getLogger()
         #logging.basicConfig()
 
         # technicolor logging
-        global logger
-        logger = logging.getLogger(__name__)
-        #logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
-        logger.addHandler(technicolor.ColorisingStreamHandler())
+        global log
+        log = logging.getLogger(__name__)
+        #log = logging.getLogger()
+        log.setLevel(logging.DEBUG)
+        log.addHandler(technicolor.ColorisingStreamHandler())
 
         # logging level
         if self.verbose:
-            logger.setLevel(logging.DEBUG)
+            log.setLevel(logging.DEBUG)
         else:
-            logger.setLevel(logging.INFO)
+            log.setLevel(logging.INFO)
 
         self.engage()
 
@@ -276,63 +293,45 @@ class Program(object):
         ):
         pyprel.printLine()
         # logo
-        if self.logo:
-            logger.info(pyprel.centerString(text = self.logo))
-        pyprel.printLine()
+        if self.displayLogo:
+            log.info(pyprel.centerString(text = self.logo))
+            pyprel.printLine()
         # engage alert
         if self.name:
-            logger.info("engage {programName}".format(
-                programName = self.name
+            log.info("initiate {name}".format(
+                name = self.name
             ))
         # version
         if self.version:
-            logger.info("version: {version}".format(
+            log.info("version: {version}".format(
                 version = self.version
             ))
-        logger.info("time: {time}".format(
-            time = shijian.time_UTC()
+        log.info("initiation time: {time}".format(
+            time = clock.startTime()
         ))
 
     def terminate(
         self
         ):
-        logger.info("time: {time}".format(
-            time = shijian.time_UTC()
+        clock.stop()
+        log.info("termination time: {time}".format(
+            time = clock.stopTime()
         ))
-        logger.info("run time: {time} s".format(
-            time = self.runTime()
+        log.info("time full report:\n{report}".format(
+            report = shijian.clocks.report(style = "full")
         ))
-        logger.info("terminate {programName}".format(
-            programName = self.name
+        log.info("time statistics report:\n{report}".format(
+            report = shijian.clocks.report()
+        ))
+        log.info("terminate {name}".format(
+            name = self.name
         ))
         pyprel.printLine()
 
-    def startTime(
-        self,
-        style = None
-        ):
-        return(
-            shijian.style_datetime_object(
-                datetimeObject = self.__startTime,
-                style = style
-            )
-        )
-        return(
-            shijian.style_datetime_object(
-                datetimeObject = self.__startTime,
-                style = ""
-            )
-        )
-
-    def runTime(
-        self
-        ):
-        return((datetime.datetime.utcnow() - self.__startTime).total_seconds())
-
 if __name__ == "__main__":
 
-    options = docopt(__doc__)
+    options = docopt.docopt(__doc__)
     if options["--version"]:
-        print(programVersion)
+        print(version)
         exit()
     main(options)
