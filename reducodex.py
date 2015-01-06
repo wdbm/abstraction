@@ -80,7 +80,6 @@ def main(options):
     log.info("access table \"{tableName}\"".format(
         tableName = tableName
     ))
-    #table = database[tableName]
     # Print the columns of the table.
     log.info("columns in table \"{tableName}\": {columns}".format(
         tableName = tableName,
