@@ -44,7 +44,7 @@ Options:
 """
 
 name    = "vicodex"
-version = "2015-01-06T1158Z"
+version = "2015-01-06T1509Z"
 
 import os
 import sys
@@ -58,17 +58,16 @@ import docopt
 import pyprel
 import shijian
 import dataset
+import abstraction
 
 def main(options):
 
     global program
     program = Program(options = options)
 
-    # Access database.
-    log.info("access database \"{database}\"".format(
-        database = program.database
-    ))
-    database = dataset.connect("sqlite:///" + program.database)
+    database = abstraction.access_database(database = program.database)
+    log.info("database metadata:")
+    abstraction.log_database_metadata()
     # Print the tables in the database.
     log.info("tables in database: {tables}".format(
         tables = database.tables
@@ -145,33 +144,22 @@ class Program(object):
         self.options               = options
         self.userName              = self.options["--username"]
         self.database              = self.options["--database"]
-        if "--verbose" in options:
-            self.verbose           = True
-        else:
-            self.verbose           = False
+        self.verbose               = self.options["--verbose"]
 
         # default values
         if self.userName is None:
             self.userName = os.getenv("USER")
 
-        ## standard logging
-        #global log
-        #log = logging.getLogger(__name__)
-        ##log = logging.getLogger()
-        #logging.basicConfig()
-
-        # technicolor logging
+        # logging
         global log
         log = logging.getLogger(__name__)
-        #log = logging.getLogger()
-        log.setLevel(logging.DEBUG)
-        log.addHandler(technicolor.ColorisingStreamHandler())
+        logging.root.addHandler(technicolor.ColorisingStreamHandler())
 
         # logging level
         if self.verbose:
-            log.setLevel(logging.DEBUG)
+            logging.root.setLevel(logging.DEBUG)
         else:
-            log.setLevel(logging.INFO)
+            logging.root.setLevel(logging.INFO)
 
         self.engage()
 
