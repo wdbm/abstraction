@@ -44,7 +44,7 @@ Options:
 """
 
 name    = "vicodex"
-version = "2015-01-06T1058Z"
+version = "2015-01-06T1158Z"
 
 import os
 import sys
@@ -78,7 +78,6 @@ def main(options):
     log.info("access table \"{tableName}\"".format(
         tableName = tableName
     ))
-    #table = database[tableName]
     # Print the columns of the table.
     log.info("columns in table \"{tableName}\": {columns}".format(
         tableName = tableName,
