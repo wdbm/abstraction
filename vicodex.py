@@ -44,7 +44,7 @@ Options:
 """
 
 name    = "vicodex"
-version = "2015-01-06T1509Z"
+version = "2015-01-06T1614Z"
 
 import os
 import sys
@@ -65,9 +65,10 @@ def main(options):
     global program
     program = Program(options = options)
 
-    database = abstraction.access_database(database = program.database)
+    # Access database.
+    database = abstraction.access_database(fileName = program.database)
     log.info("database metadata:")
-    abstraction.log_database_metadata()
+    abstraction.log_database_metadata(fileName = program.database)
     # Print the tables in the database.
     log.info("tables in database: {tables}".format(
         tables = database.tables

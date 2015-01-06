@@ -46,7 +46,7 @@ Options:
 """
 
 name    = "reducodex"
-version = "2015-01-06T1056Z"
+version = "2015-01-06T1620Z"
 
 import os
 import sys
@@ -60,6 +60,7 @@ import docopt
 import pyprel
 import shijian
 import dataset
+import abstraction
 
 def main(options):
 
@@ -67,10 +68,9 @@ def main(options):
     program = Program(options = options)
 
     # Access database.
-    log.info("access database \"{database}\"".format(
-        database = program.database
-    ))
-    database = dataset.connect("sqlite:///" + program.database)
+    database = abstraction.access_database(fileName = program.database)
+    log.info("database metadata:")
+    abstraction.log_database_metadata(fileName = program.database)
     # Print the tables in the database.
     log.info("tables in database: {tables}".format(
         tables = database.tables
@@ -97,7 +97,7 @@ def main(options):
         # utterance data against existing utterance data in the new list of
         # exchanges and append it to the new list of exchanges if it does not
         # exist in the list.
-        exchange = Exchange(
+        exchange = abstraction.Exchange(
             utterance          = entry["utterance"],
             response           = entry["response"],
             utteranceTimeUNIX  = entry["utteranceTimeUNIX"],
@@ -120,87 +120,16 @@ def main(options):
             log.debug("skip exchange \"{utterance}\"".format(
                 utterance = exchange.utterance
             ))
-
+    # Save the exchanges to the new database.
     log.info("save exchanges to database (only those not saved previously)")
-    save_exchanges_to_database(
+    abstraction.save_exchanges_to_database(
         exchanges = exchanges,
-        database  = program.databaseOut
+        fileName  = program.databaseOut
     )
+    # Save metadata to the new database.
+    abstraction.save_database_metadata(fileName = program.databaseOut)
 
     program.terminate()
-
-class Exchange(object):
-
-    def __init__(
-        self,
-        utterance               = None,
-        response                = None,
-        utteranceTimeUNIX       = None,
-        responseTimeUNIX        = None,
-        utteranceReference      = None,
-        responseReference       = None,
-        exchangeReference       = None
-        ):
-        self.utterance          = utterance
-        self.response           = response
-        self.utteranceTimeUNIX  = utteranceTimeUNIX
-        self.responseTimeUNIX   = responseTimeUNIX
-        self.utteranceReference = utteranceReference
-        self.responseReference  = responseReference
-        self.exchangeReference  = exchangeReference
-
-def create_database(
-    fileName = None
-    ):
-    os.system(
-        "sqlite3 " + \
-        fileName + \
-        " \"create table aTable(field1 int); drop table aTable;\""
-    )
-
-def save_exchanges_to_database(
-    exchanges = None,
-    database  = "database.db"
-    ):
-    # Check for the database. If it does not exist, create it.
-    if not os.path.isfile(database):
-        log.info("database {database} nonexistent".format(
-            database = database
-        ))
-        log.info("create database {database}".format(
-            database = database
-        ))
-        create_database(fileName = database)
-    # Access the database.
-    log.info("access database {database}".format(
-        database = database
-    ))
-    database = dataset.connect("sqlite:///" + database)
-    # Access or create the exchanges table.
-    tableExchanges = database["exchanges"]
-    # Access each exchange. Check the database for the utterance of the
-    # exchange. If the utterance of the exchange is not in the database, save
-    # the exchange to the database.
-    for exchange in exchanges:
-        if database["exchanges"].find_one(
-                utterance = exchange.utterance
-            ) is None:
-            log.debug("save exchange \"{utterance}\"".format(
-                utterance = exchange.utterance
-            ))
-            tableExchanges.insert(dict(
-                utterance          = exchange.utterance,
-                response           = exchange.response,
-                utteranceTimeUNIX  = exchange.utteranceTimeUNIX,
-                responseTimeUNIX   = exchange.responseTimeUNIX,
-                utteranceReference = exchange.utteranceReference,
-                responseReference  = exchange.responseReference,
-                exchangeReference  = exchange.exchangeReference
-            ))
-        else:
-            log.debug("skip previously-saved exchange \"{utterance}\"".format(
-                utterance = exchange.utterance
-            ))
 
 class Program(object):
 
@@ -241,28 +170,23 @@ class Program(object):
         self.userName              = self.options["--username"]
         self.database              = self.options["--inputdatabase"]
         self.databaseOut           = self.options["--outputdatabase"]
-        if "--verbose" in options:
-            self.verbose           = True
-        else:
-            self.verbose           = False
+        self.verbose               = self.options["--verbose"]
 
         # default values
         if self.userName is None:
             self.userName = os.getenv("USER")
         self.databaseOut = shijian.proposeFileName(fileName = self.databaseOut)
 
-        ## standard logging
-        #global log
-        #log = logging.getLogger(__name__)
-        ##log = logging.getLogger()
-        #logging.basicConfig()
-
-        # technicolor logging
+        # logging
         global log
         log = logging.getLogger(__name__)
-        #log = logging.getLogger()
-        log.setLevel(logging.DEBUG)
-        log.addHandler(technicolor.ColorisingStreamHandler())
+        logging.root.addHandler(technicolor.ColorisingStreamHandler())
+
+        # logging level
+        if self.verbose:
+            logging.root.setLevel(logging.DEBUG)
+        else:
+            logging.root.setLevel(logging.INFO)
 
         # logging level
         if self.verbose:
