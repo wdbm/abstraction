@@ -46,15 +46,7 @@ Options:
 """
 
 name    = "arcodex"
-version = "2015-01-05T1454Z"
-#logo = (
-#"    ___    ____  __________  ____  _______  __\n"
-#"   /   |  / __ \/ ____/ __ \/ __ \/ ____/ |/ /\n"
-#"  / /| | / /_/ / /   / / / / / / / __/  |   / \n"
-#" / ___ |/ _, _/ /___/ /_/ / /_/ / /___ /   |  \n"
-#"/_/  |_/_/ |_|\____/\____/_____/_____//_/|_|  \n"
-#"                                              "
-#)
+version = "2015-01-06T0350Z"
 
 import os
 import sys
@@ -75,9 +67,9 @@ def main(options):
     global program
     program = Program(options = options)
 
-    log.info("accessing exchanges")
+    log.info("access exchanges")
     exchangesReddit = access_exchanges_Reddit()
-    log.info("saving exchanges to database")
+    log.info("save exchanges to database (only those not saved previously)")
     save_exchanges_to_database(exchangesReddit)
 
     program.terminate()
@@ -104,14 +96,14 @@ class Exchange(object):
 
 def access_exchanges_Reddit():
     # Access Reddit.
-    log.info("accessing Reddit API")
+    log.info("access Reddit API")
     r = praw.Reddit(user_agent = name)
     # Access each subreddit.
-    log.info("accessing subreddits {subreddits}".format(
+    log.info("access subreddits {subreddits}".format(
         subreddits = program.subreddits
     ))
     for subreddit in program.subreddits:
-        log.info("accessing subreddit \"{subreddit}\"".format(
+        log.info("access subreddit \"{subreddit}\"".format(
             subreddit = subreddit
         ))
         submissions = r.get_subreddit(
@@ -138,7 +130,7 @@ def access_exchanges_Reddit():
                 "ignore"
             )
             log.debug(
-                "accessing submission \"{submissionTitle}\"".format(
+                "access submission \"{submissionTitle}\"".format(
                 subreddit = subreddit,
                 submissionTitle = submissionTitle
             ))
@@ -192,28 +184,40 @@ def save_exchanges_to_database(
         log.info("database {database} nonexistent".format(
             database = program.database
         ))
-        log.info("creating database {database}".format(
+        log.info("create database {database}".format(
             database = program.database
         ))
         create_database(fileName = program.database)
     # Access the database.
-    log.info("accessing database {database}".format(
+    log.info("access database {database}".format(
         database = program.database
     ))
     database = dataset.connect("sqlite:///" + program.database)
     # Access or create the exchanges table.
     tableExchanges = database["exchanges"]
-    # Access each exchange and save it to the database.
+    # Access each exchange. Check the database for the utterance of the
+    # exchange. If the utterance of the exchange is not in the database, save
+    # the exchange to the database.
     for exchange in exchanges:
-        tableExchanges.insert(dict(
-            utterance          = exchange.utterance,
-            response           = exchange.response,
-            utteranceTimeUNIX  = exchange.utteranceTimeUNIX,
-            responseTimeUNIX   = exchange.responseTimeUNIX,
-            utteranceReference = exchange.utteranceReference,
-            responseReference  = exchange.responseReference,
-            exchangeReference  = exchange.exchangeReference
-        ))
+        if database["exchanges"].find_one(
+                utterance = exchange.utterance
+            ) is None:
+            log.debug("save exchange \"{utterance}\"".format(
+                utterance = exchange.utterance
+            ))
+            tableExchanges.insert(dict(
+                utterance          = exchange.utterance,
+                response           = exchange.response,
+                utteranceTimeUNIX  = exchange.utteranceTimeUNIX,
+                responseTimeUNIX   = exchange.responseTimeUNIX,
+                utteranceReference = exchange.utteranceReference,
+                responseReference  = exchange.responseReference,
+                exchangeReference  = exchange.exchangeReference
+            ))
+        else:
+            log.debug("skip previously-saved exchange \"{utterance}\"".format(
+                utterance = exchange.utterance
+            ))
 
 class Program(object):
 
