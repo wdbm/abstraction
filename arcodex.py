@@ -46,7 +46,7 @@ Options:
 """
 
 name    = "arcodex"
-version = "2015-01-06T0350Z"
+version = "2015-01-06T1722Z"
 
 import os
 import sys
@@ -61,6 +61,7 @@ import pyprel
 import shijian
 import dataset
 import praw
+import abstraction
 
 def main(options):
 
@@ -68,156 +69,18 @@ def main(options):
     program = Program(options = options)
 
     log.info("access exchanges")
-    exchangesReddit = access_exchanges_Reddit()
+    exchangesReddit = abstraction.access_exchanges_Reddit(
+        userAgent          = name,
+        subreddits         = program.subreddits,
+        numberOfUtterances = program.numberOfUtterances
+    )
     log.info("save exchanges to database (only those not saved previously)")
-    save_exchanges_to_database(exchangesReddit)
-
-    program.terminate()
-
-class Exchange(object):
-
-    def __init__(
-        self,
-        utterance               = None,
-        response                = None,
-        utteranceTimeUNIX       = None,
-        responseTimeUNIX        = None,
-        utteranceReference      = None,
-        responseReference       = None,
-        exchangeReference       = None
-        ):
-        self.utterance          = utterance
-        self.response           = response
-        self.utteranceTimeUNIX  = utteranceTimeUNIX
-        self.responseTimeUNIX   = responseTimeUNIX
-        self.utteranceReference = utteranceReference
-        self.responseReference  = responseReference
-        self.exchangeReference  = exchangeReference
-
-def access_exchanges_Reddit():
-    # Access Reddit.
-    log.info("access Reddit API")
-    r = praw.Reddit(user_agent = name)
-    # Access each subreddit.
-    log.info("access subreddits {subreddits}".format(
-        subreddits = program.subreddits
-    ))
-    for subreddit in program.subreddits:
-        log.info("access subreddit \"{subreddit}\"".format(
-            subreddit = subreddit
-        ))
-        submissions = r.get_subreddit(
-            subreddit
-        ).get_top(
-            limit = int(program.numberOfUtterances)
-        )
-        # Access each submission, its title and its top comment.
-        exchanges = []
-        for submission in submissions:
-            # Access the submission title.
-            submissionTitle = submission.title.encode(
-                "ascii",
-                "ignore"
-            )
-            # Access the submission URL.
-            submissionURL = submission.permalink.encode(
-                "ascii",
-                "ignore"
-            )
-            # Access the submission time.
-            submissionTimeUNIX = str(submission.created_utc).encode(
-                "ascii",
-                "ignore"
-            )
-            log.debug(
-                "access submission \"{submissionTitle}\"".format(
-                subreddit = subreddit,
-                submissionTitle = submissionTitle
-            ))
-            comments = praw.helpers.flatten_tree(submission.comments)
-            if comments:
-                # Access the submission top comment.
-                commentTopText = comments[0].body.encode(
-                    "ascii",
-                    "ignore"
-                )
-                # Access the submission top comment URL.
-                commentTopURL = comments[0].permalink.encode(
-                    "ascii",
-                    "ignore"
-                )
-                # Access the submission top comment time.
-                commentTopTimeUNIX = str(comments[0].created_utc).encode(
-                    "ascii",
-                    "ignore"
-                )
-            # Create a new exchange object for the current exchange data and
-            # append it to the list of exchanges.
-            exchange = Exchange(
-                utterance          = submissionTitle,
-                response           = commentTopText,
-                utteranceTimeUNIX  = submissionTimeUNIX,
-                responseTimeUNIX   = commentTopTimeUNIX,
-                utteranceReference = submissionURL,
-                responseReference  = commentTopURL,
-                exchangeReference  = subreddit
-            )
-            exchanges.append(exchange)
-            # Pause to avoid overtaxing Reddit.
-            #time.sleep(2)
-    return(exchanges)
-
-def create_database(
-    fileName = None
-    ):
-    os.system(
-        "sqlite3 " + \
-        fileName + \
-        " \"create table aTable(field1 int); drop table aTable;\""
+    abstraction.save_exchanges_to_database(
+        exchanges = exchangesReddit,
+        fileName  = program.database
     )
 
-def save_exchanges_to_database(
-    exchanges = None
-    ):
-    # Check for the database. If it does not exist, create it.
-    if not os.path.isfile(program.database):
-        log.info("database {database} nonexistent".format(
-            database = program.database
-        ))
-        log.info("create database {database}".format(
-            database = program.database
-        ))
-        create_database(fileName = program.database)
-    # Access the database.
-    log.info("access database {database}".format(
-        database = program.database
-    ))
-    database = dataset.connect("sqlite:///" + program.database)
-    # Access or create the exchanges table.
-    tableExchanges = database["exchanges"]
-    # Access each exchange. Check the database for the utterance of the
-    # exchange. If the utterance of the exchange is not in the database, save
-    # the exchange to the database.
-    for exchange in exchanges:
-        if database["exchanges"].find_one(
-                utterance = exchange.utterance
-            ) is None:
-            log.debug("save exchange \"{utterance}\"".format(
-                utterance = exchange.utterance
-            ))
-            tableExchanges.insert(dict(
-                utterance          = exchange.utterance,
-                response           = exchange.response,
-                utteranceTimeUNIX  = exchange.utteranceTimeUNIX,
-                responseTimeUNIX   = exchange.responseTimeUNIX,
-                utteranceReference = exchange.utteranceReference,
-                responseReference  = exchange.responseReference,
-                exchangeReference  = exchange.exchangeReference
-            ))
-        else:
-            log.debug("skip previously-saved exchange \"{utterance}\"".format(
-                utterance = exchange.utterance
-            ))
+    program.terminate()
 
 class Program(object):
 
@@ -259,10 +122,7 @@ class Program(object):
         self.subreddits         = self.options["--subreddits"]
         self.numberOfUtterances = self.options["--numberOfUtterances"]
         self.database           = self.options["--database"]
-        if "--verbose" in options:
-            self.verbose        = True
-        else:
-            self.verbose        = False
+        self.verbose               = self.options["--verbose"]
 
         # default values
         if self.userName is None:
@@ -271,24 +131,16 @@ class Program(object):
         # subreddits.
         self.subreddits = self.subreddits.split(",")
 
-        ## standard logging
-        #global log
-        #log = logging.getLogger(__name__)
-        ##log = logging.getLogger()
-        #logging.basicConfig()
-
-        # technicolor logging
+        # logging
         global log
         log = logging.getLogger(__name__)
-        #log = logging.getLogger()
-        log.setLevel(logging.DEBUG)
-        log.addHandler(technicolor.ColorisingStreamHandler())
+        logging.root.addHandler(technicolor.ColorisingStreamHandler())
 
         # logging level
         if self.verbose:
-            log.setLevel(logging.DEBUG)
+            logging.root.setLevel(logging.DEBUG)
         else:
-            log.setLevel(logging.INFO)
+            logging.root.setLevel(logging.INFO)
 
         self.engage()
 
