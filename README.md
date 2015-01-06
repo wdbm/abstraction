@@ -83,3 +83,23 @@ The following example accesses database "database.db" and displays its exchanges
 ```Bash
 vicodex.py --database="database.db"
 ```
+
+# reducodex: remove duplicate collated exchanges                        
+
+The program reducodex inspects an existing database of conversational exchanges, removes duplicate entries, creates simplified identifiers for entries and then writes a new database of these entries.          
+
+## usage examples
+
+The following example accesses database "database.db" and displays its exchanges data:
+
+```Bash
+reducodex.py --inputdatabase="database.db"
+```
+
+```Bash
+reducodex.py --inputdatabase="database.db" --outputdatabase="database_1.db"
+```
+
+# future
+
+Under consideration is refactoring of common procedures of arcodex, vicodex and reducodex to a common module.

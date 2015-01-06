@@ -3,14 +3,15 @@
 """
 ################################################################################
 #                                                                              #
-# vicodex                                                                      #
+# reducodex                                                                    #
 #                                                                              #
 ################################################################################
 #                                                                              #
 # LICENCE INFORMATION                                                          #
 #                                                                              #
-# This program is a database inspection program specialised to conversational  #
-# exchanges.                                                                   #
+# This program inspects an existing database of conversational exchanges,      #
+# removes duplicate entries, creates simplified identifiers for entries and    #
+# then writes a new database of these entries.                                 #
 #                                                                              #
 # copyright (C) 2014 William Breaden Madden                                    #
 #                                                                              #
@@ -36,15 +37,16 @@ Usage:
     program [options]
 
 Options:
-    -h, --help                Show this help message.
-    --version                 Show the version and exit.
-    -v, --verbose             Show verbose logging.
-    -u, --username=USERNAME   username
-    -d, --database=DATABASE   database [default: database.db]
+    -h, --help                      Show this help message.
+    --version                       Show the version and exit.
+    -v, --verbose                   Show verbose logging.
+    -u, --username=USERNAME         username
+    -d, --inputdatabase=DATABASE    database [default: database.db]
+    -d, --outputdatabase=DATABASE   database [default: database_1.db]
 """
 
-name    = "vicodex"
-version = "2015-01-06T1058Z"
+name    = "reducodex"
+version = "2015-01-06T1056Z"
 
 import os
 import sys
@@ -89,24 +91,117 @@ def main(options):
         tableName    = tableName,
         numberOfRows = str(len(database[tableName]))
     ))
-    # Print the table entries:
-    log.info("entries of table {tableName}:\n".format(
-        tableName    = tableName
-    ))
+    # Build a list of unique exchanges.
+    exchanges = []
     for entry in database[tableName].all():
-        entryData = {
-            "id":                 entry["id"],
-            "utterance":          entry["utterance"],
-            "response":           entry["response"],
-            "utteranceTimeUNIX":  entry["utteranceTimeUNIX"],
-            "responseTimeUNIX":   entry["responseTimeUNIX"],
-            "utteranceReference": entry["utteranceReference"],
-            "responseReference":  entry["responseReference"],
-            "exchangeReference":  entry["exchangeReference"]
-        }
-        log.info(pyprel.dictionaryString(dictionary = entryData))
+        # Create a new exchange object for the existing exchange data, check its
+        # utterance data against existing utterance data in the new list of
+        # exchanges and append it to the new list of exchanges if it does not
+        # exist in the list.
+        exchange = Exchange(
+            utterance          = entry["utterance"],
+            response           = entry["response"],
+            utteranceTimeUNIX  = entry["utteranceTimeUNIX"],
+            responseTimeUNIX   = entry["responseTimeUNIX"],
+            utteranceReference = entry["utteranceReference"],
+            responseReference  = entry["responseReference"],
+            exchangeReference  = entry["exchangeReference"]
+        )
+        # Check new exchange against exchanges in new list.
+        appendFlag = True
+        for exchangeInNewList in exchanges:
+            if exchange.utterance == exchangeInNewList.utterance:
+                appendFlag = False
+        if appendFlag is True:
+            log.debug("keep exchange \"{utterance}\"".format(
+                utterance = exchange.utterance
+            ))
+            exchanges.append(exchange)
+        else:
+            log.debug("skip exchange \"{utterance}\"".format(
+                utterance = exchange.utterance
+            ))
+
+    log.info("save exchanges to database (only those not saved previously)")
+    save_exchanges_to_database(
+        exchanges = exchanges,
+        database  = program.databaseOut
+    )
 
     program.terminate()
+
+class Exchange(object):
+
+    def __init__(
+        self,
+        utterance               = None,
+        response                = None,
+        utteranceTimeUNIX       = None,
+        responseTimeUNIX        = None,
+        utteranceReference      = None,
+        responseReference       = None,
+        exchangeReference       = None
+        ):
+        self.utterance          = utterance
+        self.response           = response
+        self.utteranceTimeUNIX  = utteranceTimeUNIX
+        self.responseTimeUNIX   = responseTimeUNIX
+        self.utteranceReference = utteranceReference
+        self.responseReference  = responseReference
+        self.exchangeReference  = exchangeReference
+
+def create_database(
+    fileName = None
+    ):
+    os.system(
+        "sqlite3 " + \
+        fileName + \
+        " \"create table aTable(field1 int); drop table aTable;\""
+    )
+
+def save_exchanges_to_database(
+    exchanges = None,
+    database  = "database.db"
+    ):
+    # Check for the database. If it does not exist, create it.
+    if not os.path.isfile(database):
+        log.info("database {database} nonexistent".format(
+            database = database
+        ))
+        log.info("create database {database}".format(
+            database = database
+        ))
+        create_database(fileName = database)
+    # Access the database.
+    log.info("access database {database}".format(
+        database = database
+    ))
+    database = dataset.connect("sqlite:///" + database)
+    # Access or create the exchanges table.
+    tableExchanges = database["exchanges"]
+    # Access each exchange. Check the database for the utterance of the
+    # exchange. If the utterance of the exchange is not in the database, save
+    # the exchange to the database.
+    for exchange in exchanges:
+        if database["exchanges"].find_one(
+                utterance = exchange.utterance
+            ) is None:
+            log.debug("save exchange \"{utterance}\"".format(
+                utterance = exchange.utterance
+            ))
+            tableExchanges.insert(dict(
+                utterance          = exchange.utterance,
+                response           = exchange.response,
+                utteranceTimeUNIX  = exchange.utteranceTimeUNIX,
+                responseTimeUNIX   = exchange.responseTimeUNIX,
+                utteranceReference = exchange.utteranceReference,
+                responseReference  = exchange.responseReference,
+                exchangeReference  = exchange.exchangeReference
+            ))
+        else:
+            log.debug("skip previously-saved exchange \"{utterance}\"".format(
+                utterance = exchange.utterance
+            ))
 
 class Program(object):
 
@@ -145,7 +240,8 @@ class Program(object):
         # options
         self.options               = options
         self.userName              = self.options["--username"]
-        self.database              = self.options["--database"]
+        self.database              = self.options["--inputdatabase"]
+        self.databaseOut           = self.options["--outputdatabase"]
         if "--verbose" in options:
             self.verbose           = True
         else:
@@ -154,6 +250,7 @@ class Program(object):
         # default values
         if self.userName is None:
             self.userName = os.getenv("USER")
+        self.databaseOut = shijian.proposeFileName(fileName = self.databaseOut)
 
         ## standard logging
         #global log
