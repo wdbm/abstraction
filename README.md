@@ -1,8 +1,8 @@
 # abstraction
 
-# introduction
+<iframe width="560" height="315" src="//www.youtube.com/embed/v9zJ9noLeok" frameborder="0" allowfullscreen></iframe>
 
-This is a natural language processing project utilising curated conversation data as neural network training data.
+# setup
 
 ## quick start
 
@@ -20,39 +20,56 @@ wget https://raw.githubusercontent.com/wdbm/technicolor/master/technicolor.py
 
 # prerequisites
 
-## SQLite
+|**prerequisite**|**comment**|
+|---|---|
+|SQLite|```sudo apt-get -y install sqlite```|
+|docopt|```sudo pip install docopt```|
+|technicolor|[technicolor](https://github.com/wdbm/technicolor)|
+|PRAW|```sudo pip install praw```|
+|dataset|```sudo pip install dataset```|
 
-```Bash
-sudo apt-get -y install sqlite
-```
+# introduction
 
-## docopt
+Project abstraction is a natural language processing project utilising curated conversation data as neural network training data.
 
-```Bash
-sudo pip install docopt
-```
+# bags of words, skip-grams and word vectors
 
-## technicolor
+Word vectors are an efficient implementation of bag-of-words and skip-gram architectures for computing vector representations of words. These representations can be used in natural language processing applications and research.
 
-- [technicolor](https://github.com/wdbm/technicolor)
+An n-gram is a contiguous sequence of n items from a sequence of text or speech. The items can be phonemes, syllabels, letters, words or base pairs depending on the application. Skip-grams are a generalisation of n-grams in which the components (typically words) need not be consecutive in the text under consideration, but may have gaps that are skipped. They are one way of overcoming the data sparsity problem found in conventional n-gram analysis.
 
-## PRAW
+Formally, an n-gram is a consecutive subsequence of length n of some sequence of tokens w_n. A k-skip-n-gram is a length-n subsequence in which components occur at a distance of at most k from each other. For example, in the text
 
-```Bash
-sudo pip install praw
-```
+    the rain in Spain falls mainly on the plain
 
-## dataset
+the set of 1-skip-2-grams includes all of the 2-grams and, in addition, the following sequences:
 
-```Bash
-sudo pip install dataset
-```
+    the in,
+    rain Spain,
+    in falls,
+    Spain mainly,
+    mainly the,
+    on plain
+
+It has been demonstrated that skip-gram language models can be trained such that it is possible to perform 'word arithmetic'. For example, with an appropriate model, the expression ```king - man + woman``` evaluates to very close to ```queen```.
+
+- "Efficient Estimation of Word Representations in Vector Space", Tomas Mikolov, Kai Chen, Greg Corrado, Jeffrey Dean <http://arxiv.org/abs/1301.3781>
+
+The bag-of-words model is a simplifying representation used in natural language processing. In this model, a text is represented as a bag (multiset -- a set in which members can appear more than once) of its words, disregarding grammar and word order but keeping multiplicity. The bag-of-words model is used commonly in methods of document classification, for which the frequency of occurrence of each word is used as a feature for training a classifier.
+
+Word vectors are continuous distributed representations of words. The tool word2vec takes a text corpus as input and produces word vectors as output. It constructs a vocabulary from the training text data and then learns vector representations of words. A word2vec model is formed by training on raw text. It records the context, or usage, of each word encoded as word vectors. The significance of a word vector is defined as its usefulness as an indicator of certain larger meanings or labels.
+
+# curated conversation data
+
+Curated conversation data sourced from Reddit is used for the conversation analysis and modelling. Specifically, conversational exchanges on Reddit are recorded. An exchange consists of an utterance and a response to the utterance, together with associated data, such as references and timestamps. A submission to Reddit is considered as an utterance and a comment on the submission is considered as a response to the utterance. The utterance is assumed to be of good quality and the response is assumed to be appropriate to the utterance based on the crowd-curated quality assessment inherent in Reddit.
+
+# module abstraction
+
+The module abstraction contains functions used generally for project abstraction. Many of the programs of the project use its functions.
 
 # arcodex: archive collated exchanges
 
-The program arcodex is a data collation and archiving program specialised to conversational exchanges. It can be used to access and archive to database exchanges on Reddit. An exchange consists of an utterance and a response to the utterance, together with associated data, such as references and timestamps. A submission to Reddit is considered as an utterance and a comment on the submission is considered as a response to the utterance. The utterance is assumed to be of good quality and the response is assumed to be appropriate to the utterance based on the crowd-curated quality assessment inherent in Reddit.
-
-## usage examples
+The program arcodex is a data collation and archiving program specialised to conversational exchanges. It can be used to archive to database exchanges on Reddit.
 
 The following example accesses 2 utterances from the subreddit "worldnews" with verbosity:
 
@@ -72,11 +89,15 @@ The following example accesses 30 utterances from all of the listed subreddits w
 arcodex.py --numberOfUtterances 30 --subreddits=askreddit,changemyview,lgbt,machinelearning,particlephysics,technology,worldnews --verbose
 ```
 
+The standard run 2014-10-28T202832Z is as follows:
+
+```Bash
+arcodex.py --numberOfUtterances 200 --subreddits=askreddit,changemyview,lgbt,machinelearning,particlephysics,technology,worldnews --verbose
+```
+
 # vicodex: view collated exchanges
 
 The program vicodex is a viewing program specialised to conversational exchanges. It can be used to access and view a database of exchanges.
-
-## usage examples
 
 The following example accesses database "database.db" and displays its exchanges data:
 
@@ -88,9 +109,7 @@ vicodex.py --database="database.db"
 
 The program reducodex inspects an existing database of conversational exchanges, removes duplicate entries, creates simplified identifiers for entries and then writes a new database of these entries.          
 
-## usage examples
-
-The following example accesses database "database.db" and displays its exchanges data:
+The following examples access database "database.db", remove duplicate entries, create simplified identifiers for entries and output database "database_1.db":
 
 ```Bash
 reducodex.py --inputdatabase="database.db"
@@ -99,7 +118,3 @@ reducodex.py --inputdatabase="database.db"
 ```Bash
 reducodex.py --inputdatabase="database.db" --outputdatabase="database_1.db"
 ```
-
-# future
-
-Under consideration is refactoring of common procedures of arcodex, vicodex and reducodex to a common module.
