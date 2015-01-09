@@ -28,8 +28,8 @@ wget https://raw.githubusercontent.com/wdbm/technicolor/master/technicolor.py
 |---|---|
 |docopt|```sudo pip install docopt```|
 |pyfiglet|```sudo pip install pyfiglet```|
-|technicolor|[pyprel](https://github.com/wdbm/pyprel)|
-|technicolor|[shijian](https://github.com/wdbm/shijian)|
+|pyprel|[pyprel](https://github.com/wdbm/pyprel)|
+|shijian|[shijian](https://github.com/wdbm/shijian)|
 |technicolor|[technicolor](https://github.com/wdbm/technicolor)|
 |PRAW|```sudo pip install praw```|
 |SQLite|```sudo apt-get -y install sqlite```|
