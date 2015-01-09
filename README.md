@@ -1,5 +1,3 @@
-# abstraction
-
 [![project abstraction](http://img.youtube.com/vi/v9zJ9noLeok/0.jpg)](https://www.youtube.com/watch?v=v9zJ9noLeok)
 
 # setup
