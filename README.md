@@ -9,6 +9,12 @@ The following Bash commands, that have been tested on Ubuntu 14.10, should insta
 ```Bash
 sudo pip install docopt
 sudo pip install pyfiglet
+sudo pip install praw
+sudo apt-get -y install sqlite
+sudo pip install dataset
+sudo apt-get -y install python-nltk
+sudo python -m nltk.downloader all
+sudo easy_install -U gensim
 git clone https://github.com/wdbm/abstraction.git
 cd abstraction/
 wget https://raw.githubusercontent.com/wdbm/pyprel/master/pyprel.py
@@ -20,11 +26,17 @@ wget https://raw.githubusercontent.com/wdbm/technicolor/master/technicolor.py
 
 |**prerequisite**|**comment**|
 |---|---|
-|SQLite|```sudo apt-get -y install sqlite```|
 |docopt|```sudo pip install docopt```|
+|pyfiglet|```sudo pip install pyfiglet```|
+|technicolor|[pyprel](https://github.com/wdbm/pyprel)|
+|technicolor|[shijian](https://github.com/wdbm/shijian)|
 |technicolor|[technicolor](https://github.com/wdbm/technicolor)|
 |PRAW|```sudo pip install praw```|
+|SQLite|```sudo apt-get -y install sqlite```|
 |dataset|```sudo pip install dataset```|
+|NLTK|```sudo apt-get -y install python-nltk```|
+|NLTK data|```sudo python -m nltk.downloader all```|
+|gensim|```sudo easy_install -U gensim```|
 
 # introduction
 
