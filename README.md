@@ -1,6 +1,6 @@
 # abstraction
 
-<iframe width="560" height="315" src="//www.youtube.com/embed/v9zJ9noLeok" frameborder="0" allowfullscreen></iframe>
+[![project abstraction](http://img.youtube.com/vi/v9zJ9noLeok/0.jpg)](https://www.youtube.com/watch?v=v9zJ9noLeok)
 
 # setup
 
