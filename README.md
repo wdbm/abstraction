@@ -38,6 +38,8 @@ wget https://raw.githubusercontent.com/wdbm/technicolor/master/technicolor.py
 |NLTK data|```sudo python -m nltk.downloader all```|
 |gensim|```sudo easy_install -U gensim```|
 
+The function ```abstraction.setup()``` should be run.
+
 # introduction
 
 Project abstraction is a natural language processing project utilising curated conversation data as neural network training data.

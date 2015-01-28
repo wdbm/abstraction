@@ -9,7 +9,7 @@
 # This program provides data analysis, data selection, data collation,         #
 # database utilities and word2vec utilities for project abstraction.           #
 #                                                                              #
-# copyright (C) 2014 William Breaden Madden                                    #
+# copyright (C) 2014--2015 William Breaden Madden                              #
 #                                                                              #
 # This software is released under the terms of the GNU General Public License  #
 # version 3 (GPLv3).                                                           #
@@ -29,7 +29,7 @@
 #                                                                              #
 ################################################################################
 
-version = "2015-01-28T1911Z"
+version = "2015-01-28T1940Z"
 
 import os
 import sys
@@ -48,6 +48,11 @@ from gensim.models import Word2Vec
 import nltk
 
 log = logging.getLogger(__name__)
+
+def setup():
+    # Download NLTK data.
+    downloader = nltk.downloader.Downloader("http://nltk.github.com/nltk_data/")
+    downloader.download("all")
 
 def model_word2vec_Brown_Corpus():
     model = Word2Vec(nltk.corpus.brown.sents())
