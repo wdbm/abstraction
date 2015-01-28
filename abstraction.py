@@ -6,8 +6,8 @@
 #                                                                              #
 # LICENCE INFORMATION                                                          #
 #                                                                              #
-# This program provides data analysis, data selection, data collation and      #
-# database utilities for project abstraction.                                  #
+# This program provides data analysis, data selection, data collation,         #
+# database utilities and word2vec utilities for project abstraction.           #
 #                                                                              #
 # copyright (C) 2014 William Breaden Madden                                    #
 #                                                                              #
@@ -29,7 +29,7 @@
 #                                                                              #
 ################################################################################
 
-version = "2015-01-06T1509Z"
+version = "2015-01-28T1911Z"
 
 import os
 import sys
@@ -43,22 +43,72 @@ import shijian
 import dataset
 import praw
 
+import re
+from gensim.models import Word2Vec
+import nltk
+
 log = logging.getLogger(__name__)
 
+def model_word2vec_Brown_Corpus():
+    model = Word2Vec(nltk.corpus.brown.sents())
+    return(model)
+
+def convert_word_string_to_word_vector(
+    wordString     = None,
+    model_word2vec = None
+    ):
+    if wordString in model_word2vec:
+        return(model_word2vec[wordString])
+    else:
+        log.debug("word string \"{wordString}\" not in word2vec model".format(
+            wordString = wordString
+        ))
+        return(None)
+
+def convert_sentence_string_to_word_vector(
+    sentenceString = None,
+    model_word2vec = None
+    ):
+    # Convert the sentence string to a list of word strings.
+    wordStrings = wordList = re.sub("[^\w]", " ",  sentenceString).split()
+    # Build a list of word vectors.
+    wordVectors = []
+    for wordString in wordStrings:
+        wordVector = convert_word_string_to_word_vector(
+            wordString     = wordString,
+            model_word2vec = model_word2vec
+        )
+        if wordVector is not None:
+            wordVectors.append(wordVector)
+        else:
+            log.debug("skip undefined word vector")
+    # Combine all of the word vectors into one word vector by summation.
+    sentenceWordVector = sum(wordVectors)
+    return(sentenceWordVector)
+
+def create_database(
+    fileName = None
+    ):
+    os.system(
+        "sqlite3 " + \
+        fileName + \
+        " \"create table aTable(field1 int); drop table aTable;\""
+    )
+
 def access_database(
-    database = "database.db"
+    fileName = "database.db"
     ):
     # Access the database.
-    log.debug("access database \"{database}\"".format(
-        database = database
+    log.debug("access database \"{fileName}\"".format(
+        fileName = fileName
     ))
-    database = dataset.connect("sqlite:///" + database)
+    database = dataset.connect("sqlite:///" + fileName)
     return(database)
 
 def save_database_metadata(
-    database = "database.db"
+    fileName = "database.db"
     ):
-    database = access_database(database = database)
+    database = access_database(fileName = fileName)
     # Access or create the exchanges table, delete it and then recreate it.
     tableMetadata = database["metadata"]
     tableMetadata.drop()
@@ -79,9 +129,9 @@ def save_database_metadata(
     tableMetadata.insert(metadata)
 
 def database_metadata(
-    database = "database.db"
+    fileName = "database.db"
     ):
-    database = access_database(database = database)
+    database = access_database(fileName = fileName)
     # Access the database metadata.
     log.debug("access database metadata")
     # Check if metadata exists for the database.
@@ -99,7 +149,180 @@ def database_metadata(
     return(metadata)
 
 def log_database_metadata(
-    database = "database.db"
+    fileName = "database.db"
     ):
-    metadata = database_metadata(database = database)
+    metadata = database_metadata(fileName = fileName)
     log.info(pyprel.dictionaryString(dictionary = metadata))
+
+class Exchange(object):
+
+    def __init__(
+        self,
+        utterance                = None,
+        response                 = None,
+        utteranceTimeUNIX        = None,
+        responseTimeUNIX         = None,
+        utteranceWordVector      = None,
+        responseWordVector       = None,
+        utteranceReference       = None,
+        responseReference        = None,
+        exchangeReference        = None
+        ):
+        self.utterance           = utterance
+        self.response            = response
+        self.utteranceTimeUNIX   = utteranceTimeUNIX
+        self.responseTimeUNIX    = responseTimeUNIX
+        self.utteranceWordVector = utteranceWordVector,
+        self.responseWordVector  = responseWordVector,
+        self.utteranceReference  = utteranceReference,
+        self.responseReference   = responseReference,
+        self.exchangeReference   = exchangeReference
+
+    def printout(
+        self
+        ):
+        print("exchange:")
+        print("utterance: {utterance}".format(
+            utterance = self.utterance
+        ))
+        print("response: {response}".format(
+            response = self.response))
+        print("utteranceTimeUNIX: {utteranceTimeUNIX}".format(
+            utteranceTimeUNIX = self.utteranceTimeUNIX
+        ))
+        print("responseTimeUNIX: {responseTimeUNIX}".format(
+            responseTimeUNIX = self.responseTimeUNIX
+        ))
+        print("utteranceWordVector: {utteranceWordVector}".format(
+            utteranceWordVector = self.utteranceWordVector
+        ))
+        print("responseWordVector: {responseWordVector}".format(
+            responseWordVector = self.responseWordVector
+        ))
+        print("utteranceReference: {utteranceReference}".format(
+            utteranceReference = self.utteranceReference
+        ))
+        print("responseReference: {responseReference}".format(
+            responseReference = self.responseReference
+        ))
+        print("exchangeReference: {exchangeReference}".format(
+            exchangeReference = self.exchangeReference
+        ))
+
+def access_exchanges_Reddit(
+    userAgent          = "scriptwire",
+    subreddits         = None,
+    numberOfUtterances = 200
+    ):
+    # Access Reddit.
+    log.info("access Reddit API")
+    r = praw.Reddit(user_agent = userAgent)
+    # Access each subreddit.
+    log.info("access subreddits {subreddits}".format(
+        subreddits = subreddits
+    ))
+    for subreddit in subreddits:
+        log.info("access subreddit \"{subreddit}\"".format(
+            subreddit = subreddit
+        ))
+        submissions = r.get_subreddit(
+            subreddit
+        ).get_top(
+            limit = int(numberOfUtterances)
+        )
+        # Access each submission, its title and its top comment.
+        exchanges = []
+        for submission in submissions:
+            # Access the submission title.
+            submissionTitle = submission.title.encode(
+                "ascii",
+                "ignore"
+            )
+            # Access the submission URL.
+            submissionURL = submission.permalink.encode(
+                "ascii",
+                "ignore"
+            )
+            # Access the submission time.
+            submissionTimeUNIX = str(submission.created_utc).encode(
+                "ascii",
+                "ignore"
+            )
+            log.debug(
+                "access submission \"{submissionTitle}\"".format(
+                subreddit = subreddit,
+                submissionTitle = submissionTitle
+            ))
+            comments = praw.helpers.flatten_tree(submission.comments)
+            if comments:
+                # Access the submission top comment.
+                commentTopText = comments[0].body.encode(
+                    "ascii",
+                    "ignore"
+                )
+                # Access the submission top comment URL.
+                commentTopURL = comments[0].permalink.encode(
+                    "ascii",
+                    "ignore"
+                )
+                # Access the submission top comment time.
+                commentTopTimeUNIX = str(comments[0].created_utc).encode(
+                    "ascii",
+                    "ignore"
+                )
+            # Create a new exchange object for the current exchange data and
+            # append it to the list of exchanges.
+            exchange = Exchange(
+                utterance          = submissionTitle,
+                response           = commentTopText,
+                utteranceTimeUNIX  = submissionTimeUNIX,
+                responseTimeUNIX   = commentTopTimeUNIX,
+                utteranceReference = submissionURL,
+                responseReference  = commentTopURL,
+                exchangeReference  = subreddit
+            )
+            exchanges.append(exchange)
+            # Pause to avoid overtaxing Reddit.
+            #time.sleep(2)
+    return(exchanges)
+
+def save_exchanges_to_database(
+    exchanges = None,
+    fileName  = "database.db"
+    ):
+    # Check for the database. If it does not exist, create it.
+    if not os.path.isfile(fileName):
+        log.info("database {fileName} nonexistent".format(
+            fileName = fileName
+        ))
+        log.info("create database {fileName}".format(
+            fileName = fileName
+        ))
+        create_database(fileName = fileName)
+    # Access the database.
+    database = access_database(fileName = fileName)
+    # Access or create the exchanges table.
+    tableExchanges = database["exchanges"]
+    # Access each exchange. Check the database for the utterance of the
+    # exchange. If the utterance of the exchange is not in the database, save
+    # the exchange to the database.
+    for exchange in exchanges:
+        if database["exchanges"].find_one(
+                utterance = exchange.utterance
+            ) is None:
+            log.debug("save exchange \"{utterance}\"".format(
+                utterance = exchange.utterance
+            ))
+            tableExchanges.insert(dict(
+                utterance          = str(exchange.utterance),
+                response           = str(exchange.response),
+                utteranceTimeUNIX  = str(exchange.utteranceTimeUNIX),
+                responseTimeUNIX   = str(exchange.responseTimeUNIX),
+                utteranceReference = str(exchange.utteranceReference),
+                responseReference  = str(exchange.responseReference),
+                exchangeReference  = str(exchange.exchangeReference)
+            ))
+        else:
+            log.debug("skip previously-saved exchange \"{utterance}\"".format(
+                utterance = exchange.utterance
+            ))
