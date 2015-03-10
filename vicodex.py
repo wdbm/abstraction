@@ -36,15 +36,41 @@ Usage:
     program [options]
 
 Options:
-    -h, --help                Show this help message.
-    --version                 Show the version and exit.
-    -v, --verbose             Show verbose logging.
+    -h, --help                display help message
+    --version                 display version and exit
+    -v, --verbose             verbose logging
     -u, --username=USERNAME   username
     -d, --database=DATABASE   database [default: database.db]
+    -t, --tableLimit=NUMBER   limit on number of table entries displayed
 """
 
 name    = "vicodex"
-version = "2015-01-06T1614Z"
+version = "2015-03-10T1048Z"
+
+def smuggle(
+    moduleName = None,
+    URL        = None
+    ):
+    if moduleName is None:
+        moduleName = URL
+    try:
+        module = __import__(moduleName)
+        return(module)
+    except:
+        try:
+            moduleString = urllib.urlopen(URL).read()
+            module = imp.new_module("module")
+            exec moduleString in module.__dict__
+            return(module)
+        except: 
+            raise(
+                Exception(
+                    "module {moduleName} import error".format(
+                        moduleName = moduleName
+                    )
+                )
+            )
+            sys.exit()
 
 import os
 import sys
@@ -52,13 +78,25 @@ import subprocess
 import time
 import datetime
 import logging
-import technicolor
 import inspect
-import docopt
-import pyprel
-import shijian
 import dataset
 import abstraction
+docopt = smuggle(
+    moduleName = "docopt",
+    URL = "https://rawgit.com/docopt/docopt/master/docopt.py"
+)
+technicolor = smuggle(
+    moduleName = "technicolor",
+    URL = "https://rawgit.com/wdbm/technicolor/master/technicolor.py"
+)
+shijian = smuggle(
+    moduleName = "shijian",
+    URL = "https://rawgit.com/wdbm/shijian/master/shijian.py"
+)
+pyprel = smuggle(
+    moduleName = "pyprel",
+    URL = "https://rawgit.com/wdbm/pyprel/master/pyprel.py"
+)
 
 def main(options):
 
@@ -92,18 +130,44 @@ def main(options):
     log.info("entries of table {tableName}:\n".format(
         tableName    = tableName
     ))
+    # Define table headings.
+    tableContents = [
+        [
+            "id",
+            "utterance",
+            "response",
+            "utteranceTimeUNIX",
+            "responseTimeUNIX",
+            "utteranceReference",
+            "responseReference",
+            "exchangeReference"
+        ]
+    ]
+    # Fill table data.
+    countEntries = 0
     for entry in database[tableName].all():
-        entryData = {
-            "id":                 entry["id"],
-            "utterance":          entry["utterance"],
-            "response":           entry["response"],
-            "utteranceTimeUNIX":  entry["utteranceTimeUNIX"],
-            "responseTimeUNIX":   entry["responseTimeUNIX"],
-            "utteranceReference": entry["utteranceReference"],
-            "responseReference":  entry["responseReference"],
-            "exchangeReference":  entry["exchangeReference"]
-        }
-        log.info(pyprel.dictionaryString(dictionary = entryData))
+        tableContents.append(
+            [
+                str(entry["id"]),
+                str(entry["utterance"]),
+                str(entry["response"]),
+                str(entry["utteranceTimeUNIX"]),
+                str(entry["responseTimeUNIX"]),
+                str(entry["utteranceReference"]),
+                str(entry["responseReference"]),
+                str(entry["exchangeReference"])
+            ]
+        )
+        countEntries += 1
+        if program.tableLimit is not None:
+            if countEntries >= program.tableLimit:
+                break
+    # Record table.
+    print(
+        pyprel.Table(
+            contents = tableContents
+        )
+    )
 
     program.terminate()
 
@@ -146,6 +210,10 @@ class Program(object):
         self.userName              = self.options["--username"]
         self.database              = self.options["--database"]
         self.verbose               = self.options["--verbose"]
+        if self.options["--tableLimit"] is not None:
+            self.tableLimit = int(self.options["--tableLimit"])
+        else:
+            self.tableLimit = None
 
         # default values
         if self.userName is None:
