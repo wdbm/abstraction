@@ -75,6 +75,10 @@ Word vectors are continuous distributed representations of words. The tool word2
 
 Curated conversation data sourced from Reddit is used for the conversation analysis and modelling. Specifically, conversational exchanges on Reddit are recorded. An exchange consists of an utterance and a response to the utterance, together with associated data, such as references and timestamps. A submission to Reddit is considered as an utterance and a comment on the submission is considered as a response to the utterance. The utterance is assumed to be of good quality and the response is assumed to be appropriate to the utterance based on the crowd-curated quality assessment inherent in Reddit.
 
+# abstraction code picture
+
+![](packages_abstraction.png)
+
 # module abstraction
 
 The module abstraction contains functions used generally for project abstraction. Many of the programs of the project use its functions.
