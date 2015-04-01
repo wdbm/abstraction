@@ -3,7 +3,7 @@
 """
 ################################################################################
 #                                                                              #
-# toywv1                                                                       #
+# toywv-1                                                                      #
 #                                                                              #
 ################################################################################
 #                                                                              #
@@ -40,13 +40,13 @@ Options:
     -v, --verbose             Show verbose logging.
     -u, --username=USERNAME   username
     --expression=TEXT         text expression to convert to word vector
-                              [default: hello world]
+                              [default: All those moments will be lost in time.]
     --wordvectormodel=NAME    word vector model
                               [default: Brown_corpus.wvm]
 """
 
-name    = "toywv1"
-version = "2015-04-01T0909Z"
+name    = "toywv-1"
+version = "2015-04-01T1024Z"
 
 import os
 import sys
@@ -62,6 +62,7 @@ import shijian
 import dataset
 import abstraction
 from gensim.models import Word2Vec
+import numpy
 
 def main(options):
 
@@ -95,6 +96,16 @@ def main(options):
         "\n{expressionWordVector}".format(
             expression           = program.expression,
             expressionWordVector = expressionWordVector
+        )
+    )
+
+    log.info("")
+
+    log.info(
+        "word vector representation of expression \"{expression}\" as NumPy "
+        "array:\n{expressionNumPyArray}".format(
+            expression           = program.expression,
+            expressionNumPyArray = numpy.array_repr(expressionWordVector)
         )
     )
 
