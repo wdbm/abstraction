@@ -29,7 +29,7 @@
 #                                                                              #
 ################################################################################
 
-version = "2015-01-28T1940Z"
+version = "2015-05-08T1834Z"
 
 import os
 import sys
@@ -114,7 +114,7 @@ def save_database_metadata(
     fileName = "database.db"
     ):
     database = access_database(fileName = fileName)
-    # Access or create the exchanges table, delete it and then recreate it.
+    # Access or create the metadata table, delete it and then recreate it.
     tableMetadata = database["metadata"]
     tableMetadata.drop()
     tableMetadata = database["metadata"]
