@@ -42,10 +42,11 @@ Options:
     -u, --username=USERNAME   username
     -d, --database=DATABASE   database [default: database.db]
     -t, --tableLimit=NUMBER   limit on number of table entries displayed
+    -t, --outputFile=NAME     optional output file for simple training
 """
 
 name    = "vicodex"
-version = "2015-03-10T1048Z"
+version = "2015-05-28T2125Z"
 
 def smuggle(
     moduleName = None,
@@ -143,6 +144,7 @@ def main(options):
             "exchangeReference"
         ]
     ]
+    simpleTrainingRepresentation = ""
     # Fill table data.
     countEntries = 0
     for entry in database[tableName].all():
@@ -159,6 +161,20 @@ def main(options):
             ]
         )
         countEntries += 1
+        # simple training representation
+        if program.outputFile is not None:
+            if simpleTrainingRepresentation is "":
+                simpleTrainingRepresentation = \
+                    str(entry["utterance"]) + \
+                    " => " + \
+                    str(entry["response"])                
+            else:
+                simpleTrainingRepresentation = \
+                    simpleTrainingRepresentation + \
+                    "\n" + \
+                    str(entry["utterance"]) + \
+                    " => " + \
+                    str(entry["response"])
         if program.tableLimit is not None:
             if countEntries >= program.tableLimit:
                 break
@@ -168,6 +184,16 @@ def main(options):
             contents = tableContents
         )
     )
+    # Record to file, if specified.
+    if program.outputFile is not None:
+        log.info(
+            "save simple training representation to file {fileName}".format(
+                fileName = program.outputFile
+            )
+        )
+        outputFile = open(program.outputFile, "w")
+        outputFile.write(simpleTrainingRepresentation)
+        outputFile.close()
 
     program.terminate()
 
@@ -214,6 +240,10 @@ class Program(object):
             self.tableLimit = int(self.options["--tableLimit"])
         else:
             self.tableLimit = None
+        if self.options["--outputFile"] is not None:
+            self.outputFile = str(self.options["--outputFile"])
+        else:
+            self.outputFile = None
 
         # default values
         if self.userName is None:
