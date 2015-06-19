@@ -4,7 +4,6 @@
 
 ## "Simulated the Hofbräuhaus": text generation by a recurrent neural network trained on Mein Kampf
 
-```
 quie{ment is not completely his common glasm. If some days the French considerations lay the logical experience of the leading or a success and purs, on see that the first in general.
 
 That
@@ -174,4 +173,3 @@ die for my history he might are the word
 aspect. For.
 Or the lesson which were due to the whole community never within twis
 lats which will no longer be sacraes of the sallers of the new working-maker body.
-```
