@@ -38,13 +38,13 @@ Options:
     --inputpixels=FILENAME       input pixels -- ASCII format
     --outputimage=FILENAME       output image file
     --outputimagewidth=NUMBER    width of output image in pixels [default: 2379]
-    --convertImageToPixels       mode to convert image to pixels
+    --convertimagetopixels       mode to convert image to pixels
     --validatepixels             mode to validate pixels
     --convertPixelsToImage       mode to convert pixels to image
 """
 
 name    = "imconv-1"
-version = "2015-06-22T1453Z"
+version = "2015-06-29T2022Z"
 
 import smuggle # http://cern.ch/go/PG8f
 import os
@@ -85,7 +85,7 @@ def main(options):
     input_pixels_filename        = options["--inputpixels"]
     output_image_filename        = options["--outputimage"]
     output_image_width           = int(options["--outputimagewidth"])
-    mode_convert_image_to_pixels = bool(options["--convertImageToPixels"])
+    mode_convert_image_to_pixels = bool(options["--convertimagetopixels"])
     mode_validate_pixels         = bool(options["--validatepixels"])
     mode_convert_pixels_to_image = bool(options["--convertPixelsToImage"])
 
