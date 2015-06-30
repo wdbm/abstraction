@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="378" height="378" viewBox="1 1 378 378">
+	<title>Raven Matrix</title>
+	<path d="M 2,2 378,2 378,378 2,378 z" style="fill:white;stroke:black;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter" />
+	<g id="Rectangle01" style="fill:none;stroke:black;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1">
+		<path d="M 20,20 70,20 70,70 20,70 z" style="fill:black" />
+		<path d="M 70,20 120,20 120,70 70,70 z M 20,70 70,70 70,120 20,120 z M 70,70 120,70 120,120 70,120 z" />
+	</g>
+	<use xlink:href="#Rectangle01" transform="matrix(0,1,-1,0,260,0)" />
+	<use xlink:href="#Rectangle01" transform="matrix(-1,0,0,-1,380,140)" />
+	<g id="Circle01" style="fill:none;stroke:black;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter">
+		<path d="M 70,190 20,190 A 50,50 0 0 1 70,140 L 70,190 z" style="fill:black" />
+		<path d="M 70,190 70,140 A 50,50 0 0 1 120,190 L 70,190 z" />
+		<path d="M 70,190 120,190 A 50,50 0 0 1 70,240 L 70,190 z" />
+		<path d="M 70,190 70,240 A 50,50 0 0 1 20,190 L 70,190 z" />
+	</g>
+	<use xlink:href="#Circle01" transform="matrix(0,1,-1,0,380,120)" />
+	<use xlink:href="#Circle01" transform="matrix(-1,0,0,-1,380,380)" />
+	<g id="Lozenge01" style="fill:none;stroke:black;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter">
+		<path d="M 70,310 45,335 20,310 45,285 z" style="fill:black" />
+		<path d="M 70,310 45,285 70,260 95,285 z M 70,310 95,285 120,310 95,335 z M 70,310 95,335 70,360 45,335 z" />
+	</g>
+	<use xlink:href="#Lozenge01" transform="matrix(0,1,-1,0,500,240)" />
+	<rect width="100" height="100" x="260" y="260" style="fill:none;stroke:black;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4" />
+</svg>

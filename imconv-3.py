@@ -41,9 +41,7 @@ Options:
     --outputimagewidth=NUMBER    width of output image in pixels [default: 2379]
     --convertimagetopixels       mode to convert image to pixels
     --validatepixels             mode to validate pixels
-    --validateNLpixels           mode to validate pixels with newlines
     --convertpixelstoimage       mode to convert pixels to image
-    --convertNLpixelstoimage     mode to convert NL pixels to image
 """
 
 name    = "imconv-3"
