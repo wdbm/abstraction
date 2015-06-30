@@ -45,7 +45,7 @@ Options:
 """
 
 name    = "imconv-3"
-version = "2015-06-30T1918Z"
+version = "2015-06-30T2010Z"
 
 import smuggle # http://cern.ch/go/PG8f
 import os
@@ -87,10 +87,8 @@ def main(options):
     output_image_filename        = options["--outputimage"]
     output_image_width           = int(options["--outputimagewidth"])
     mode_convert_image_to_pixels = bool(options["--convertimagetopixels"])
-    mode_validate_NL_pixels      = bool(options["--validateNLpixels"])
     mode_validate_pixels         = bool(options["--validatepixels"])
     mode_convert_pixels_to_image = bool(options["--convertpixelstoimage"])
-    mode_convert_NL_pixels_to_image = bool(options["--convertNLpixelstoimage"])
 
     log.info("")
 
