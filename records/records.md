@@ -1,10 +1,24 @@
 # records
 
+# 2015-06-30
+
+## Raven's Progressive Matrices psychology test -- generation from training on RPM image
+
+input:
+
+![](images/RPM_1_500x500.png)
+
+output:
+
+![](images/2015-06-30T2030Z_500x500.png)
+
+2015-06-30T2030Z.png
+
 # 2015-06-20
 
 ## image
 
-![](2015-06-30T171020Z.png)
+![](images/2015-06-30T171020Z.png)
 
 # 2015-06-19
 
