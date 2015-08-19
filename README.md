@@ -47,6 +47,7 @@ sudo apt-get -y install libprotobuf-dev
 sudo apt-get -y install libleveldb-dev
 sudo apt-get -y install libsnappy-dev
 sudo apt-get -y install libopencv-dev
+sudo apt-get -y install libhdf5-dev
 sudo apt-get -y install libhdf5-serial-dev
 sudo apt-get -y install protobuf-compiler
 sudo apt-get -y install --no-install-recommends libboost-all-dev
@@ -62,11 +63,19 @@ sudo pip install scikit-image
 
 ```Bash
 cd
-# https://github.com/BVLC/caffe
 git clone https://github.com/BVLC/caffe.git
 cd caffe
 cp Makefile.config.example Makefile.config
-# Uncomment CPU_ONLY := 1 for a non-GPU compilation (without CUDA).
+```
+
+Edit the makefile. Uncomment ```CPU_ONLY := 1``` for a non-GPU compilation (without CUDA). It may be necessary to include the following lines:
+
+```
+INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /usr/include/hdf5/serial/
+LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib /usr/lib/x86_64-linux-gnu/hdf5/serial
+```
+
+```Bash
 time make all
 time make test
 time make runtest

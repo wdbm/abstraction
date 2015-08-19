@@ -41,7 +41,7 @@ Options:
 """
 
 name    = "es-1"
-version = "2015-08-19T1651Z"
+version = "2015-08-19T1715Z"
 logo    = "\n" + name
 
 from cStringIO import StringIO
@@ -196,7 +196,10 @@ def main(options):
 
     # Load GoogLeNet model trained on ImageNet dataset.
     log.info("load model")
-    model_path = "/home/wbm/caffe/models/bvlc_googlenet/"
+    username = os.getenv("USER")
+    model_path = "/home/{username}/caffe/models/bvlc_googlenet/".format(
+        username = username
+    ))
     net_fn     = model_path + "deploy.prototxt"
     param_fn   = model_path + "bvlc_googlenet.caffemodel"
 
