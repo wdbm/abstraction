@@ -15,14 +15,21 @@
 #                                                                              #
 # 2015 Will Breaden Madden, w.bm@cern.ch                                       #
 #                                                                              #
-# Subject to ATLAS Data Access Policy, this software is released under the     #
-# terms of the GNU General Public License version 3 (GPLv3).                   #
+# This software is released under the terms of the GNU General Public License  #
+# version 3 (GPLv3).                                                           #
 #                                                                              #
-# For a copy of the ATLAS Data Access Policy, see                              #
-# DOI: 10.7483/OPENDATA.ATLAS.T9YR.Y7MZ or http://opendata.cern.ch/record/413. #
+# This program is free software: you can redistribute it and/or modify it      #
+# under the terms of the GNU General Public License as published by the Free   #
+# Software Foundation, either version 3 of the License, or (at your option)    #
+# any later version.                                                           #
+#                                                                              #
+# This program is distributed in the hope that it will be useful, but WITHOUT  #
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or        #
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for     #
+# more details.                                                                #
 #                                                                              #
 # For a copy of the GNU General Public License, see                            #
-# http://www.gnu.org/licenses/.                                                #
+# <http://www.gnu.org/licenses/>.                                              #
 #                                                                              #
 ################################################################################
 
@@ -45,7 +52,7 @@ Options:
 """
 
 name    = "imconv-3"
-version = "2015-06-30T2010Z"
+version = "2015-08-19T1620Z"
 
 import smuggle # http://cern.ch/go/PG8f
 import os

@@ -40,6 +40,53 @@ wget https://raw.githubusercontent.com/wdbm/technicolor/master/technicolor.py
 
 The function ```abstraction.setup()``` should be run.
 
+# Caffe infrastructure setup
+
+```Bash
+sudo apt-get -y install libprotobuf-dev
+sudo apt-get -y install libleveldb-dev
+sudo apt-get -y install libsnappy-dev
+sudo apt-get -y install libopencv-dev
+sudo apt-get -y install libhdf5-serial-dev
+sudo apt-get -y install protobuf-compiler
+sudo apt-get -y install --no-install-recommends libboost-all-dev
+sudo apt-get -y install libatlas-base-dev
+sudo apt-get -y install python-dev
+sudo apt-get -y install libgflags-dev libgoogle-glog-dev liblmdb-dev
+```
+
+```Bash
+sudo pip install protobuf
+sudo pip install scikit-image
+```
+
+```Bash
+cd
+# https://github.com/BVLC/caffe
+git clone https://github.com/BVLC/caffe.git
+cd caffe
+cp Makefile.config.example Makefile.config
+# Uncomment CPU_ONLY := 1 for a non-GPU compilation (without CUDA).
+time make all
+time make test
+time make runtest
+time make pycaffe
+```
+
+```Bash
+PYTHONPATH="/home/"${USER}"/caffe/python:${PYTHONPATH}"
+CAFFE="/home/"${USER}"/caffe"
+```
+
+Download Caffe models from the Model Zoo.
+
+- <http://caffe.berkeleyvision.org/model_zoo.html>
+- <https://github.com/BVLC/caffe/wiki/Model-Zoo>
+
+```Bash
+~/caffe/scripts/download_model_binary.py models/bvlc_googlenet
+```
+
 # introduction
 
 Project abstraction is a natural language processing project utilising curated conversation data as neural network training data.
