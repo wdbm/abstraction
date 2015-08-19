@@ -41,7 +41,7 @@ Options:
 """
 
 name    = "es-1"
-version = "2015-08-19T1715Z"
+version = "2015-08-19T1721Z"
 logo    = "\n" + name
 
 from cStringIO import StringIO
@@ -199,7 +199,7 @@ def main(options):
     username = os.getenv("USER")
     model_path = "/home/{username}/caffe/models/bvlc_googlenet/".format(
         username = username
-    ))
+    )
     net_fn     = model_path + "deploy.prototxt"
     param_fn   = model_path + "bvlc_googlenet.caffemodel"
 
