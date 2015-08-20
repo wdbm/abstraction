@@ -41,7 +41,7 @@ Options:
 """
 
 name    = "es-1"
-version = "2015-08-19T1721Z"
+version = "2015-08-20T1504Z"
 logo    = "\n" + name
 
 from cStringIO import StringIO
@@ -223,7 +223,7 @@ def main(options):
 
     log.info("generate")
     
-    if recursiveZoom is None:
+    if recursiveZoom is not True:
         outputImage = deepdream(net, inputImage, end = "inception_4c/output")
         outputImage = np.uint8(outputImage)
         log.info("save {filename}".format(
