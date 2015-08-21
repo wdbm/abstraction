@@ -135,7 +135,10 @@ sudo apt-get -y install protobuf-compiler
 sudo apt-get -y install --no-install-recommends libboost-all-dev
 sudo apt-get -y install libatlas-base-dev
 sudo apt-get -y install python-dev
-sudo apt-get -y install libgflags-dev libgoogle-glog-dev liblmdb-dev
+sudo apt-get -y install libgflags-dev
+sudo apt-get -y install libgoogle-glog-dev
+sudo apt-get -y install liblmdb-dev
+sudo apt-get -y install python-pydot
 ```
 
 ```Bash
