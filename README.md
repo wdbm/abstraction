@@ -122,6 +122,12 @@ The Python interface ```pycaffe``` is the caffe module and its scripts are at th
 
 The MATLAB interface ```matcaffe``` is the Caffe MATLAB MEX file and its helper m-files are at the directory caffe/matlab. There is example code ```caffe/matlab/caffe/matcaffe_demo.m```.
 
+## draw a graph of network architecture
+
+```Bash
+"${CAFFE}"/python/draw_net.py "${CAFFE}"/models/bvlc_googlenet/deploy.prototxt bvlc_googlenet_deploy.png
+```
+
 ## setup
 
 ```Bash
