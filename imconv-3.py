@@ -52,9 +52,8 @@ Options:
 """
 
 name    = "imconv-3"
-version = "2015-08-19T1620Z"
+version = "2015-08-21T1543Z"
 
-import smuggle # http://cern.ch/go/PG8f
 import os
 import sys
 import logging
@@ -64,22 +63,10 @@ import time
 from PIL import Image
 import re
 import ast
-docopt = smuggle.smuggle(
-    moduleName = "docopt",
-    URL = "https://rawgit.com/docopt/docopt/master/docopt.py"
-)
-technicolor = smuggle.smuggle(
-    moduleName = "technicolor",
-    URL = "https://rawgit.com/wdbm/technicolor/master/technicolor.py"
-)
-shijian = smuggle.smuggle(
-    moduleName = "shijian",
-    URL = "https://rawgit.com/wdbm/shijian/master/shijian.py"
-)
-pyprel = smuggle.smuggle(
-    moduleName = "pyprel",
-    URL = "https://rawgit.com/wdbm/pyprel/master/pyprel.py"
-)
+import docopt
+import technicolor
+import shijian
+import pyprel
 
 @shijian.timer
 def main(options):
