@@ -122,6 +122,39 @@ The Python interface ```pycaffe``` is the caffe module and its scripts are at th
 
 The MATLAB interface ```matcaffe``` is the Caffe MATLAB MEX file and its helper m-files are at the directory caffe/matlab. There is example code ```caffe/matlab/caffe/matcaffe_demo.m```.
 
+## models
+
+The directory structure of models is as follows:
+
+```Bash
+.
+├── bvlc_alexnet
+│   ├── deploy.prototxt
+│   ├── readme.md
+│   ├── solver.prototxt
+│   └── train_val.prototxt
+├── bvlc_googlenet
+│   ├── bvlc_googlenet.caffemodel
+│   ├── deploy.prototxt
+│   ├── quick_solver.prototxt
+│   ├── readme.md
+│   ├── solver.prototxt
+│   └── train_val.prototxt
+├── bvlc_reference_caffenet
+│   ├── deploy.prototxt
+│   ├── readme.md
+│   ├── solver.prototxt
+│   └── train_val.prototxt
+├── bvlc_reference_rcnn_ilsvrc13
+│   ├── deploy.prototxt
+│   └── readme.md
+└── finetune_flickr_style
+    ├── deploy.prototxt
+    ├── readme.md
+    ├── solver.prototxt
+    └── train_val.prototxt
+```
+
 ## draw a graph of network architecture
 
 ```Bash
@@ -185,6 +218,16 @@ Download Caffe models from the Model Zoo.
 
 ```Bash
 ~/caffe/scripts/download_model_binary.py models/bvlc_googlenet
+```
+
+# Torch
+
+## setup
+
+```Bash
+curl -s https://raw.githubusercontent.com/torch/ezinstall/master/install-deps | bash
+git clone https://github.com/torch/distro.git ~/torch --recursive
+cd ~/torch; ./install.sh
 ```
 
 # CPU versus GPU for deep learning
