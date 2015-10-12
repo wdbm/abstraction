@@ -29,7 +29,7 @@
 #                                                                              #
 ################################################################################
 
-version = "2015-10-12T2147Z"
+version = "2015-10-12T2217Z"
 
 import os
 import sys
@@ -42,6 +42,8 @@ import pyprel
 import shijian
 import dataset
 import praw
+import math
+import numpy
 
 import re
 from gensim.models import Word2Vec
@@ -353,3 +355,30 @@ def load_word_vector_model(
         ))
         model_word2vec = Word2Vec.load(fileName)
     return model_word2vec
+
+def ensure_file_existence(fileName):
+    log.debug("ensure existence of file {fileName}".format(
+        fileName = fileName
+    ))
+    if not os.path.isfile(os.path.expandvars(fileName)):
+        log.error("file {fileName} does not exist".format(
+            fileName = fileName
+        ))
+        program.terminate()
+        raise(Exception)
+    else:
+        log.debug("file {fileName} found".format(
+            fileName = fileName
+        ))
+
+def dot_product(v1, v2):
+    return(sum((a*b) for a, b in zip(v1, v2)))
+
+def magnitude(v):
+    return(numpy.linalg.norm(v))
+    #return(math.sqrt(dot_product(v, v)))
+
+def angle(v1, v2):
+    cosine = dot_product(v1, v2) / (magnitude(v1) * magnitude(v2))
+    cosine = 1 if cosine > 1 else cosine
+    return(math.acos(cosine))

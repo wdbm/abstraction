@@ -46,7 +46,7 @@ Options:
 """
 
 name    = "toywv-1"
-version = "2015-10-12T2148Z"
+version = "2015-10-12T2217Z"
 
 import os
 import sys
@@ -98,21 +98,6 @@ def main(options):
     )
 
     program.terminate()
-
-def ensure_file_existence(fileName):
-    log.debug("ensure existence of file {fileName}".format(
-        fileName = fileName
-    ))
-    if not os.path.isfile(os.path.expandvars(fileName)):
-        log.error("file {fileName} does not exist".format(
-            fileName = fileName
-        ))
-        program.terminate()
-        raise(Exception)
-    else:
-        log.debug("file {fileName} found".format(
-            fileName = fileName
-        ))
 
 class Program(object):
 

@@ -49,7 +49,7 @@ Options:
 """
 
 name    = "toywv-2"
-version = "2015-10-12T2209Z"
+version = "2015-10-12T2217Z"
 
 import os
 import sys
@@ -266,14 +266,14 @@ def main(options):
     magnitude_differences   = []
     angles                  = []
     storedExpressionsNLList = []
-    magnitude_workingExpressionWV = magnitude(workingExpressionWV)
+    magnitude_workingExpressionWV = abstraction.magnitude(workingExpressionWV)
     for storedExpressionNL in storedExpressions:
         storedExpressionWV = storedExpressions[storedExpressionNL]
-        magnitude_storedExpressionWV = magnitude(storedExpressionWV)
+        magnitude_storedExpressionWV = abstraction.magnitude(storedExpressionWV)
         magnitude_difference_workingExpressionWV_storedExpressionWV = abs(
             magnitude_workingExpressionWV - magnitude_storedExpressionWV
         )
-        angle_workingExpressionWV_storedExpressionWV = angle(
+        angle_workingExpressionWV_storedExpressionWV = abstraction.angle(
             workingExpressionWV,
             storedExpressionWV
         )
@@ -321,33 +321,6 @@ def main(options):
     log.info("")
 
     program.terminate()
-
-def ensure_file_existence(fileName):
-    log.debug("ensure existence of file {fileName}".format(
-        fileName = fileName
-    ))
-    if not os.path.isfile(os.path.expandvars(fileName)):
-        log.error("file {fileName} does not exist".format(
-            fileName = fileName
-        ))
-        program.terminate()
-        raise(Exception)
-    else:
-        log.debug("file {fileName} found".format(
-            fileName = fileName
-        ))
-
-def dot_product(v1, v2):
-  return(sum((a*b) for a, b in zip(v1, v2)))
-
-def magnitude(v):
-    return(numpy.linalg.norm(v))
-    #return(math.sqrt(dot_product(v, v)))
-
-def angle(v1, v2):
-    cosine = dot_product(v1, v2) / (magnitude(v1) * magnitude(v2))
-    cosine = 1 if cosine > 1 else cosine
-    return(math.acos(cosine))
 
 class Program(object):
 
