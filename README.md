@@ -335,3 +335,13 @@ reducodex.py --inputdatabase="database.db"
 ```Bash
 reducodex.py --inputdatabase="database.db" --outputdatabase="database_1.db"
 ```
+
+# abstraction development testing
+
+```Bash
+./arcodex.py --numberOfUtterances 10 --subreddits=askreddit,changemyview,lgbt,machinelearning,particlephysics,technology,worldnews --database=2015-10-12T1612Z.db --verbose
+```
+
+```Bash
+./vicodex.py --database=2015-10-12T1612Z.db
+```

@@ -29,7 +29,7 @@
 #                                                                              #
 ################################################################################
 
-version = "2015-05-08T1834Z"
+version = "2015-10-12T1627Z"
 
 import os
 import sys
@@ -125,7 +125,7 @@ def save_database_metadata(
         name                 = "abstraction",
         description          = "project abstraction conversation "
                                "utterance-response data",
-        version              = currentTime,
+        version              = "2015-01-06T172242Z",
         lastModificationTime = currentTime
     )
     log.debug(pyprel.dictionaryString(dictionary = metadata))

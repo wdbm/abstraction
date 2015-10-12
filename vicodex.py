@@ -46,7 +46,7 @@ Options:
 """
 
 name    = "vicodex"
-version = "2015-05-28T2125Z"
+version = "2015-10-12T1624Z"
 
 def smuggle(
     moduleName = None,
@@ -106,8 +106,9 @@ def main(options):
 
     # Access database.
     database = abstraction.access_database(fileName = program.database)
-    log.info("database metadata:")
+    log.info("\ndatabase metadata:")
     abstraction.log_database_metadata(fileName = program.database)
+    log.info("")
     # Print the tables in the database.
     log.info("tables in database: {tables}".format(
         tables = database.tables

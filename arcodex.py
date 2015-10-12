@@ -46,7 +46,7 @@ Options:
 """
 
 name    = "arcodex"
-version = "2015-01-06T1722Z"
+version = "2015-10-12T1547Z"
 
 import os
 import sys
@@ -78,6 +78,9 @@ def main(options):
     abstraction.save_exchanges_to_database(
         exchanges = exchangesReddit,
         fileName  = program.database
+    )
+    abstraction.save_database_metadata(
+        fileName = program.database
     )
 
     program.terminate()
@@ -122,7 +125,7 @@ class Program(object):
         self.subreddits         = self.options["--subreddits"]
         self.numberOfUtterances = self.options["--numberOfUtterances"]
         self.database           = self.options["--database"]
-        self.verbose               = self.options["--verbose"]
+        self.verbose            = self.options["--verbose"]
 
         # default values
         if self.userName is None:
