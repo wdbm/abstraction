@@ -46,7 +46,7 @@ Options:
 """
 
 name    = "toywv-1"
-version = "2015-04-01T1024Z"
+version = "2015-10-12T2148Z"
 
 import os
 import sys
@@ -69,21 +69,9 @@ def main(options):
     global program
     program = Program(options = options)
 
-    # If an existing word vector model file does not exist, create it.
-    if not os.path.isfile(os.path.expandvars(program.wordVectorModel)):
-        log.error("file {fileName} does not exist".format(
-            fileName = program.wordVectorModel
-        ))
-        log.info("create word vector model and save to file {fileName}".format(
-            fileName = program.wordVectorModel
-        ))
-        model_word2vec = abstraction.model_word2vec_Brown_Corpus()
-        model_word2vec.save(program.wordVectorModel)
-    else:
-        log.info("access file {fileName}".format(
-            fileName = program.wordVectorModel
-        ))
-        model_word2vec = Word2Vec.load(program.wordVectorModel)
+    model_word2vec = abstraction.load_word_vector_model(
+        fileName = program.wordVectorModel
+    )
 
     # Convert the expression to a word vector.
     expressionWordVector =\

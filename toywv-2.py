@@ -49,32 +49,7 @@ Options:
 """
 
 name    = "toywv-2"
-version = "2015-04-01T1435Z"
-
-def smuggle(
-    moduleName = None,
-    URL        = None
-    ):
-    if moduleName is None:
-        moduleName = URL
-    try:
-        module = __import__(moduleName)
-        return(module)
-    except:
-        try:
-            moduleString = urllib.urlopen(URL).read()
-            module = imp.new_module("module")
-            exec moduleString in module.__dict__
-            return(module)
-        except: 
-            raise(
-                Exception(
-                    "module {moduleName} import error".format(
-                        moduleName = moduleName
-                    )
-                )
-            )
-            sys.exit()
+version = "2015-10-12T2150Z"
 
 import os
 import sys
@@ -91,10 +66,7 @@ import abstraction
 from gensim.models import Word2Vec
 import math
 import numpy
-pyprel = smuggle(
-    moduleName = "pyprel",
-    URL = "https://rawgit.com/wdbm/pyprel/master/pyprel.py"
-)
+import pyprel
 
 def main(options):
 
@@ -259,21 +231,10 @@ def main(options):
             ],
                 dtype=numpy.float32),
     }
-    # If an existing word vector model file does not exist, create it.
-    if not os.path.isfile(os.path.expandvars(program.wordVectorModel)):
-        log.error("file {fileName} does not exist".format(
-            fileName = program.wordVectorModel
-        ))
-        log.info("create word vector model and save to file {fileName}".format(
-            fileName = program.wordVectorModel
-        ))
-        model_word2vec = abstraction.model_word2vec_Brown_Corpus()
-        model_word2vec.save(program.wordVectorModel)
-    else:
-        log.info("access file {fileName}".format(
-            fileName = program.wordVectorModel
-        ))
-        model_word2vec = Word2Vec.load(program.wordVectorModel)
+
+    model_word2vec = abstraction.load_word_vector_model(
+        fileName = program.wordVectorModel
+    )
 
     workingExpressionNL = program.expression
 

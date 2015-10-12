@@ -29,7 +29,7 @@
 #                                                                              #
 ################################################################################
 
-version = "2015-10-12T1627Z"
+version = "2015-10-12T2147Z"
 
 import os
 import sys
@@ -55,20 +55,20 @@ def setup():
     downloader.download("all")
 
 def model_word2vec_Brown_Corpus():
-    model = Word2Vec(nltk.corpus.brown.sents())
-    return(model)
+    model_word2vec = Word2Vec(nltk.corpus.brown.sents())
+    return model_word2vec
 
 def convert_word_string_to_word_vector(
     wordString     = None,
     model_word2vec = None
     ):
     if wordString in model_word2vec:
-        return(model_word2vec[wordString])
+        return model_word2vec[wordString]
     else:
         log.debug("word string \"{wordString}\" not in word2vec model".format(
             wordString = wordString
         ))
-        return(None)
+        return None
 
 def convert_sentence_string_to_word_vector(
     sentenceString = None,
@@ -89,7 +89,7 @@ def convert_sentence_string_to_word_vector(
             log.debug("skip undefined word vector")
     # Combine all of the word vectors into one word vector by summation.
     sentenceWordVector = sum(wordVectors)
-    return(sentenceWordVector)
+    return sentenceWordVector
 
 def create_database(
     fileName = None
@@ -108,7 +108,7 @@ def access_database(
         fileName = fileName
     ))
     database = dataset.connect("sqlite:///" + fileName)
-    return(database)
+    return database
 
 def save_database_metadata(
     fileName = "database.db"
@@ -128,6 +128,7 @@ def save_database_metadata(
         version              = "2015-01-06T172242Z",
         lastModificationTime = currentTime
     )
+    log.debug("database metadata:")
     log.debug(pyprel.dictionaryString(dictionary = metadata))
     # Save metadata to database.
     log.debug("save database metadata")
@@ -151,7 +152,7 @@ def database_metadata(
     else:
         log.error("database metadata not found")
         raise(Exception)
-    return(metadata)
+    return metadata
 
 def log_database_metadata(
     fileName = "database.db"
@@ -181,7 +182,8 @@ class Exchange(object):
         self.responseWordVector  = responseWordVector,
         self.utteranceReference  = utteranceReference,
         self.responseReference   = responseReference,
-        self.exchangeReference   = exchangeReference
+        self.exchangeReference   = exchangeReference,
+        self.utteranceWordVector = utteranceWordVector
 
     def printout(
         self
@@ -289,7 +291,7 @@ def access_exchanges_Reddit(
             exchanges.append(exchange)
             # Pause to avoid overtaxing Reddit.
             #time.sleep(2)
-    return(exchanges)
+    return exchanges
 
 def save_exchanges_to_database(
     exchanges = None,
@@ -331,3 +333,23 @@ def save_exchanges_to_database(
             log.debug("skip previously-saved exchange \"{utterance}\"".format(
                 utterance = exchange.utterance
             ))
+
+def load_word_vector_model(
+    fileName = None
+    ):
+    # If an existing word vector model file does not exist, create it.
+    if not os.path.isfile(os.path.expandvars(fileName)):
+        log.error("file {fileName} does not exist".format(
+            fileName = fileName
+        ))
+        log.info("create word vector model and save to file {fileName}".format(
+            fileName = fileName
+        ))
+        model_word2vec = model_word2vec_Brown_Corpus()
+        model_word2vec.save(fileName)
+    else:
+        log.info("access file {fileName}".format(
+            fileName = fileName
+        ))
+        model_word2vec = Word2Vec.load(fileName)
+    return model_word2vec
