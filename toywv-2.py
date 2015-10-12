@@ -49,7 +49,7 @@ Options:
 """
 
 name    = "toywv-2"
-version = "2015-10-12T2150Z"
+version = "2015-10-12T2209Z"
 
 import os
 import sys
@@ -112,7 +112,7 @@ def main(options):
                 -0.6659264,   0.0437102,  -0.11230323,
                 -0.13493723
             ],
-                dtype=numpy.float32
+                dtype = numpy.float32
         ),
         "All those moments will be lost in time.":
             numpy.array([
@@ -151,7 +151,7 @@ def main(options):
                  1.64443821e-01, -7.78683364e-01, -9.80837345e-02,
                 -1.07415296e-01
             ],
-                dtype=numpy.float32
+                dtype = numpy.float32
             ),
         "All those moments were lost in time.":
             numpy.array([
@@ -190,7 +190,7 @@ def main(options):
                  0.085365,   -0.58662325, -0.13062993,
                 -0.04200239
             ],
-                dtype=numpy.float32
+                dtype = numpy.float32
             ),
         "All those moments are lost in time.":
             numpy.array([
@@ -229,7 +229,7 @@ def main(options):
                 -0.08164676, -0.41151166, -0.1280518,
                  0.02905136
             ],
-                dtype=numpy.float32),
+                dtype = numpy.float32),
     }
 
     model_word2vec = abstraction.load_word_vector_model(
