@@ -29,7 +29,7 @@
 #                                                                              #
 ################################################################################
 
-version = "2015-10-13T0023Z"
+version = "2015-10-13T0057Z"
 
 import os
 import sys
@@ -405,21 +405,28 @@ def add_exchange_word_vectors_to_database(
         uniqueIdentifier = str(entry["id"])
         # Create word vector representations of utterances and responses and
         # add them or update them in the database.
-        utteranceWordVectorNumPyArray = numpy.array_repr(
-            convert_sentence_string_to_word_vector(
-                sentenceString = str(entry["utterance"]),
-                model_word2vec = model_word2vec
+        try:
+            utteranceWordVectorNumPyArray = numpy.array_repr(
+                convert_sentence_string_to_word_vector(
+                    sentenceString = str(entry["utterance"]),
+                    model_word2vec = model_word2vec
+                )
             )
-        )
-        responseWordVectorNumPyArray = numpy.array_repr(
-            convert_sentence_string_to_word_vector(
-                sentenceString = str(entry["response"]),
-                model_word2vec = model_word2vec
+            responseWordVectorNumPyArray = numpy.array_repr(
+                convert_sentence_string_to_word_vector(
+                    sentenceString = str(entry["response"]),
+                    model_word2vec = model_word2vec
+                )
             )
-        )
-        data = dict(
-            id                  = uniqueIdentifier,
-            utteranceWordVector = utteranceWordVectorNumPyArray,
-            responseWordVector  = responseWordVectorNumPyArray
-        )
+            data = dict(
+                id                  = uniqueIdentifier,
+                utteranceWordVector = utteranceWordVectorNumPyArray,
+                responseWordVector  = responseWordVectorNumPyArray
+            )
+        except:
+            data = dict(
+                id                  = uniqueIdentifier,
+                utteranceWordVector = None,
+                responseWordVector  = None
+            )
         database[tableName].update(data, ["id"])
