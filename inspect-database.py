@@ -3,16 +3,15 @@
 """
 ################################################################################
 #                                                                              #
-# vicodex                                                                      #
+# inspect-database                                                             #
 #                                                                              #
 ################################################################################
 #                                                                              #
 # LICENCE INFORMATION                                                          #
 #                                                                              #
-# This program is a database inspection program specialised to conversational  #
-# exchanges.                                                                   #
+# This program gives a simple printout of a database.                          #
 #                                                                              #
-# copyright (C) 2014 William Breaden Madden                                    #
+# 2015 Will Breaden Madden, w.bm@cern.ch                                       #
 #                                                                              #
 # This software is released under the terms of the GNU General Public License  #
 # version 3 (GPLv3).                                                           #
@@ -36,128 +35,54 @@ Usage:
     program [options]
 
 Options:
-    -h, --help                display help message
-    --version                 display version and exit
-    -v, --verbose             verbose logging
-    -u, --username=USERNAME   username
-    -d, --database=DATABASE   database [default: database.db]
-    -t, --tableLimit=NUMBER   limit on number of table entries displayed
-    -t, --outputFile=NAME     optional output file for simple training
+    -h, --help               display help message
+    --version                display version and exit
+    -v, --verbose            verbose logging
+    -u, --username=USERNAME  username
+    -d, --database=FILE      database [default: database.db]
 """
 
-name    = "vicodex"
-version = "2015-10-12T2229Z"
+name    = "inspect-database"
+version = "2015-10-13T0002Z"
 
 import os
 import sys
-import subprocess
-import time
-import datetime
 import logging
-import inspect
-import dataset
-import abstraction
 import docopt
 import technicolor
 import shijian
 import pyprel
+import abstraction
 
+@shijian.timer
 def main(options):
 
     global program
     program = Program(options = options)
 
-    # Access database.
-    database = abstraction.access_database(fileName = program.database)
-    log.info("\ndatabase metadata:")
-    abstraction.log_database_metadata(fileName = program.database)
+    # access options and arguments
+    databaseFileName = options["--database"]
+
     log.info("")
-    # Print the tables in the database.
-    log.info("tables in database: {tables}".format(
-        tables = database.tables
-    ))
-    # Access the exchanges table.
-    tableName = "exchanges"
-    log.info("access table \"{tableName}\"".format(
-        tableName = tableName
-    ))
-    # Print the columns of the table.
-    log.info("columns in table \"{tableName}\": {columns}".format(
-        tableName = tableName,
-        columns   = database[tableName].columns
-    ))
-    # Print the number of rows of the table.
-    log.info("number of rows in table \"{tableName}\": {numberOfRows}".format(
-        tableName    = tableName,
-        numberOfRows = str(len(database[tableName]))
-    ))
-    # Print the table entries:
-    log.info("entries of table {tableName}:\n".format(
-        tableName    = tableName
-    ))
-    # Define table headings.
-    tableContents = [
-        [
-            "id",
-            "utterance",
-            "response",
-            "utteranceTimeUNIX",
-            "responseTimeUNIX",
-            "utteranceReference",
-            "responseReference",
-            "exchangeReference"
-        ]
-    ]
-    simpleTrainingRepresentation = ""
-    # Fill table data.
-    countEntries = 0
-    for entry in database[tableName].all():
-        tableContents.append(
-            [
-                str(entry["id"]),
-                str(entry["utterance"]),
-                str(entry["response"]),
-                str(entry["utteranceTimeUNIX"]),
-                str(entry["responseTimeUNIX"]),
-                str(entry["utteranceReference"]),
-                str(entry["responseReference"]),
-                str(entry["exchangeReference"])
-            ]
-        )
-        countEntries += 1
-        # simple training representation
-        if program.outputFile is not None:
-            if simpleTrainingRepresentation is "":
-                simpleTrainingRepresentation = \
-                    str(entry["utterance"]) + \
-                    " => " + \
-                    str(entry["response"])                
-            else:
-                simpleTrainingRepresentation = \
-                    simpleTrainingRepresentation + \
-                    "\n" + \
-                    str(entry["utterance"]) + \
-                    " => " + \
-                    str(entry["response"])
-        if program.tableLimit is not None:
-            if countEntries >= program.tableLimit:
-                break
-    # Record table.
-    print(
-        pyprel.Table(
-            contents = tableContents
-        )
+
+    database = abstraction.access_database(
+        fileName = databaseFileName
     )
-    # Record to file, if specified.
-    if program.outputFile is not None:
-        log.info(
-            "save simple training representation to file {fileName}".format(
-                fileName = program.outputFile
-            )
-        )
-        outputFile = open(program.outputFile, "w")
-        outputFile.write(simpleTrainingRepresentation)
-        outputFile.close()
+
+    for table in database.tables:
+        log.info("\ntable: {table}/n".format(
+            table = table
+        ))
+        for entry in database[table].all():
+            pyprel.printLine()
+            for column in database[table].columns:
+                log.info("\n{column}: {content}".format(
+                    column  = column,
+                    content = str(entry[column])
+                ))
+        pyprel.printLine()
+
+    log.info("")
 
     program.terminate()
 
@@ -198,16 +123,7 @@ class Program(object):
         # options
         self.options               = options
         self.userName              = self.options["--username"]
-        self.database              = self.options["--database"]
         self.verbose               = self.options["--verbose"]
-        if self.options["--tableLimit"] is not None:
-            self.tableLimit = int(self.options["--tableLimit"])
-        else:
-            self.tableLimit = None
-        if self.options["--outputFile"] is not None:
-            self.outputFile = str(self.options["--outputFile"])
-        else:
-            self.outputFile = None
 
         # default values
         if self.userName is None:
@@ -255,9 +171,6 @@ class Program(object):
         log.info("termination time: {time}".format(
             time = clock.stopTime()
         ))
-        log.info("time full report:\n{report}".format(
-            report = shijian.clocks.report(style = "full")
-        ))
         log.info("time statistics report:\n{report}".format(
             report = shijian.clocks.report()
         ))
@@ -265,9 +178,9 @@ class Program(object):
             name = self.name
         ))
         pyprel.printLine()
+        sys.exit()
 
 if __name__ == "__main__":
-
     options = docopt.docopt(__doc__)
     if options["--version"]:
         print(version)

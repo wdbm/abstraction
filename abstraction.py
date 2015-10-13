@@ -29,7 +29,7 @@
 #                                                                              #
 ################################################################################
 
-version = "2015-10-12T2217Z"
+version = "2015-10-13T0023Z"
 
 import os
 import sys
@@ -153,7 +153,8 @@ def database_metadata(
             }
     else:
         log.error("database metadata not found")
-        raise(Exception)
+        program.terminate()
+        raise Exception
     return metadata
 
 def log_database_metadata(
@@ -365,7 +366,7 @@ def ensure_file_existence(fileName):
             fileName = fileName
         ))
         program.terminate()
-        raise(Exception)
+        raise Exception
     else:
         log.debug("file {fileName} found".format(
             fileName = fileName
@@ -382,3 +383,43 @@ def angle(v1, v2):
     cosine = dot_product(v1, v2) / (magnitude(v1) * magnitude(v2))
     cosine = 1 if cosine > 1 else cosine
     return(math.acos(cosine))
+
+def add_exchange_word_vectors_to_database(
+    fileName       = "database.db",
+    model_word2vec = None
+    ):
+    # Ensure that the database exists.
+    if not os.path.isfile(fileName):
+        log.info("database {fileName} nonexistent".format(
+            fileName = fileName
+        ))
+        program.terminate()
+        raise Exception
+    # Access the database.
+    database = access_database(fileName = fileName)
+    # Access or create the exchanges table.
+    tableExchanges = database["exchanges"]
+    # Access exchanges.
+    tableName = "exchanges"
+    for entry in database[tableName].all():
+        uniqueIdentifier = str(entry["id"])
+        # Create word vector representations of utterances and responses and
+        # add them or update them in the database.
+        utteranceWordVectorNumPyArray = numpy.array_repr(
+            convert_sentence_string_to_word_vector(
+                sentenceString = str(entry["utterance"]),
+                model_word2vec = model_word2vec
+            )
+        )
+        responseWordVectorNumPyArray = numpy.array_repr(
+            convert_sentence_string_to_word_vector(
+                sentenceString = str(entry["response"]),
+                model_word2vec = model_word2vec
+            )
+        )
+        data = dict(
+            id                  = uniqueIdentifier,
+            utteranceWordVector = utteranceWordVectorNumPyArray,
+            responseWordVector  = responseWordVectorNumPyArray
+        )
+        database[tableName].update(data, ["id"])
