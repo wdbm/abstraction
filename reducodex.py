@@ -37,16 +37,16 @@ Usage:
     program [options]
 
 Options:
-    -h, --help                      Show this help message.
-    --version                       Show the version and exit.
-    -v, --verbose                   Show verbose logging.
-    -u, --username=USERNAME         username
-    -d, --inputdatabase=DATABASE    database [default: database.db]
-    -d, --outputdatabase=DATABASE   database [default: database_1.db]
+    -h, --help                 Show this help message.
+    --version                  Show the version and exit.
+    -v, --verbose              Show verbose logging.
+    -u, --username=USERNAME    username
+    -d, --inputdatabase=FILE   database [default: database.db]
+    -d, --outputdatabase=FILE  database [default: database_1.db]
 """
 
 name    = "reducodex"
-version = "2015-01-06T1620Z"
+version = "2015-10-13T1133Z"
 
 import os
 import sys

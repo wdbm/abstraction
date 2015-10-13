@@ -253,16 +253,20 @@ An n-gram is a contiguous sequence of n items from a sequence of text or speech.
 
 Formally, an n-gram is a consecutive subsequence of length n of some sequence of tokens w_n. A k-skip-n-gram is a length-n subsequence in which components occur at a distance of at most k from each other. For example, in the text
 
-    the rain in Spain falls mainly on the plain
+```
+the rain in Spain falls mainly on the plain
+```
 
 the set of 1-skip-2-grams includes all of the 2-grams and, in addition, the following sequences:
 
-    the in,
-    rain Spain,
-    in falls,
-    Spain mainly,
-    mainly the,
-    on plain
+```
+the in,
+rain Spain,
+in falls,
+Spain mainly,
+mainly the,
+on plain
+```
 
 It has been demonstrated that skip-gram language models can be trained such that it is possible to perform 'word arithmetic'. For example, with an appropriate model, the expression ```king - man + woman``` evaluates to very close to ```queen```.
 
@@ -320,6 +324,22 @@ The following example accesses database "database.db" and displays its exchanges
 
 ```Bash
 vicodex.py --database="database.db"
+```
+
+# inspect-database: quick printout of database
+
+The program inspect-database provides a simple, comprehensive printout of the contents of a database. Specifically, for every table in the database it prints all of the column contents for every entry.
+
+```Bash
+inspect-database.py --database="database.db"
+```
+
+# vcodex: word vectors 
+
+The program vcodex converts conversational exchanges in an abstraction database to word vector representations and adds or updates an abstraction database with these vectors.          
+
+```Bash
+vcodex.py --database="database.db" --wordvectormodel=Brown_corpus.wvm
 ```
 
 # reducodex: remove duplicate collated exchanges                        

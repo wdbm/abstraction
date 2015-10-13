@@ -35,18 +35,18 @@ Usage:
     program [options]
 
 Options:
-    -h, --help                Show this help message.
-    --version                 Show the version and exit.
-    -v, --verbose             Show verbose logging.
-    -u, --username=USERNAME   username
-    --expression=TEXT         text expression to convert to word vector
-                              [default: All those moments will be lost in time.]
-    --wordvectormodel=NAME    word vector model
-                              [default: Brown_corpus.wvm]
+    -h, --help               Show this help message.
+    --version                Show the version and exit.
+    -v, --verbose            Show verbose logging.
+    -u, --username=USERNAME  username
+    --expression=TEXT        text expression to convert to word vector
+                             [default: All those moments will be lost in time.]
+    --wordvectormodel=NAME   word vector model
+                             [default: Brown_corpus.wvm]
 """
 
 name    = "toywv-1"
-version = "2015-10-12T2217Z"
+version = "2015-10-13T1132Z"
 
 import os
 import sys

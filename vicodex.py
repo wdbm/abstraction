@@ -36,17 +36,17 @@ Usage:
     program [options]
 
 Options:
-    -h, --help                display help message
-    --version                 display version and exit
-    -v, --verbose             verbose logging
-    -u, --username=USERNAME   username
-    -d, --database=DATABASE   database [default: database.db]
-    -t, --tableLimit=NUMBER   limit on number of table entries displayed
-    -t, --outputFile=NAME     optional output file for simple training
+    -h, --help               display help message
+    --version                display version and exit
+    -v, --verbose            verbose logging
+    -u, --username=USERNAME  username
+    -d, --database=FILE      database [default: database.db]
+    -t, --tableLimit=NUMBER  limit on number of table entries displayed
+    -t, --outputFile=NAME    optional output file for simple training
 """
 
 name    = "vicodex"
-version = "2015-10-12T2229Z"
+version = "2015-10-13T1131Z"
 
 import os
 import sys

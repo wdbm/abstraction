@@ -36,17 +36,17 @@ Usage:
     program [options]
 
 Options:
-    -h, --help                    Show this help message.
-    --version                     Show the version and exit.
-    -v, --verbose                 Show verbose logging.
-    -u, --username=USERNAME       username
-    -r, --subreddits=SUBREDDITS   subreddits [default: changemyview]
-    -n, --numberOfUtterances=N    number of utterances to access [default: 10]
-    -d, --database=DATABASE       database [default: database.db]
+    -h, --help                   Show this help message.
+    --version                    Show the version and exit.
+    -v, --verbose                Show verbose logging.
+    -u, --username=USERNAME      username
+    -r, --subreddits=SUBREDDITS  subreddits [default: changemyview]
+    -n, --numberOfUtterances=N   number of utterances to access [default: 10]
+    -d, --database=FILE          database [default: database.db]
 """
 
 name    = "arcodex"
-version = "2015-10-12T1547Z"
+version = "2015-10-13T1134Z"
 
 import os
 import sys
