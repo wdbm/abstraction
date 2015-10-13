@@ -342,7 +342,9 @@ The program vcodex converts conversational exchanges in an abstraction database 
 vcodex.py --database="database.db" --wordvectormodel=Brown_corpus.wvm
 ```
 
-# reducodex: remove duplicate collated exchanges                        
+The program vcodex increases the file size of abstraction database version 2015-01-06T172242Z by a factor of ~5.49.
+
+# reducodex: remove duplicate collated exchanges
 
 The program reducodex inspects an existing database of conversational exchanges, removes duplicate entries, creates simplified identifiers for entries and then writes a new database of these entries.          
 
