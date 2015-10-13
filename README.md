@@ -280,6 +280,16 @@ Word vectors are continuous distributed representations of words. The tool word2
 
 Curated conversation data sourced from Reddit is used for the conversation analysis and modelling. Specifically, conversational exchanges on Reddit are recorded. An exchange consists of an utterance and a response to the utterance, together with associated data, such as references and timestamps. A submission to Reddit is considered as an utterance and a comment on the submission is considered as a response to the utterance. The utterance is assumed to be of good quality and the response is assumed to be appropriate to the utterance based on the crowd-curated quality assessment inherent in Reddit.
 
+# translation with word vectors
+
+In the paper ["Exploiting Similarities among Languages for Machine Translation"](http://arxiv.org/abs/1309.4168), Tomas Milokov describes how after training two monolingual modes, a translation matrix is generated on the most frequently occurring 5000 words. Using this translation matrix, the accuracy of the translations was tested on 1000 words. A description Milokov gave of the general procedure is as follows:
+
+- Create matrix `M` with dimensionality `I` times `O`, where `I` is the size of input vectors and `O` is the size of the output vectors.
+- Iterate over the training set several times with decreasing learning rate and update `M`.
+    - For each training sample, compute outputs by multiplying the input vector by `M`.
+    - Compute the gradient of the error (target vector - output vector).
+    - Update the weights in `M` (with reference to how the weights are updated between the hidden layer and the output layer in word2vec code).
+
 # abstraction code picture
 
 ![](packages_abstraction.png)
