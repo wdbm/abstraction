@@ -20,6 +20,7 @@ cd abstraction/
 wget https://raw.githubusercontent.com/wdbm/pyprel/master/pyprel.py
 wget https://raw.githubusercontent.com/wdbm/shijian/master/shijian.py
 wget https://raw.githubusercontent.com/wdbm/technicolor/master/technicolor.py
+wget https://raw.githubusercontent.com/wdbm/propyte/master/propyte.py
 ```
 
 # prerequisites
