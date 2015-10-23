@@ -47,7 +47,7 @@ Options:
 """
 
 name    = "arcodex"
-version = "2015-10-22T1558Z"
+version = "2015-10-23T1450Z"
 logo    = None
 
 import os
@@ -72,6 +72,7 @@ def main(options):
         version = version,
         logo    = logo
         )
+    global log
     from propyte import log
 
     # access options and arguments
