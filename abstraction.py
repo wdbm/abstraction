@@ -9,7 +9,7 @@
 # This program provides data analysis, data selection, data collation,         #
 # database utilities and word2vec utilities for project abstraction.           #
 #                                                                              #
-# copyright (C) 2014--2015 William Breaden Madden                              #
+# copyright (C) 2014 William Breaden Madden                                    #
 #                                                                              #
 # This software is released under the terms of the GNU General Public License  #
 # version 3 (GPLv3).                                                           #
@@ -29,7 +29,7 @@
 #                                                                              #
 ################################################################################
 
-version = "2015-10-13T0057Z"
+version = "2015-10-30T2039Z"
 
 import os
 import sys
