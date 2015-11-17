@@ -42,7 +42,7 @@ Options:
 """
 
 name    = "es-1"
-version = "2015-10-23T1436Z"
+version = "2015-11-17T1245Z"
 logo    = None
 
 from cStringIO import StringIO
@@ -224,6 +224,13 @@ def main(options):
         mean = np.float32([104.0, 116.0, 122.0]),
         channel_swap = (2,1,0)
     )
+
+    ## Save an image of the network.
+    #net.name = "network"
+    #caffe.draw.draw_net_to_file(
+    #    net,
+    #    "LR"
+    #)
 
     log.info("access {filename}".format(
         filename = inputImageFilename,
