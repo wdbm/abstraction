@@ -28,8 +28,9 @@
 # <http://www.gnu.org/licenses/>.                                              #
 #                                                                              #
 ################################################################################
+from __future__ import division
 
-version = "2015-10-30T2039Z"
+version = "2015-11-17T1319Z"
 
 import os
 import sys
@@ -401,7 +402,11 @@ def add_exchange_word_vectors_to_database(
     tableExchanges = database["exchanges"]
     # Access exchanges.
     tableName = "exchanges"
-    for entry in database[tableName].all():
+    # progress
+    progress = shijian.Progress()
+    progress.engage_quick_calculation_mode()
+    numberOfEntries = len(database[tableName])
+    for entryIndex, entry in enumerate(database[tableName].all()):
         uniqueIdentifier = str(entry["id"])
         # Create word vector representations of utterances and responses and
         # add them or update them in the database.
@@ -430,3 +435,4 @@ def add_exchange_word_vectors_to_database(
                 responseWordVector  = None
             )
         database[tableName].update(data, ["id"])
+        print progress.add_datum(fraction = entryIndex / numberOfEntries),

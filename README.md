@@ -353,7 +353,7 @@ The program vcodex converts conversational exchanges in an abstraction database 
 vcodex.py --database="database.db" --wordvectormodel=Brown_corpus.wvm
 ```
 
-The program vcodex increases the file size of abstraction database version 2015-01-06T172242Z by a factor of ~5.49.
+The program vcodex increases the file size of abstraction database version 2015-01-06T172242Z by a factor of ~5.49. On an i7-5500U CPU running at 2.40 GHz, the conversion rate is ~25 exchanges per second.
 
 # reducodex: remove duplicate collated exchanges
 
