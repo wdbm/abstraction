@@ -37,22 +37,24 @@ Usage:
     program [options]
 
 Options:
-    -h, --help                   display help message
-    --version                    display version and exit
-    -v, --verbose                verbose logging
-    -u, --username=USERNAME      username
-    --inputimage=FILENAME        input image file
-    --outputpixels=FILENAME      output pixels -- ASCII format
-    --inputpixels=FILENAME       input pixels -- ASCII format
-    --outputimage=FILENAME       output image file
-    --outputimagewidth=NUMBER    width of output image in pixels [default: 2379]
-    --convertimagetopixels       mode to convert image to pixels
-    --validatepixels             mode to validate pixels
-    --convertpixelstoimage       mode to convert pixels to image
+    -h, --help                 display help message
+    --version                  display version and exit
+    -v, --verbose              verbose logging
+    -s, --silent               silent
+    -u, --username=USERNAME    username
+    --inputimage=FILENAME      input image file
+    --outputpixels=FILENAME    output pixels -- ASCII format
+    --inputpixels=FILENAME     input pixels -- ASCII format
+    --outputimage=FILENAME     output image file
+    --outputimagewidth=NUMBER  width of output image in pixels [default: 2379]
+    --convertimagetopixels     mode to convert image to pixels
+    --validatepixels           mode to validate pixels
+    --convertpixelstoimage     mode to convert pixels to image
 """
 
 name    = "imconv-3"
-version = "2015-08-21T1543Z"
+version = "2015-11-17T1303Z"
+logo    = None
 
 import os
 import sys
@@ -67,12 +69,20 @@ import docopt
 import technicolor
 import shijian
 import pyprel
+import propyte
 
 @shijian.timer
 def main(options):
 
     global program
-    program = Program(options = options)
+    program = propyte.Program(
+        options = options,
+        name    = name,
+        version = version,
+        logo    = logo
+        )
+    global log
+    from propyte import log
 
     # access options and arguments
     input_image_filename         = options["--inputimage"]
@@ -191,100 +201,6 @@ def main(options):
     log.info("")
 
     program.terminate()
-
-class Program(object):
-
-    def __init__(
-        self,
-        parent  = None,
-        options = None
-        ):
-
-        # internal options
-        self.displayLogo           = True
-
-        # clock
-        global clock
-        clock = shijian.Clock(name = "program run time")
-
-        # name, version, logo
-        if "name" in globals():
-            self.name              = name
-        else:
-            self.name              = None
-        if "version" in globals():
-            self.version           = version
-        else:
-            self.version           = None
-        if "logo" in globals():
-            self.logo              = logo
-        elif "logo" not in globals() and hasattr(self, "name"):
-            self.logo              = pyprel.renderBanner(
-                                         text = self.name.upper()
-                                     )
-        else:
-            self.displayLogo       = False
-            self.logo              = None
-
-        # options
-        self.options               = options
-        self.userName              = self.options["--username"]
-        self.verbose               = self.options["--verbose"]
-
-        # default values
-        if self.userName is None:
-            self.userName = os.getenv("USER")
-
-        # logging
-        global log
-        log = logging.getLogger(__name__)
-        logging.root.addHandler(technicolor.ColorisingStreamHandler())
-
-        # logging level
-        if self.verbose:
-            logging.root.setLevel(logging.DEBUG)
-        else:
-            logging.root.setLevel(logging.INFO)
-
-        self.engage()
-
-    def engage(
-        self
-        ):
-        pyprel.printLine()
-        # logo
-        if self.displayLogo:
-            log.info(pyprel.centerString(text = self.logo))
-            pyprel.printLine()
-        # engage alert
-        if self.name:
-            log.info("initiate {name}".format(
-                name = self.name
-            ))
-        # version
-        if self.version:
-            log.info("version: {version}".format(
-                version = self.version
-            ))
-        log.info("initiation time: {time}".format(
-            time = clock.startTime()
-        ))
-
-    def terminate(
-        self
-        ):
-        clock.stop()
-        log.info("termination time: {time}".format(
-            time = clock.stopTime()
-        ))
-        log.info("time statistics report:\n{report}".format(
-            report = shijian.clocks.report()
-        ))
-        log.info("terminate {name}".format(
-            name = self.name
-        ))
-        pyprel.printLine()
-        sys.exit()
 
 if __name__ == "__main__":
     options = docopt.docopt(__doc__)
