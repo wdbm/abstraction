@@ -9,7 +9,7 @@ def main():
 
     setuptools.setup(
         name             = "abstraction",
-        version          = "2015.10.30.2039",
+        version          = "2015.12.02.1425",
         description      = "machine learning framework",
         long_description = pypandoc.convert("README.md", "rst"),
         url              = "https://github.com/wdbm/abstraction",

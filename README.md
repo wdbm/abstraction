@@ -7,39 +7,39 @@
 The following Bash commands, that have been tested on Ubuntu 14.10, should install prerequisites and check out abstraction.
 
 ```Bash
-sudo pip install docopt
-sudo pip install pyfiglet
-sudo pip install praw
+sudo pip install --only-upgrade propyte
+sudo pip install --only-upgrade pyprel
+sudo pip install --only-upgrade shijian
+sudo pip install --only-upgrade technicolor
+sudo pip install --only-upgrade docopt
+sudo pip install --only-upgrade pyfiglet
+sudo pip install --only-upgrade praw
 sudo apt-get -y install sqlite
 sudo pip install dataset
 sudo apt-get -y install python-nltk
 sudo python -m nltk.downloader all
 sudo easy_install -U gensim
 git clone https://github.com/wdbm/abstraction.git
-cd abstraction/
-wget https://raw.githubusercontent.com/wdbm/pyprel/master/pyprel.py
-wget https://raw.githubusercontent.com/wdbm/shijian/master/shijian.py
-wget https://raw.githubusercontent.com/wdbm/technicolor/master/technicolor.py
-wget https://raw.githubusercontent.com/wdbm/propyte/master/propyte.py
 ```
 
 # prerequisites
 
-|**prerequisite**|**comment**|
-|---|---|
-|docopt|```sudo pip install docopt```|
-|pyfiglet|```sudo pip install pyfiglet```|
-|pyprel|[pyprel](https://github.com/wdbm/pyprel)|
-|shijian|[shijian](https://github.com/wdbm/shijian)|
-|technicolor|[technicolor](https://github.com/wdbm/technicolor)|
-|PRAW|```sudo pip install praw```|
-|SQLite|```sudo apt-get -y install sqlite```|
-|dataset|```sudo pip install dataset```|
-|NLTK|```sudo apt-get -y install python-nltk```|
-|NLTK data|```sudo python -m nltk.downloader all```|
-|gensim|```sudo easy_install -U gensim```|
+|**prerequisite**|**comment**                                                                       |
+|----------------|----------------------------------------------------------------------------------|
+|docopt          |`sudo pip install docopt`                                                         |
+|pyfiglet        |`sudo pip install pyfiglet`                                                       |
+|propyte         |[propyte](https://github.com/wdbm/propyte), `sudo pip install propyte`            |
+|pyprel          |[pyprel](https://github.com/wdbm/pyprel), `sudo pip install pyprel`               |
+|shijian         |[shijian](https://github.com/wdbm/shijian), `sudo pip install shijian`            |
+|technicolor     |[technicolor](https://github.com/wdbm/technicolor), `sudo pip install technicolor`|
+|PRAW            |`sudo pip install praw`                                                           |
+|SQLite          |`sudo apt-get -y install sqlite`                                                  |
+|dataset         |`sudo pip install dataset`                                                        |
+|NLTK            |`sudo apt-get -y install python-nltk`                                             |
+|NLTK data       |`sudo python -m nltk.downloader all`                                              |
+|gensim          |`sudo easy_install -U gensim`                                                     |
 
-The function ```abstraction.setup()``` should be run.
+The function `abstraction.setup()` should be run.
 
 # Caffe 
 
@@ -70,11 +70,11 @@ The Caffe build tools are CMake and make.
 
 ## command line
 
-The command line interface cmdcaffe is a Caffe tool for model training, scoring and diagnostics. Run it without arguments for help. It is at directory ```caffe/build/tools```.
+The command line interface cmdcaffe is a Caffe tool for model training, scoring and diagnostics. Run it without arguments for help. It is at directory `caffe/build/tools`.
 
 ### train
 
-```caffe train``` learns models from scratch, resumes learning from saved snapshots and fine-tunes models to new data and tasks. All training requires a solver configuration through the option ```-solver solver.prototxt```. Resuming requires the option ```snapshot model_item_1000.solverstate``` argument to load the solver snapshot.
+`caffe train` learns models from scratch, resumes learning from saved snapshots and fine-tunes models to new data and tasks. All training requires a solver configuration through the option `-solver solver.prototxt`. Resuming requires the option `snapshot model_item_1000.solverstate` argument to load the solver snapshot.
 
 ```Bash
 # train LeNet
@@ -85,7 +85,7 @@ caffe train -solver examples/mnist/lenet_solver .prototxt -gpu 2
 
 ### test
 
-```caffe test``` scores models by running them in the test phase and resport the network output as its score. The network architecture must be defined properly to output an accuracy measure or loss as its output. The per-batch score is reported and then the grand average is reported last.
+`caffe test` scores models by running them in the test phase and resport the network output as its score. The network architecture must be defined properly to output an accuracy measure or loss as its output. The per-batch score is reported and then the grand average is reported last.
 
 ```Bash
 # score the learned LeNet model on the validation set
@@ -95,7 +95,7 @@ caffe test - model examples/mnist/lenet_train_test.prototxt -weights examples/mn
 
 ### benchmark
 
-```caffe time``` benchmarks model execution layer-by-layer through timing and synchronisation. This is useful to check system performance and measure relative execution times for models.
+`caffe time` benchmarks model execution layer-by-layer through timing and synchronisation. This is useful to check system performance and measure relative execution times for models.
 
 ```Bash
 # time LeNet training on CPU for 10 iterations
@@ -106,7 +106,7 @@ caffe time -model examples/mnist/lenet_train_test.prototxt - gpu 0
 
 ### diagnose
 
-```caffe device_query``` reports GPU details for reference and checking device ordinals for running on a device in multi-GPU machines.
+`caffe device_query` reports GPU details for reference and checking device ordinals for running on a device in multi-GPU machines.
 
 ```Bash
 # query the first device
@@ -115,13 +115,13 @@ caffe device_query -gpu 0
 
 ## pycaffe
 
-The Python interface ```pycaffe``` is the caffe module and its scripts are at the directory ```caffe/python```. Run ```import caffe``` to load models, do forward and backward, handle IO, visualise networks and instrument model-solving. All model data, derivatives and parameters are exposed for reading and writing.
+The Python interface `pycaffe` is the caffe module and its scripts are at the directory `caffe/python`. Run `import caffe` to load models, do forward and backward, handle IO, visualise networks and instrument model-solving. All model data, derivatives and parameters are exposed for reading and writing.
 
-```caffe.Net``` is the central interface for loading, configuring and running models. ```caffe.Classifier``` and ```caffe.Detector``` provide convenience interfaces for common tasks. ```caffe.SGDSolver``` exposes the solving interface. ```caffe.io``` handles input and output with preprocessing and protocol buffers. ```caffe.draw``` visualises network architectures. Caffe blobs are exposed as numpy ndarrays for ease-of-use and efficiency.
+`caffe.Net` is the central interface for loading, configuring and running models. `caffe.Classifier` and `caffe.Detector` provide convenience interfaces for common tasks. `caffe.SGDSolver` exposes the solving interface. `caffe.io` handles input and output with preprocessing and protocol buffers. `caffe.draw` visualises network architectures. Caffe blobs are exposed as numpy ndarrays for ease-of-use and efficiency.
 
 ## MATLAB
 
-The MATLAB interface ```matcaffe``` is the Caffe MATLAB MEX file and its helper m-files are at the directory caffe/matlab. There is example code ```caffe/matlab/caffe/matcaffe_demo.m```.
+The MATLAB interface `matcaffe` is the Caffe MATLAB MEX file and its helper m-files are at the directory caffe/matlab. There is example code `caffe/matlab/caffe/matcaffe_demo.m`.
 
 ## models
 
@@ -193,7 +193,7 @@ cd caffe
 cp Makefile.config.example Makefile.config
 ```
 
-Edit the makefile. Uncomment ```CPU_ONLY := 1``` for a non-GPU compilation (without CUDA). It may be necessary to include the following lines:
+Edit the makefile. Uncomment `CPU_ONLY := 1` for a non-GPU compilation (without CUDA). It may be necessary to include the following lines:
 
 ```
 INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /usr/include/hdf5/serial/
@@ -269,7 +269,7 @@ mainly the,
 on plain
 ```
 
-It has been demonstrated that skip-gram language models can be trained such that it is possible to perform 'word arithmetic'. For example, with an appropriate model, the expression ```king - man + woman``` evaluates to very close to ```queen```.
+It has been demonstrated that skip-gram language models can be trained such that it is possible to perform 'word arithmetic'. For example, with an appropriate model, the expression `king - man + woman` evaluates to very close to `queen`.
 
 - "Efficient Estimation of Word Representations in Vector Space", Tomas Mikolov, Kai Chen, Greg Corrado, Jeffrey Dean <http://arxiv.org/abs/1301.3781>
 
