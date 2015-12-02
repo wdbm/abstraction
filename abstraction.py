@@ -30,13 +30,14 @@
 ################################################################################
 from __future__ import division
 
-version = "2015-11-17T1319Z"
+version = "2015-12-02T1425Z"
 
 import os
 import sys
 import subprocess
 import time
 import datetime
+import re
 import logging
 import inspect
 import pyprel
@@ -45,8 +46,8 @@ import dataset
 import praw
 import math
 import numpy
-
-import re
+import matplotlib
+import matplotlib.pyplot
 from gensim.models import Word2Vec
 import nltk
 
@@ -436,3 +437,86 @@ def add_exchange_word_vectors_to_database(
             )
         database[tableName].update(data, ["id"])
         print progress.add_datum(fraction = entryIndex / numberOfEntries),
+
+def draw_neural_network(
+    axes        = None,
+    left        = None,
+    right       = None,
+    bottom      = None,
+    top         = None,
+    layer_sizes = None
+    ):
+    """
+    # abstract
+
+    This function draws a neural network representation diagram using
+    matplotilb.
+
+    # arguments
+
+    |*argument* |*description*                                                 |
+    |-----------|--------------------------------------------------------------|
+    |axes       |matplotlib.axes.AxesSubplot: the axes on which to plot the    |
+    |           |diagram (returned by matplotlib.pyplot.gca())                 |
+    |left       |float: the position of the centers of the left nodes          |
+    |right      |float: the position of the centers of the right nodes         |
+    |bottom     |float: the position of the centers of the bottom nodes        |
+    |top        |float: the position of the centers of the top nodes           |
+    |layer_sizes|list of integers: list of layer sizes, including input and    |
+    |           |output dimensionality                                         |
+
+    # example
+
+    ```Python
+    figure = matplotlib.pyplot.figure(figsize = (12, 12))
+    abstraction.draw_neural_network(
+        axes        = figure.gca(),
+        left        = .1,
+        right       = .9,
+        bottom      = .1,
+        top         = .9,
+        layer_sizes = [4, 7, 2]
+    )
+    figure.savefig("neural_network_diagram.png")
+    ```
+    """
+    spacing_vertical   = (top - bottom) / float(max(layer_sizes))
+    spacing_horizontal = (right - left) / float(len(layer_sizes) - 1)
+    # nodes
+    for n, layer_size in enumerate(layer_sizes):
+        layer_top = spacing_vertical * (layer_size - 1)/2 + (top + bottom) / 2
+        for m in xrange(layer_size):
+            circle = matplotlib.pyplot.Circle(
+                (
+                    n * spacing_horizontal + left,
+                    layer_top - m * spacing_vertical
+                ),
+                spacing_vertical / 4,
+                color  = "w",
+                ec     = "k",
+                zorder = 4
+            )
+            axes.add_artist(circle)
+    # edges
+    for n, (layer_size_a, layer_size_b) in enumerate(zip(
+        layer_sizes[:-1],
+        layer_sizes[1:]
+        )):
+        layer_top_a =\
+            spacing_vertical * (layer_size_a - 1) / 2 + (top + bottom) / 2
+        layer_top_b =\
+            spacing_vertical * (layer_size_b - 1) / 2 + (top + bottom) / 2
+        for m in xrange(layer_size_a):
+            for o in xrange(layer_size_b):
+                line = matplotlib.pyplot.Line2D(
+                    [
+                        n * spacing_horizontal + left,
+                        (n + 1) * spacing_horizontal + left
+                    ],
+                    [
+                        layer_top_a - m * spacing_vertical,
+                        layer_top_b - o * spacing_vertical
+                    ],
+                    c = "k"
+                )
+                axes.add_artist(line)
