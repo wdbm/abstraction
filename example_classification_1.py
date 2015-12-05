@@ -43,7 +43,7 @@ options:
 """
 
 name    = "example_classification_1"
-version = "2015-12-05T0504Z"
+version = "2015-12-05T0512Z"
 logo    = name
 
 import os
@@ -238,33 +238,34 @@ def main(options):
             train_size = 0.7
         )
     log.info("define classification model")
+
+    # define model
+
     classifier = abstraction.Classification(
         number_of_classes = 3,
         hidden_nodes      = [10, 20, 10],
         epochs            = 500
-    ).model()
-    
-    # define model
+    )
 
-    log.info("fit classification model to dataset features and targets")
-    classifier.fit(features_train, targets_train)
-    
     # train model
 
-    log.info("test trained classification model on training dataset")
-    score = metrics.accuracy_score(
-        classifier.predict(features_train),
-        targets_train
-    )
+    log.info("fit classification model to dataset features and targets")
+    classifier._model.fit(features_train, targets_train)
+    #classifier.save()
 
     # predict and cross-validate training
 
+    log.info("test trained classification model on training dataset")
+    score = metrics.accuracy_score(
+        classifier._model.predict(features_train),
+        targets_train
+    )
     log.info("prediction accuracy on training dataset: {percentage}".format(
         percentage = 100 * score
     ))
     log.info("accuracy of classifier on test dataset:")
     score = metrics.accuracy_score(
-        classifier.predict(features_test),
+        classifier._model.predict(features_test),
         targets_test
     )
     log.info("prediction accuracy on test dataset: {percentage}".format(

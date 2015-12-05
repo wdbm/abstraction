@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2015-12-05T0505Z"
+version = "2015-12-05T0519Z"
 
 import os
 import sys
@@ -40,6 +40,7 @@ import datetime
 import re
 import logging
 import inspect
+import pickle
 import pyprel
 import shijian
 import dataset
@@ -581,3 +582,10 @@ class Classification(object):
 
     def model(self):
         return self._model
+
+    def save(
+        self,
+        filename = "classifier.abs"
+    ):
+        with open(filename, "wb") as output:
+            pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
