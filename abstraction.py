@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2015-12-05T0519Z"
+version = "2015-12-05T0523Z"
 
 import os
 import sys
@@ -587,5 +587,12 @@ class Classification(object):
         self,
         filename = "classifier.abs"
     ):
-        with open(filename, "wb") as output:
-            pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
+        with open(filename, "wb") as output_file:
+            pickle.dump(self._model, output_file, pickle.HIGHEST_PROTOCOL)
+
+    def load(
+        self,
+        filename = "classifier.abs"
+    ):
+        with open(filename, "rb") as input_file:
+            self._model = pickle.load(input_file)
