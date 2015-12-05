@@ -19,6 +19,9 @@ sudo pip install dataset
 sudo apt-get -y install python-nltk
 sudo python -m nltk.downloader all
 sudo easy_install -U gensim
+sudo pip install git+git://github.com/google/skflow.git
+sudo pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.5.0-cp27-none-linux_x86_64.whl
+sudo pip install git+git://github.com/google/skflow.git
 git clone https://github.com/wdbm/abstraction.git
 ```
 

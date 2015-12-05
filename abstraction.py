@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2015-12-02T1425Z"
+version = "2015-12-05T0505Z"
 
 import os
 import sys
@@ -49,6 +49,10 @@ import numpy
 import matplotlib
 import matplotlib.pyplot
 from gensim.models import Word2Vec
+from sklearn import datasets
+from sklearn import metrics
+from sklearn import cross_validation
+import skflow
 import nltk
 
 log = logging.getLogger(__name__)
@@ -520,3 +524,60 @@ def draw_neural_network(
                     c = "k"
                 )
                 axes.add_artist(line)
+
+class Dataset(object):
+
+    def __init__(
+        self,
+        data = None
+    ):
+        self._data = data
+
+    def features(
+        self,
+        format_type = "ndarray"
+        ):
+            if format_type == "ndarray":
+                return numpy.asarray(self._data[::2])
+            elif format_type == "list":
+                return self._data[::2]
+            else:
+                raise Exception("unknown format requested")
+
+    def targets(
+        self,
+        format_type = "ndarray"
+        ):
+            if format_type == "ndarray":
+                return numpy.asarray(self._data[1::2])
+            elif format_type == "list":
+                return self._data[1::2]
+            else:
+                raise Exception("unknown format requested")
+
+class Classification(object):
+
+    def __init__(
+        self,
+        number_of_classes = None,
+        hidden_nodes      = [10, 20, 10],
+        epochs            = 5000,
+        batch_size        = 32,
+        optimizer         = "SGD",
+        learning_rate     = 0.1,
+        seed              = 42,
+        continue_training = True
+    ):
+        self._model = skflow.TensorFlowDNNClassifier(
+            n_classes         = number_of_classes,
+            hidden_units      = hidden_nodes,
+            steps             = epochs,
+            batch_size        = batch_size,
+            optimizer         = optimizer,
+            learning_rate     = learning_rate,
+            tf_random_seed    = seed,
+            continue_training = True
+        )
+
+    def model(self):
+        return self._model
