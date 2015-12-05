@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2015-12-05T0523Z"
+version = "2015-12-05T0645Z"
 
 import os
 import sys
@@ -38,6 +38,8 @@ import subprocess
 import time
 import datetime
 import re
+import csv
+import itertools
 import logging
 import inspect
 import pickle
@@ -596,3 +598,18 @@ class Classification(object):
     ):
         with open(filename, "rb") as input_file:
             self._model = pickle.load(input_file)
+
+def access_SUSY_dataset_format_file(filename):
+    """
+    This function accesses a CSV file containing data of the form of the [SUSY
+    dataset](https://archive.ics.uci.edu/ml/datasets/SUSY), i.e. with the first
+    column being class labels and other columns being features.
+    """
+    # Load the CSV file to a list.
+    with open(filename, "rb") as dataset_file:
+        dataset_CSV = [row for row in csv.reader(dataset_file, delimiter = ",")]
+        # Reorganise the data.
+        return [
+            i for i in itertools.chain(*[list((element[1:],
+            [int(float(element[0]))])) for element in dataset_CSV])
+        ]
