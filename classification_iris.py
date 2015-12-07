@@ -3,7 +3,7 @@
 """
 ################################################################################
 #                                                                              #
-# example_classification_1                                                     #
+# classification_iris                                                          #
 #                                                                              #
 ################################################################################
 #                                                                              #
@@ -42,8 +42,8 @@ options:
     -u, --username=USERNAME  username
 """
 
-name    = "example_classification_1"
-version = "2015-12-05T0512Z"
+name    = "classification_iris"
+version = "2015-12-05T0647Z"
 logo    = name
 
 import os
