@@ -44,6 +44,36 @@ git clone https://github.com/wdbm/abstraction.git
 
 The function `abstraction.setup()` should be run.
 
+# data
+
+## SUSY Data Set
+
+- <https://archive.ics.uci.edu/ml/datasets/SUSY>
+- <http://arxiv.org/abs/1402.4735>
+
+The SUSY Data Set is a classification problem to distinguish between a signal process which produces supersymmetric particles and a background process which does not. In the data, the first column is the class label (1 for signal, 0 for background), followed by 18 features (8 low-level features and 10 high-level features):
+
+- lepton 1 pT
+- lepton 1 eta
+- lepton 1 phi
+- lepton 2 pT
+- lepton 2 eta
+- lepton 2 phi
+- missing energy magnitude
+- missing energy phi
+- MET_rel
+- axial MET
+- M_R
+- M_TR_2
+- R
+- MT2
+- S_R
+- M_Delta_R
+- dPhi_r_b
+- cos(theta_r1)
+
+This data has been produced by MadGraph5 Monte Carlo simulations of 8 TeV proton collisions, with showering and hadronisation performed by Pythia 6 and detector response simulated by Delphes. The first 8 features are kinematic properties measured by simulated particle detectors. The next 10 features are functions of the first 8 features; they are high-level features derived by physicists to help discriminate between the two classes. There are 46% positive examples in the SUSY data set. The features were standardised over the entire training/testing sets with mean zero and standard deviation one, except for those features with values strictly greater than zero; these were scaled such that the mean value was one.
+
 # Caffe 
 
 ## introduction

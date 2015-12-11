@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2015-12-05T0645Z"
+version = "2015-12-11T1214Z"
 
 import os
 import sys
@@ -393,6 +393,13 @@ def angle(v1, v2):
     cosine = 1 if cosine > 1 else cosine
     return(math.acos(cosine))
 
+def composite_variable(x):
+    k = len(x) + 1
+    variable = 0
+    for index, element in enumerate(x):
+        variable += k**(index - 1) * element
+    return variable
+
 def add_exchange_word_vectors_to_database(
     fileName       = "database.db",
     model_word2vec = None
@@ -571,6 +578,9 @@ class Classification(object):
         seed              = 42,
         continue_training = True
     ):
+        """
+        batch_size: number of training examples to use per training step
+        """
         self._model = skflow.TensorFlowDNNClassifier(
             n_classes         = number_of_classes,
             hidden_units      = hidden_nodes,

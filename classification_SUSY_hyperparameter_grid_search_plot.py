@@ -4,7 +4,7 @@
 """
 ################################################################################
 #                                                                              #
-# classification_SUSY_hyperparameter_grid_search                               #
+# classification_SUSY_hyperparameter_grid_search_plot                          #
 #                                                                              #
 ################################################################################
 #                                                                              #
@@ -36,17 +36,18 @@ usage:
     program [options]
 
 options:
-    -h, --help               display help message
-    --version                display version and exit
-    -v, --verbose            verbose logging
-    -s, --silent             silent
-    -u, --username=USERNAME  username
-    --data=FILENAME          input data filename [default: SUSY_100k.csv]
+    -h, --help                 display help message
+    --version                  display version and exit
+    -v, --verbose              verbose logging
+    -s, --silent               silent
+    -u, --username=USERNAME    username
+    --gridsearchfile=FILENAME  input grid search filename
+                               [default: grid_search_map.pkl]
 """
 from __future__ import division
 
-name    = "classification_SUSY_hyperparameter_grid_search"
-version = "2015-12-11T1211Z"
+name    = "classification_SUSY_hyperparameter_grid_search_plot"
+version = "2015-12-11T1213Z"
 logo    = name
 
 import os
@@ -79,132 +80,10 @@ def main(options):
     log.info("")
 
     # access options and arguments
-    input_data_filename = options["--data"]
+    grid_search_filename = options["--gridsearchfile"]
 
-    # define dataset
-
-    # Load the SUSY dataset (https://archive.ics.uci.edu/ml/datasets/SUSY). 
-    # The first column is the class label (1 for signal, 0 for background),
-    # followed by 18 features (8 low-level features and 10 high-level features):
-    #
-    # - lepton 1 pT
-    # - lepton 1 eta
-    # - lepton 1 phi
-    # - lepton 2 pT
-    # - lepton 2 eta
-    # - lepton 2 phi
-    # - missing energy magnitude
-    # - missing energy phi
-    # - MET_rel
-    # - axial MET
-    # - M_R
-    # - M_TR_2
-    # - R
-    # - MT2
-    # - S_R
-    # - M_Delta_R
-    # - dPhi_r_b
-    # - cos(theta_r1)
-
-    data = abstraction.access_SUSY_dataset_format_file(input_data_filename)
-
-    dataset = abstraction.Dataset(
-        data = data
-    )
-
-    # define data
-
-    log.info("split data for cross-validation")
-    features_train, features_test, targets_train, targets_test =\
-        cross_validation.train_test_split(
-            dataset.features(),
-            dataset.targets(),
-            train_size = 0.7
-        )
-
-    # grid search
-
-    import itertools
-
-    epochs       = [10, 100, 500, 1000]
-    architecture = [200, 300, 300, 300, 200]
-
-    grid_search_map = {}
-    grid_search_map["epoch"]          = []
-    grid_search_map["hidden_nodes"]   = []
-    grid_search_map["score_training"] = []
-    grid_search_map["score_test"]     = []
-
-    # define progress
-    count_total = 0
-    for epoch in epochs:
-        for nodes_count in xrange(1, len(architecture) + 1):
-            combinations = itertools.product(architecture, repeat = nodes_count)
-            for combination in combinations:
-                count_total += 1
-    count = 0
-    progress = shijian.Progress()
-    progress.engage_quick_calculation_mode()
-
-    for epoch in epochs:
-        for nodes_count in xrange(1, len(architecture) + 1):
-            combinations = itertools.product(architecture, repeat = nodes_count)
-            for combination in combinations:
-                hidden_nodes = list(combination)
-
-                # define model
-
-                log.info("define classification model")
-                classifier = abstraction.Classification(
-                    number_of_classes = 2,
-                    hidden_nodes      = hidden_nodes,
-                    epochs            = epoch
-                )
-                
-                # train model
-                
-                log.info("fit model to dataset features and targets")
-                classifier._model.fit(features_train, targets_train)
-                #classifier.save()
-                
-                # predict and cross-validate training
-                
-                log.info("test trained model on training dataset")
-                score_training = metrics.accuracy_score(
-                    classifier._model.predict(features_train),
-                    targets_train
-                )
-                score_test = metrics.accuracy_score(
-                    classifier._model.predict(features_test),
-                    targets_test
-                )
-                log.info("\ntraining-testing instance complete:")
-                log.info("epoch:          {epoch}".format(
-                    epoch = epoch
-                ))
-                log.info("architecture:   {architecture}".format(
-                    architecture = hidden_nodes
-                ))
-                log.info("score training: {score_training}".format(
-                    score_training = 100 * score_training
-                ))
-                log.info("score test:     {score_test}".format(
-                    score_test = 100 * score_test
-                ))
-                pyprel.printLine()
-                grid_search_map["epoch"].append(epoch)
-                grid_search_map["hidden_nodes"].append(hidden_nodes)
-                grid_search_map["score_training"].append(score_training)
-                grid_search_map["score_test"].append(score_test)
-
-                # save current grid search map
-                shijian.export_object(
-                    grid_search_map,
-                    filename = "grid_search_map.pkl"
-                )
-
-                count += 1
-                print(progress.add_datum(fraction = (count + 1) / count_total))
+    # load grid search map
+    grid_search_map = shijian.import_object(filename = grid_search_filename)
 
     number_of_entries = len(grid_search_map["epoch"])
 
@@ -258,13 +137,17 @@ def main(options):
         score_test = [element[1] for element in value]
         matplotlib.pyplot.plot(epochs, score_test, label = key)
     
-    matplotlib.pyplot.legend(loc = "center right")
-
-    matplotlib.pyplot.savefig(
-        "hyperparameter_map.eps",
-        bbox_inches = "tight",
-        format      = "eps"
+    matplotlib.pyplot.legend(
+        loc = "bottom right",
+        prop={'size': 10}
     )
+
+    matplotlib.pyplot.show()
+    #matplotlib.pyplot.savefig(
+    #    "hyperparameter_map.eps",
+    #    bbox_inches = "tight",
+    #    format      = "eps"
+    #)
 
     # find best-scoring models
 

@@ -40,10 +40,11 @@ options:
     -v, --verbose            verbose logging
     -s, --silent             silent
     -u, --username=USERNAME  username
+    --data=FILENAME          input data filename [default: SUSY_100k.csv]
 """
 
 name    = "classification_SUSY"
-version = "2015-12-05T0646Z"
+version = "2015-12-11T1208Z"
 logo    = name
 
 import os
@@ -70,6 +71,9 @@ def main(options):
 
     log.info("")
 
+    # access options and arguments
+    input_data_filename = options["--data"]
+
     # define dataset
 
     # Load the SUSY dataset (https://archive.ics.uci.edu/ml/datasets/SUSY). 
@@ -95,7 +99,7 @@ def main(options):
     # - dPhi_r_b
     # - cos(theta_r1)
 
-    data = abstraction.access_SUSY_dataset_format_file("SUSY_100k.csv")
+    data = abstraction.access_SUSY_dataset_format_file(input_data_filename)
 
     dataset = abstraction.Dataset(
         data = data
@@ -116,8 +120,8 @@ def main(options):
 
     classifier = abstraction.Classification(
         number_of_classes = 2,
-        hidden_nodes      = [20, 30, 20],
-        epochs            = 3000000
+        hidden_nodes      = [200, 300, 300, 300, 200],
+        epochs            = 10000
     )
 
     # train model
