@@ -11,6 +11,7 @@ sudo pip install --only-upgrade propyte
 sudo pip install --only-upgrade pyprel
 sudo pip install --only-upgrade shijian
 sudo pip install --only-upgrade technicolor
+sudo pip install --only-upgrade datavision
 sudo pip install --only-upgrade docopt
 sudo pip install --only-upgrade pyfiglet
 sudo pip install --only-upgrade praw
