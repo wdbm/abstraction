@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2015-12-11T1214Z"
+version = "2015-12-16T1504Z"
 
 import os
 import sys
@@ -43,8 +43,10 @@ import itertools
 import logging
 import inspect
 import pickle
+import propyte
 import pyprel
 import shijian
+import datavision
 import dataset
 import praw
 import math
@@ -57,18 +59,23 @@ from sklearn import metrics
 from sklearn import cross_validation
 import skflow
 import nltk
+with propyte.import_ganzfeld():
+    from ROOT import *
 
 log = logging.getLogger(__name__)
 
+@shijian.timer
 def setup():
     # Download NLTK data.
     downloader = nltk.downloader.Downloader("http://nltk.github.com/nltk_data/")
     downloader.download("all")
 
+@shijian.timer
 def model_word2vec_Brown_Corpus():
     model_word2vec = Word2Vec(nltk.corpus.brown.sents())
     return model_word2vec
 
+@shijian.timer
 def convert_word_string_to_word_vector(
     wordString     = None,
     model_word2vec = None
@@ -81,6 +88,7 @@ def convert_word_string_to_word_vector(
         ))
         return None
 
+@shijian.timer
 def convert_sentence_string_to_word_vector(
     sentenceString = None,
     model_word2vec = None
@@ -102,6 +110,7 @@ def convert_sentence_string_to_word_vector(
     sentenceWordVector = sum(wordVectors)
     return sentenceWordVector
 
+@shijian.timer
 def create_database(
     fileName = None
     ):
@@ -111,6 +120,7 @@ def create_database(
         " \"create table aTable(field1 int); drop table aTable;\""
     )
 
+@shijian.timer
 def access_database(
     fileName = "database.db"
     ):
@@ -121,6 +131,7 @@ def access_database(
     database = dataset.connect("sqlite:///" + fileName)
     return database
 
+@shijian.timer
 def save_database_metadata(
     fileName = "database.db"
     ):
@@ -145,6 +156,7 @@ def save_database_metadata(
     log.debug("save database metadata")
     tableMetadata.insert(metadata)
 
+@shijian.timer
 def database_metadata(
     fileName = "database.db"
     ):
@@ -166,6 +178,7 @@ def database_metadata(
         raise Exception
     return metadata
 
+@shijian.timer
 def log_database_metadata(
     fileName = "database.db"
     ):
@@ -228,6 +241,7 @@ class Exchange(object):
             exchangeReference = self.exchangeReference
         ))
 
+@shijian.timer
 def access_exchanges_Reddit(
     userAgent          = "scriptwire",
     subreddits         = None,
@@ -305,6 +319,7 @@ def access_exchanges_Reddit(
             #time.sleep(2)
     return exchanges
 
+@shijian.timer
 def save_exchanges_to_database(
     exchanges = None,
     fileName  = "database.db"
@@ -346,6 +361,7 @@ def save_exchanges_to_database(
                 utterance = exchange.utterance
             ))
 
+@shijian.timer
 def load_word_vector_model(
     fileName = None
     ):
@@ -366,6 +382,7 @@ def load_word_vector_model(
         model_word2vec = Word2Vec.load(fileName)
     return model_word2vec
 
+@shijian.timer
 def ensure_file_existence(fileName):
     log.debug("ensure existence of file {fileName}".format(
         fileName = fileName
@@ -381,18 +398,22 @@ def ensure_file_existence(fileName):
             fileName = fileName
         ))
 
+@shijian.timer
 def dot_product(v1, v2):
     return(sum((a*b) for a, b in zip(v1, v2)))
 
+@shijian.timer
 def magnitude(v):
     return(numpy.linalg.norm(v))
     #return(math.sqrt(dot_product(v, v)))
 
+@shijian.timer
 def angle(v1, v2):
     cosine = dot_product(v1, v2) / (magnitude(v1) * magnitude(v2))
     cosine = 1 if cosine > 1 else cosine
     return(math.acos(cosine))
 
+@shijian.timer
 def composite_variable(x):
     k = len(x) + 1
     variable = 0
@@ -400,6 +421,7 @@ def composite_variable(x):
         variable += k**(index - 1) * element
     return variable
 
+@shijian.timer
 def add_exchange_word_vectors_to_database(
     fileName       = "database.db",
     model_word2vec = None
@@ -452,6 +474,7 @@ def add_exchange_word_vectors_to_database(
         database[tableName].update(data, ["id"])
         print progress.add_datum(fraction = entryIndex / numberOfEntries),
 
+@shijian.timer
 def draw_neural_network(
     axes        = None,
     left        = None,
@@ -609,6 +632,7 @@ class Classification(object):
         with open(filename, "rb") as input_file:
             self._model = pickle.load(input_file)
 
+@shijian.timer
 def access_SUSY_dataset_format_file(filename):
     """
     This function accesses a CSV file containing data of the form of the [SUSY
@@ -623,3 +647,225 @@ def access_SUSY_dataset_format_file(filename):
             i for i in itertools.chain(*[list((element[1:],
             [int(float(element[0]))])) for element in dataset_CSV])
         ]
+
+@shijian.timer
+def ensure_file_existence(filename):
+    log.debug("ensure existence of file {filename}".format(
+        filename = filename
+    ))
+    if not os.path.isfile(os.path.expandvars(filename)):
+        log.fatal("file {filename} does not exist".format(
+            filename = filename
+        ))
+        raise(IOError)
+    else:
+        log.debug("file {filename} found".format(
+            filename = filename
+        ))
+
+@shijian.timer
+def open_ROOT_file(
+    filename,
+    ):
+    ensure_file_existence(filename)
+    log.info("access file {filename}".format(
+        filename = filename
+    ))
+    return TFile.Open(filename)
+
+class ROOT_Variable(numpy.ndarray):
+ 
+    def __new__(
+        cls,
+        name                     = None,
+        tree                     = None,
+        ):
+        self = numpy.asarray([]).view(cls)
+        # arguments
+        self._name               = name
+        self.tree                = tree
+        # internal
+        self.event_number        = 0
+        self.variable_object     = None
+        self.variable_type       = None
+        self.data_type           = None
+        self.variable_data_types = None
+        self.canvas              = None
+        self.histogram           = None
+        self._values             = [] # list of values
+        return(self)
+ 
+    @shijian.timer
+    def identify_variable(
+        self,
+        ):
+        # Identify the variable data type.
+        # Set the identifiable data types.
+        self.variable_data_types = {
+            "<type 'int'>"                        : "int",
+            "<class 'ROOT.vector<float>'>"        : "vector<float>",
+            "<class 'ROOT.vector<int>'>"          : "vector<int>",
+            "<type 'float'>"                      : "float",
+            "<type 'long'>"                       : "long",
+            "<type 'ROOT.PyFloatBuffer'>"         : "PyFloatBuffer",
+            "<type 'ROOT.PyIntBuffer'>"           : "PyIntBuffer",
+            "<class 'ROOT.vector<unsigned int>'>" : "unsigned int"
+        }
+        # If the variable object exists, check its data type. If there is no
+        # variable object, do not set its data type.
+        if self.variable_object:
+            variable_data_type = str(type(self.variable_object))
+        else:
+            variable_data_type = None
+        if variable_data_type in self.variable_data_types:
+            self.data_type = self.variable_data_types[variable_data_type]
+            log.debug(
+                "variable {name} is identified as data type {data_type}".format(
+                    name      = self._name,
+                    data_type = self.data_type
+                )
+            )
+        else:
+            self.data_type = variable_data_type
+            log.warning(
+                "variable {name} is of unknown data type {data_type}".format(
+                    name      = self._name,
+                    data_type = self.data_type
+                )
+            )
+            self.data_type = "vector<float>"
+            #self.data_type = "int"
+            log.warning("set to default data type {data_type}".format(
+                data_type = self.data_type
+            ))
+ 
+    @shijian.timer
+    def load_variable_object(
+        self,
+        ):
+        if self.tree is None:
+            log.error("no tree specified")
+            raise(Exception)
+        # Set the current event.
+        self.tree.GetEntry(self.event_number)
+        self.variable_object = getattr(self.tree, self._name)
+ 
+    @shijian.timer
+    def load_variable(
+        self,
+        all_events = True # option to load variable values for all events
+        ):
+        # Load the variable values.
+        log.debug("load variable {name} values".format(name = self._name))
+        self._values     = []
+        if all_events is None:
+            # Load the variable object.
+            self.load_variable_object()
+            # Identify the variable type and data type.
+            self.identify_variable()
+            # Use a loading method appropriate to the data type.
+            if self.data_type == "int":
+                self._values = self.variable_object
+            elif self.data_type == "float":
+                self._values = self.variable_object
+            elif self.data_type == "long":
+                self._values = self.variable_object
+            else:
+                for value in self.variable_object:
+                    self._values.append(value)
+        else:
+            # Load the variable object.
+            self.load_variable_object()
+            # Identify the variable type and data type.
+            self.identify_variable()
+            for event in self.tree:
+                # Use a loading method appropriate to the data type.
+                if self.data_type == "int":
+                    self._values.append(self.variable_object)
+                elif self.data_type == "float":
+                    self._values.append(self.variable_object)
+                elif self.data_type == "long":
+                    self._values.append(self.variable_object)
+                else:
+                    for value in self.variable_object:
+                        self._values.append(value)
+ 
+    @shijian.timer
+    def name(
+        self,
+        ):
+        # return name
+        return(self._name)
+ 
+    @shijian.timer
+    def values(
+        self,
+        ):
+        # return values
+        return(self._values)
+
+def select_event(
+    event     = None,
+    selection = "ejets"
+    ):
+    """
+    Select a HEP event.
+    """
+    if selection == "ejets":
+        # Require single lepton.
+        # Require >= 4 jets.
+        if \
+            0 < len(event.el_pt) < 2 and \
+            len(event.jet_pt) >= 4:
+            return True
+        else:
+            return False
+
+def load_HEP_data(
+    ROOT_filename            = "output.root",
+    tree_name                = "nominal",
+    maximum_number_of_events = None
+    ):
+    """
+    Load HEP data and return dataset.
+    """
+    ROOT_file        = open_ROOT_file(ROOT_filename)
+    tree             = ROOT_file.Get(tree_name)
+    number_of_events = tree.GetEntries()
+    data             = datavision.Dataset()
+
+    progress = shijian.Progress()
+    progress.engage_quick_calculation_mode()
+    # counters
+    number_of_events_loaded = 0
+
+    for index, event in enumerate(tree):
+
+        if maximum_number_of_events is not None and\
+            number_of_events_loaded >= int(maximum_number_of_events):
+            log.info(
+                "loaded maximum requested number of events " +
+                "({maximum_number_of_events})\r".format(
+                    maximum_number_of_events = maximum_number_of_events
+                )
+            )
+            break
+        number_of_events_loaded += 1
+        print progress.add_datum(fraction = (index + 2) / number_of_events),
+    
+        if select_event(event):
+            data.variable(index = index, name = "el_1_pt",   value = event.el_pt[0])
+            data.variable(index = index, name = "el_1_eta",  value = event.el_eta[0])
+            data.variable(index = index, name = "el_1_phi",  value = event.el_phi[0])
+            data.variable(index = index, name = "jet_1_pt",  value = event.jet_pt[0])
+            data.variable(index = index, name = "jet_1_eta", value = event.jet_eta[0])
+            data.variable(index = index, name = "jet_1_phi", value = event.jet_phi[0])
+            data.variable(index = index, name = "jet_1_e",   value = event.jet_e[0])
+            data.variable(index = index, name = "jet_2_pt",  value = event.jet_pt[1])
+            data.variable(index = index, name = "jet_2_eta", value = event.jet_phi[1])
+            data.variable(index = index, name = "jet_2_phi", value = event.jet_eta[1])
+            data.variable(index = index, name = "jet_2_e",   value = event.jet_e[1])
+            data.variable(index = index, name = "met",       value = event.met_met)
+            data.variable(index = index, name = "met_phi",   value = event.met_phi)
+
+    return data
