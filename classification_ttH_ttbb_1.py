@@ -47,7 +47,7 @@ options:
 from __future__ import division
 
 name    = "classification_ttH_ttbb_1"
-version = "2016-01-06T1746Z"
+version = "2016-01-06T1917Z"
 logo    = name
 
 import os
@@ -103,10 +103,10 @@ def main(options):
 
     # upcoming: consider data ordering
 
-    # Normalize all data (to be updated).
+    # Preprocess all data (to be updated).
 
-    data_ttbb.normalize_all()
-    data_ttH.normalize_all()
+    data_ttbb.preprocess_all()
+    data_ttH.preprocess_all()
 
     # Add class labels to the data sets, 0 for ttbb and 1 for ttH.
 
