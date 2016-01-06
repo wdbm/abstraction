@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2015-12-16T1504Z"
+version = "2016-01-06T1800Z"
 
 import os
 import sys
@@ -854,18 +854,21 @@ def load_HEP_data(
         print progress.add_datum(fraction = (index + 2) / number_of_events),
     
         if select_event(event):
-            data.variable(index = index, name = "el_1_pt",   value = event.el_pt[0])
-            data.variable(index = index, name = "el_1_eta",  value = event.el_eta[0])
-            data.variable(index = index, name = "el_1_phi",  value = event.el_phi[0])
-            data.variable(index = index, name = "jet_1_pt",  value = event.jet_pt[0])
-            data.variable(index = index, name = "jet_1_eta", value = event.jet_eta[0])
-            data.variable(index = index, name = "jet_1_phi", value = event.jet_phi[0])
-            data.variable(index = index, name = "jet_1_e",   value = event.jet_e[0])
-            data.variable(index = index, name = "jet_2_pt",  value = event.jet_pt[1])
-            data.variable(index = index, name = "jet_2_eta", value = event.jet_phi[1])
-            data.variable(index = index, name = "jet_2_phi", value = event.jet_eta[1])
-            data.variable(index = index, name = "jet_2_e",   value = event.jet_e[1])
-            data.variable(index = index, name = "met",       value = event.met_met)
-            data.variable(index = index, name = "met_phi",   value = event.met_phi)
+            data.variable(index = index, name = "el_1_pt",        value = event.el_pt[0])
+            data.variable(index = index, name = "el_1_eta",       value = event.el_eta[0])
+            data.variable(index = index, name = "el_1_phi",       value = event.el_phi[0])
+            data.variable(index = index, name = "jet_1_pt",       value = event.jet_pt[0])
+            data.variable(index = index, name = "jet_1_eta",      value = event.jet_eta[0])
+            data.variable(index = index, name = "jet_1_phi",      value = event.jet_phi[0])
+            data.variable(index = index, name = "jet_1_e",        value = event.jet_e[0])
+            data.variable(index = index, name = "jet_2_pt",       value = event.jet_pt[1])
+            data.variable(index = index, name = "jet_2_eta",      value = event.jet_eta[1])
+            data.variable(index = index, name = "jet_2_phi",      value = event.jet_phi[1])
+            data.variable(index = index, name = "jet_2_e",        value = event.jet_e[1])
+            data.variable(index = index, name = "met",            value = event.met_met)
+            data.variable(index = index, name = "met_phi",        value = event.met_phi)
+            data.variable(index = index, name = "nJets",          value = event.nJets)
+            data.variable(index = index, name = "Centrality_all", value = event.Centrality_all)
+            data.variable(index = index, name = "Mbb_MindR",      value = event.Mbb_MindR)
 
     return data

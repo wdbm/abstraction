@@ -47,7 +47,7 @@ options:
 from __future__ import division
 
 name    = "classification_ttH_ttbb_1"
-version = "2015-12-16T1444Z"
+version = "2016-01-06T1746Z"
 logo    = name
 
 import os
@@ -59,6 +59,8 @@ import propyte
 import shijian
 import datavision
 import abstraction
+from sklearn import metrics
+from sklearn import cross_validation
 
 def main(options):
 
@@ -85,18 +87,129 @@ def main(options):
         filename = ROOT_filename_ttbb
     ))
 
-    # upcoming
+    # Access data for event classes ttbb and ttH.
 
-    # Access data for event classes ttbb and ttH and add class labels to them.
-
-    data = abstraction.load_HEP_data(
-        ROOT_filename            = "output.root",
+    data_ttbb = abstraction.load_HEP_data(
+        ROOT_filename            = ROOT_filename_ttbb,
         tree_name                = "nominal",
         maximum_number_of_events = None
-        )
-    print(data.table())
+    )
 
-    # Combine the data sets and prepare them for classifier training.
+    data_ttH = abstraction.load_HEP_data(
+        ROOT_filename            = ROOT_filename_ttH,
+        tree_name                = "nominal",
+        maximum_number_of_events = None
+    )
+
+    # upcoming: consider data ordering
+
+    # Normalize all data (to be updated).
+
+    data_ttbb.normalize_all()
+    data_ttH.normalize_all()
+
+    # Add class labels to the data sets, 0 for ttbb and 1 for ttH.
+
+    for index in data_ttbb.indices():
+        data_ttbb.variable(index = index, name = "class", value = 0)
+
+    for index in data_ttH.indices():
+        data_ttH.variable(index = index, name = "class", value = 1)
+
+    # Convert the data sets to a simple list format with the first column
+    # containing the class label.
+    _data = []
+    for index in data_ttbb.indices():
+        _data.append([
+            data_ttbb.variable(name = "el_1_pt"),
+            data_ttbb.variable(name = "el_1_eta"),
+            data_ttbb.variable(name = "el_1_phi"),
+            data_ttbb.variable(name = "jet_1_pt"),
+            data_ttbb.variable(name = "jet_1_eta"),
+            data_ttbb.variable(name = "jet_1_phi"),
+            data_ttbb.variable(name = "jet_1_e"),
+            data_ttbb.variable(name = "jet_2_pt"),
+            data_ttbb.variable(name = "jet_2_eta"),
+            data_ttbb.variable(name = "jet_2_phi"),
+            data_ttbb.variable(name = "jet_2_e"),
+            data_ttbb.variable(name = "met"),
+            data_ttbb.variable(name = "met_phi"),
+            data_ttbb.variable(name = "nJets"),
+            data_ttbb.variable(name = "Centrality_all"),
+            data_ttbb.variable(name = "Mbb_MindR")
+        ])
+        _data.append([
+            data_ttbb.variable(name = "class")
+        ])
+    for index in data_ttH.indices():
+        _data.append([
+            data_ttH.variable(name = "el_1_pt"),
+            data_ttH.variable(name = "el_1_eta"),
+            data_ttH.variable(name = "el_1_phi"),
+            data_ttH.variable(name = "jet_1_pt"),
+            data_ttH.variable(name = "jet_1_eta"),
+            data_ttH.variable(name = "jet_1_phi"),
+            data_ttH.variable(name = "jet_1_e"),
+            data_ttH.variable(name = "jet_2_pt"),
+            data_ttH.variable(name = "jet_2_eta"),
+            data_ttH.variable(name = "jet_2_phi"),
+            data_ttH.variable(name = "jet_2_e"),
+            data_ttH.variable(name = "met"),
+            data_ttH.variable(name = "met_phi"),
+            data_ttH.variable(name = "nJets"),
+            data_ttH.variable(name = "Centrality_all"),
+            data_ttH.variable(name = "Mbb_MindR")
+        ])
+        _data.append([
+            data_ttH.variable(name = "class")
+        ])
+    dataset = abstraction.Dataset(data = _data)
+
+    log.info("")
+
+    # define data
+    
+    log.info("split data for cross-validation")
+    features_train, features_test, targets_train, targets_test =\
+        cross_validation.train_test_split(
+            dataset.features(),
+            dataset.targets(),
+            train_size = 0.7
+        )
+    log.info("define classification model")
+
+    # define model
+
+    classifier = abstraction.Classification(
+        number_of_classes = 2,
+        hidden_nodes      = [200, 300, 300, 300, 200],
+        epochs            = 1000
+    )
+
+    # train model
+
+    log.info("fit classification model to dataset features and targets")
+    classifier._model.fit(features_train, targets_train)
+    #classifier.save()
+
+    # predict and cross-validate training
+
+    log.info("test trained classification model on training dataset")
+    score = metrics.accuracy_score(
+        classifier._model.predict(features_train),
+        targets_train
+    )
+    log.info("prediction accuracy on training dataset: {percentage}".format(
+        percentage = 100 * score
+    ))
+    log.info("accuracy of classifier on test dataset:")
+    score = metrics.accuracy_score(
+        classifier._model.predict(features_test),
+        targets_test
+    )
+    log.info("prediction accuracy on test dataset: {percentage}".format(
+        percentage = 100 * score
+    ))
 
     log.info("")
 

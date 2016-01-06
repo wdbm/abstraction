@@ -4,11 +4,11 @@
 
 ## quick start
 
-The following Bash commands, that have been tested on Ubuntu 14.10, should install prerequisites and check out abstraction.
+The following Bash commands, that have been tested on Ubuntu 15.10, should install prerequisites and check out abstraction.
 
 ```Bash
 sudo pip install --only-upgrade propyte
-sudo pip install --only-upgrade pyprel
+sudo pip install --only-upgrade git+https://github.com/wdbm/pyprel.git
 sudo pip install --only-upgrade shijian
 sudo pip install --only-upgrade technicolor
 sudo pip install --only-upgrade datavision
@@ -26,22 +26,31 @@ sudo pip install git+git://github.com/google/skflow.git
 git clone https://github.com/wdbm/abstraction.git
 ```
 
+# logging
+
+Updating logging procedures is under consideration because of logging conflicts. It could be beneficial currently to run using Bash anonymous pipes, in a way like the following:
+
+```Bash
+python script.py 2> >(grep -E -v "INFO|DEBUG")
+```
+
 # prerequisites
 
-|**prerequisite**|**comment**                                                                       |
-|----------------|----------------------------------------------------------------------------------|
-|docopt          |`sudo pip install docopt`                                                         |
-|pyfiglet        |`sudo pip install pyfiglet`                                                       |
-|propyte         |[propyte](https://github.com/wdbm/propyte), `sudo pip install propyte`            |
-|pyprel          |[pyprel](https://github.com/wdbm/pyprel), `sudo pip install pyprel`               |
-|shijian         |[shijian](https://github.com/wdbm/shijian), `sudo pip install shijian`            |
-|technicolor     |[technicolor](https://github.com/wdbm/technicolor), `sudo pip install technicolor`|
-|PRAW            |`sudo pip install praw`                                                           |
-|SQLite          |`sudo apt-get -y install sqlite`                                                  |
-|dataset         |`sudo pip install dataset`                                                        |
-|NLTK            |`sudo apt-get -y install python-nltk`                                             |
-|NLTK data       |`sudo python -m nltk.downloader all`                                              |
-|gensim          |`sudo easy_install -U gensim`                                                     |
+|**prerequisite**|**comment**                                                                                        |
+|----------------|---------------------------------------------------------------------------------------------------|
+|docopt          |`sudo pip install docopt`                                                                          |
+|pyfiglet        |`sudo pip install pyfiglet`                                                                        |
+|propyte         |[propyte](https://github.com/wdbm/propyte), `sudo pip install propyte`                             |
+|pyprel          |[pyprel](https://github.com/wdbm/pyprel), `sudo pip install git+https://github.com/wdbm/pyprel.git`|
+|shijian         |[shijian](https://github.com/wdbm/shijian), `sudo pip install shijian`                             |
+|technicolor     |[technicolor](https://github.com/wdbm/technicolor), `sudo pip install technicolor`                 |
+|datavision      |[datavision](https://github.com/wdbm/datavision), `sudo pip install datavision`                    |
+|PRAW            |`sudo pip install praw`                                                                            |
+|SQLite          |`sudo apt-get -y install sqlite`                                                                   |
+|dataset         |`sudo pip install dataset`                                                                         |
+|NLTK            |`sudo apt-get -y install python-nltk`                                                              |
+|NLTK data       |`sudo python -m nltk.downloader all`                                                               |
+|gensim          |`sudo easy_install -U gensim`                                                                      |
 
 The function `abstraction.setup()` should be run.
 
