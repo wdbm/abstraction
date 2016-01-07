@@ -7,14 +7,14 @@
 The following Bash commands, that have been tested on Ubuntu 15.10, should install prerequisites and check out abstraction.
 
 ```Bash
-sudo pip install --only-upgrade propyte
-sudo pip install --only-upgrade git+https://github.com/wdbm/pyprel.git
-sudo pip install --only-upgrade shijian
-sudo pip install --only-upgrade technicolor
-sudo pip install --only-upgrade datavision
-sudo pip install --only-upgrade docopt
-sudo pip install --only-upgrade pyfiglet
-sudo pip install --only-upgrade praw
+sudo pip install datavision
+sudo pip install propyte
+sudo pip install git+https://github.com/wdbm/pyprel.git
+sudo pip install shijian
+sudo pip install technicolor
+sudo pip install docopt
+sudo pip install pyfiglet
+sudo pip install praw
 sudo apt-get -y install sqlite
 sudo pip install dataset
 sudo apt-get -y install python-nltk
