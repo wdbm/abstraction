@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-01-12T1959Z"
+version = "2016-01-12T2339Z"
 
 import os
 import sys
@@ -804,6 +804,7 @@ class ROOT_Variable(numpy.ndarray):
         # return values
         return(self._values)
 
+@shijian.timer
 def select_event(
     event     = None,
     selection = "ejets"
@@ -821,6 +822,7 @@ def select_event(
         else:
             return False
 
+@shijian.timer
 def load_HEP_data(
     ROOT_filename            = "output.root",
     tree_name                = "nominal",
