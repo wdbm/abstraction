@@ -53,7 +53,7 @@ Options:
 """
 
 name    = "imconv-3"
-version = "2015-11-17T1303Z"
+version = "2016-01-12T2225Z"
 logo    = None
 
 import os
@@ -101,8 +101,8 @@ def main(options):
         # Access the input image.
         log.info("access input image")
         input_image = Image.open(input_image_filename)
-        log.info("input image mode: {imageMode}".format(imageMode = input_image.mode))
-        log.info("input image size: {imageSize}".format(imageSize = input_image.size))
+        log.info("input image mode: {image_mode}".format(image_mode = input_image.mode))
+        log.info("input image size: {image_size}".format(image_size = input_image.size))
         pixels = list(input_image.getdata())
         pixels_text = str(pixels)
         # Add newlines.
@@ -110,8 +110,8 @@ def main(options):
         # Save the pixels.
         output_pixels_file = open(output_pixels_filename, "w")
         output_pixels_file.truncate()
-        log.info("save output pixels {outputPixelsFilename}".format(
-            outputPixelsFilename = output_pixels_filename
+        log.info("save output pixels {output_pixels_filename}".format(
+            output_pixels_filename = output_pixels_filename
         ))
         output_pixels_file.write(pixels_text)
         output_pixels_file.close()
@@ -140,8 +140,8 @@ def main(options):
         # Save the pixels.
         output_pixels_file = open(output_pixels_filename, "w")
         output_pixels_file.truncate()
-        log.info("save output pixels {outputPixelsFilename}".format(
-            outputPixelsFilename = output_pixels_filename
+        log.info("save output pixels {output_pixels_filename}".format(
+            output_pixels_filename = output_pixels_filename
         ))
         output_pixels_file.write(pixels_text)
         output_pixels_file.close()
@@ -157,13 +157,13 @@ def main(options):
         # Determine the image height by determining the maximum number of image
         # widths that are possible with the available pixel data.
         log.info("determine output image dimensions")
-        imageMode = "RGBA"
-        imageWidth = output_image_width # e.g. 2379
-        imageHeight = int(len(pixels)/imageWidth) # e.g. 2196
-        imageSize = (imageWidth, imageHeight)
-        print type(imageSize)
-        print("output image mode: {imageMode}".format(imageMode = imageMode))
-        print("output image size: {imageSize}".format(imageSize = imageSize))
+        image_mode = "RGBA"
+        image_width = output_image_width # e.g. 2379
+        image_height = int(len(pixels)/image_width) # e.g. 2196
+        image_size = (image_width, image_height)
+        print type(image_size)
+        print("output image mode: {image_mode}".format(image_mode = image_mode))
+        print("output image size: {image_size}".format(image_size = image_size))
 
         pixels = [pixel.replace("))", ")").replace("((", "(").replace("),)", "), ") for pixel in pixels]
 
@@ -172,15 +172,17 @@ def main(options):
 
         # Use only the number of pixels to make the image of the defined
         # dimensions.
-        numberOfPixels = imageWidth * imageHeight
-        pixels = pixels[:numberOfPixels]
+        number_of_pixels = image_width * image_height
+        pixels = pixels[:number_of_pixels]
 
         # Create and save the output image.
         log.info("create output image")
-        #output_image_file = Image.new(imageMode, imageSize)
+        #output_image_file = Image.new(image_mode, image_size)
         output_image_file = Image.new("RGBA", (2379, 2069))
 
-        log.info("number of pixels: {numberOfPixels}".format(numberOfPixels = len(pixels)))
+        log.info("number of pixels: {number_of_pixels}".format(
+            number_of_pixels = len(pixels))
+        )
 
         #for pixel in pixels:
         #    if str(type(pixel)) is not "<type 'tuple'>":
@@ -189,8 +191,8 @@ def main(options):
         pixels = pixels[:4922151]
 
         output_image_file.putdata(pixels)
-        log.info("save output image {outputImageFilename}".format(
-            outputImageFilename = output_image_filename
+        log.info("save output image {output_image_filename}".format(
+            output_image_filename = output_image_filename
         ))
         output_image_file.save(output_image_filename)
 

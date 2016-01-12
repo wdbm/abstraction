@@ -46,7 +46,7 @@ Options:
 """
 
 name    = "vicodex"
-version = "2015-10-13T1131Z"
+version = "2016-01-12T2212Z"
 
 import os
 import sys
@@ -68,35 +68,35 @@ def main(options):
     program = Program(options = options)
 
     # Access database.
-    database = abstraction.access_database(fileName = program.database)
+    database = abstraction.access_database(filename = program.database)
     log.info("\ndatabase metadata:")
-    abstraction.log_database_metadata(fileName = program.database)
+    abstraction.log_database_metadata(filename = program.database)
     log.info("")
     # Print the tables in the database.
     log.info("tables in database: {tables}".format(
         tables = database.tables
     ))
     # Access the exchanges table.
-    tableName = "exchanges"
-    log.info("access table \"{tableName}\"".format(
-        tableName = tableName
+    table_name = "exchanges"
+    log.info("access table \"{table_name}\"".format(
+        table_name = table_name
     ))
     # Print the columns of the table.
-    log.info("columns in table \"{tableName}\": {columns}".format(
-        tableName = tableName,
-        columns   = database[tableName].columns
+    log.info("columns in table \"{table_name}\": {columns}".format(
+        table_name = table_name,
+        columns    = database[table_name].columns
     ))
     # Print the number of rows of the table.
-    log.info("number of rows in table \"{tableName}\": {numberOfRows}".format(
-        tableName    = tableName,
-        numberOfRows = str(len(database[tableName]))
+    log.info("number of rows in table \"{table_name}\": {number_of_rows}".format(
+        table_name     = table_name,
+        number_of_rows = str(len(database[table_name]))
     ))
     # Print the table entries:
-    log.info("entries of table {tableName}:\n".format(
-        tableName    = tableName
+    log.info("entries of table {table_name}:\n".format(
+        table_name    = table_name
     ))
     # Define table headings.
-    tableContents = [
+    table_contents = [
         [
             "id",
             "utterance",
@@ -108,11 +108,11 @@ def main(options):
             "exchangeReference"
         ]
     ]
-    simpleTrainingRepresentation = ""
+    simple_training_representation = ""
     # Fill table data.
-    countEntries = 0
-    for entry in database[tableName].all():
-        tableContents.append(
+    count_entries = 0
+    for entry in database[table_name].all():
+        table_contents.append(
             [
                 str(entry["id"]),
                 str(entry["utterance"]),
@@ -124,40 +124,40 @@ def main(options):
                 str(entry["exchangeReference"])
             ]
         )
-        countEntries += 1
+        count_entries += 1
         # simple training representation
-        if program.outputFile is not None:
-            if simpleTrainingRepresentation is "":
-                simpleTrainingRepresentation = \
+        if program.output_file is not None:
+            if simple_training_representation is "":
+                simple_training_representation = \
                     str(entry["utterance"]) + \
                     " => " + \
                     str(entry["response"])                
             else:
-                simpleTrainingRepresentation = \
-                    simpleTrainingRepresentation + \
+                simple_training_representation = \
+                    simple_training_representation + \
                     "\n" + \
                     str(entry["utterance"]) + \
                     " => " + \
                     str(entry["response"])
-        if program.tableLimit is not None:
-            if countEntries >= program.tableLimit:
+        if program.table_limit is not None:
+            if count_entries >= program.table_limit:
                 break
     # Record table.
     print(
         pyprel.Table(
-            contents = tableContents
+            contents = table_contents
         )
     )
     # Record to file, if specified.
-    if program.outputFile is not None:
+    if program.output_file is not None:
         log.info(
-            "save simple training representation to file {fileName}".format(
-                fileName = program.outputFile
+            "save simple training representation to file {filename}".format(
+                filename = program.output_file
             )
         )
-        outputFile = open(program.outputFile, "w")
-        outputFile.write(simpleTrainingRepresentation)
-        outputFile.close()
+        output_file = open(program.output_file, "w")
+        output_file.write(simple_training_representation)
+        output_file.close()
 
     program.terminate()
 
@@ -170,7 +170,7 @@ class Program(object):
         ):
 
         # internal options
-        self.displayLogo           = True
+        self.display_logo          = True
 
         # clock
         global clock
@@ -188,30 +188,30 @@ class Program(object):
         if "logo" in globals():
             self.logo              = logo
         elif "logo" not in globals() and hasattr(self, "name"):
-            self.logo              = pyprel.renderBanner(
+            self.logo              = pyprel.render_banner(
                                          text = self.name.upper()
                                      )
         else:
-            self.displayLogo       = False
+            self.display_logo      = False
             self.logo              = None
 
         # options
         self.options               = options
-        self.userName              = self.options["--username"]
+        self.user_name             = self.options["--username"]
         self.database              = self.options["--database"]
         self.verbose               = self.options["--verbose"]
         if self.options["--tableLimit"] is not None:
-            self.tableLimit = int(self.options["--tableLimit"])
+            self.table_limit = int(self.options["--tableLimit"])
         else:
-            self.tableLimit = None
+            self.table_limit = None
         if self.options["--outputFile"] is not None:
-            self.outputFile = str(self.options["--outputFile"])
+            self.output_file = str(self.options["--outputFile"])
         else:
-            self.outputFile = None
+            self.output_file = None
 
         # default values
-        if self.userName is None:
-            self.userName = os.getenv("USER")
+        if self.user_name is None:
+            self.user_name = os.getenv("USER")
 
         # logging
         global log
@@ -229,11 +229,11 @@ class Program(object):
     def engage(
         self
         ):
-        pyprel.printLine()
+        pyprel.print_line()
         # logo
-        if self.displayLogo:
-            log.info(pyprel.centerString(text = self.logo))
-            pyprel.printLine()
+        if self.display_logo:
+            log.info(pyprel.center_string(text = self.logo))
+            pyprel.print_line()
         # engage alert
         if self.name:
             log.info("initiate {name}".format(
@@ -245,7 +245,7 @@ class Program(object):
                 version = self.version
             ))
         log.info("initiation time: {time}".format(
-            time = clock.startTime()
+            time = clock.start_time()
         ))
 
     def terminate(
@@ -253,7 +253,7 @@ class Program(object):
         ):
         clock.stop()
         log.info("termination time: {time}".format(
-            time = clock.stopTime()
+            time = clock.stop_time()
         ))
         log.info("time full report:\n{report}".format(
             report = shijian.clocks.report(style = "full")
@@ -264,7 +264,7 @@ class Program(object):
         log.info("terminate {name}".format(
             name = self.name
         ))
-        pyprel.printLine()
+        pyprel.print_line()
 
 if __name__ == "__main__":
 

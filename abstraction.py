@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-01-06T1800Z"
+version = "2016-01-12T1959Z"
 
 import os
 import sys
@@ -77,90 +77,90 @@ def model_word2vec_Brown_Corpus():
 
 @shijian.timer
 def convert_word_string_to_word_vector(
-    wordString     = None,
+    word_string    = None,
     model_word2vec = None
     ):
-    if wordString in model_word2vec:
-        return model_word2vec[wordString]
+    if word_string in model_word2vec:
+        return model_word2vec[word_string]
     else:
-        log.debug("word string \"{wordString}\" not in word2vec model".format(
-            wordString = wordString
+        log.debug("word string \"{word_string}\" not in word2vec model".format(
+            word_string = word_string
         ))
         return None
 
 @shijian.timer
 def convert_sentence_string_to_word_vector(
-    sentenceString = None,
-    model_word2vec = None
+    sentence_string = None,
+    model_word2vec  = None
     ):
     # Convert the sentence string to a list of word strings.
-    wordStrings = wordList = re.sub("[^\w]", " ",  sentenceString).split()
+    word_strings = word_list = re.sub("[^\w]", " ",  sentence_string).split()
     # Build a list of word vectors.
-    wordVectors = []
-    for wordString in wordStrings:
-        wordVector = convert_word_string_to_word_vector(
-            wordString     = wordString,
+    word_vectors = []
+    for word_string in word_strings:
+        word_vector = convert_word_string_to_word_vector(
+            word_string    = word_string,
             model_word2vec = model_word2vec
         )
-        if wordVector is not None:
-            wordVectors.append(wordVector)
+        if word_vector is not None:
+            word_vectors.append(word_vector)
         else:
             log.debug("skip undefined word vector")
     # Combine all of the word vectors into one word vector by summation.
-    sentenceWordVector = sum(wordVectors)
-    return sentenceWordVector
+    sentence_word_vector = sum(word_vectors)
+    return sentence_word_vector
 
 @shijian.timer
 def create_database(
-    fileName = None
+    filename = None
     ):
     os.system(
         "sqlite3 " + \
-        fileName + \
+        filename + \
         " \"create table aTable(field1 int); drop table aTable;\""
     )
 
 @shijian.timer
 def access_database(
-    fileName = "database.db"
+    filename = "database.db"
     ):
     # Access the database.
-    log.debug("access database \"{fileName}\"".format(
-        fileName = fileName
+    log.debug("access database \"{filename}\"".format(
+        filename = filename
     ))
-    database = dataset.connect("sqlite:///" + fileName)
+    database = dataset.connect("sqlite:///" + filename)
     return database
 
 @shijian.timer
 def save_database_metadata(
-    fileName = "database.db"
+    filename = "database.db"
     ):
-    database = access_database(fileName = fileName)
+    database = access_database(filename = filename)
     # Access or create the metadata table, delete it and then recreate it.
-    tableMetadata = database["metadata"]
-    tableMetadata.drop()
-    tableMetadata = database["metadata"]
+    table_metadata = database["metadata"]
+    table_metadata.drop()
+    table_metadata = database["metadata"]
     # Create database metadata.
     log.debug("create database metadata")
-    currentTime = shijian.time_UTC()
+    current_time = shijian.time_UTC()
     metadata = dict(
-        name                 = "abstraction",
-        description          = "project abstraction conversation "
-                               "utterance-response data",
-        version              = "2015-01-06T172242Z",
-        lastModificationTime = currentTime
+        name                   = "abstraction",
+        description            = "project abstraction conversation "
+                                 "utterance-response data",
+        version                = "2015-01-06T172242Z",
+        last_modification_time = current_time
     )
     log.debug("database metadata:")
-    log.debug(pyprel.dictionaryString(dictionary = metadata))
+    log.debug(pyprel.dictionary_string(dictionary = metadata))
     # Save metadata to database.
     log.debug("save database metadata")
-    tableMetadata.insert(metadata)
+    table_metadata.insert(metadata)
 
 @shijian.timer
 def database_metadata(
-    fileName = "database.db"
+    filename = "database.db"
     ):
-    database = access_database(fileName = fileName)
+    database = access_database(filename = filename)
     # Access the database metadata.
     log.debug("access database metadata")
     # Check if metadata exists for the database.
@@ -180,35 +180,35 @@ def database_metadata(
 
 @shijian.timer
 def log_database_metadata(
-    fileName = "database.db"
+    filename = "database.db"
     ):
-    metadata = database_metadata(fileName = fileName)
-    log.info(pyprel.dictionaryString(dictionary = metadata))
+    metadata = database_metadata(filename = filename)
+    log.info(pyprel.dictionary_string(dictionary = metadata))
 
 class Exchange(object):
 
     def __init__(
         self,
-        utterance                = None,
-        response                 = None,
-        utteranceTimeUNIX        = None,
-        responseTimeUNIX         = None,
-        utteranceWordVector      = None,
-        responseWordVector       = None,
-        utteranceReference       = None,
-        responseReference        = None,
-        exchangeReference        = None
+        utterance                  = None,
+        response                   = None,
+        utterance_time_UNIX        = None,
+        response_time_UNIX         = None,
+        utterance_word_vector      = None,
+        response_word_vector       = None,
+        utterance_reference        = None,
+        response_reference         = None,
+        exchange_reference         = None
         ):
-        self.utterance           = utterance
-        self.response            = response
-        self.utteranceTimeUNIX   = utteranceTimeUNIX
-        self.responseTimeUNIX    = responseTimeUNIX
-        self.utteranceWordVector = utteranceWordVector,
-        self.responseWordVector  = responseWordVector,
-        self.utteranceReference  = utteranceReference,
-        self.responseReference   = responseReference,
-        self.exchangeReference   = exchangeReference,
-        self.utteranceWordVector = utteranceWordVector
+        self.utterance             = utterance
+        self.response              = response
+        self.utterance_time_UNIX   = utterance_time_UNIX
+        self.response_time_UNIX    = response_time_UNIX
+        self.utterance_word_vector = utterance_word_vector,
+        self.response_word_vector  = response_word_vector,
+        self.utterance_reference   = utterance_reference,
+        self.response_reference    = response_reference,
+        self.exchange_reference    = exchange_reference,
+        self.utterance_word_vector = utterance_word_vector
 
     def printout(
         self
@@ -219,37 +219,37 @@ class Exchange(object):
         ))
         print("response: {response}".format(
             response = self.response))
-        print("utteranceTimeUNIX: {utteranceTimeUNIX}".format(
-            utteranceTimeUNIX = self.utteranceTimeUNIX
+        print("utterance_time_UNIX: {utterance_time_UNIX}".format(
+            utterance_time_UNIX = self.utterance_time_UNIX
         ))
-        print("responseTimeUNIX: {responseTimeUNIX}".format(
-            responseTimeUNIX = self.responseTimeUNIX
+        print("response_time_UNIX: {response_time_UNIX}".format(
+            response_time_UNIX = self.response_time_UNIX
         ))
-        print("utteranceWordVector: {utteranceWordVector}".format(
-            utteranceWordVector = self.utteranceWordVector
+        print("utterance_word_vector: {utterance_word_vector}".format(
+            utterance_word_vector = self.utterance_word_vector
         ))
-        print("responseWordVector: {responseWordVector}".format(
-            responseWordVector = self.responseWordVector
+        print("response_word_vector: {response_word_vector}".format(
+            response_word_vector = self.response_word_vector
         ))
-        print("utteranceReference: {utteranceReference}".format(
-            utteranceReference = self.utteranceReference
+        print("utterance_reference: {utterance_reference}".format(
+            utterance_reference = self.utterance_reference
         ))
-        print("responseReference: {responseReference}".format(
-            responseReference = self.responseReference
+        print("response_reference: {response_reference}".format(
+            response_reference = self.response_reference
         ))
-        print("exchangeReference: {exchangeReference}".format(
-            exchangeReference = self.exchangeReference
+        print("exchange_reference: {exchange_reference}".format(
+            exchange_reference = self.exchange_reference
         ))
 
 @shijian.timer
 def access_exchanges_Reddit(
-    userAgent          = "scriptwire",
-    subreddits         = None,
-    numberOfUtterances = 200
+    user_agent           = "scriptwire",
+    subreddits           = None,
+    number_of_utterances = 200
     ):
     # Access Reddit.
     log.info("access Reddit API")
-    r = praw.Reddit(user_agent = userAgent)
+    r = praw.Reddit(user_agent = user_agent)
     # Access each subreddit.
     log.info("access subreddits {subreddits}".format(
         subreddits = subreddits
@@ -261,58 +261,58 @@ def access_exchanges_Reddit(
         submissions = r.get_subreddit(
             subreddit
         ).get_top(
-            limit = int(numberOfUtterances)
+            limit = int(number_of_utterances)
         )
         # Access each submission, its title and its top comment.
         exchanges = []
         for submission in submissions:
             # Access the submission title.
-            submissionTitle = submission.title.encode(
+            submission_title = submission.title.encode(
                 "ascii",
                 "ignore"
             )
             # Access the submission URL.
-            submissionURL = submission.permalink.encode(
+            submission_URL = submission.permalink.encode(
                 "ascii",
                 "ignore"
             )
             # Access the submission time.
-            submissionTimeUNIX = str(submission.created_utc).encode(
+            submission_time_UNIX = str(submission.created_utc).encode(
                 "ascii",
                 "ignore"
             )
             log.debug(
-                "access submission \"{submissionTitle}\"".format(
+                "access submission \"{submission_title}\"".format(
                 subreddit = subreddit,
-                submissionTitle = submissionTitle
+                submission_title = submission_title
             ))
             comments = praw.helpers.flatten_tree(submission.comments)
             if comments:
                 # Access the submission top comment.
-                commentTopText = comments[0].body.encode(
+                comment_top_text = comments[0].body.encode(
                     "ascii",
                     "ignore"
                 )
                 # Access the submission top comment URL.
-                commentTopURL = comments[0].permalink.encode(
+                comment_top_URL = comments[0].permalink.encode(
                     "ascii",
                     "ignore"
                 )
                 # Access the submission top comment time.
-                commentTopTimeUNIX = str(comments[0].created_utc).encode(
+                comment_top_time_UNIX = str(comments[0].created_utc).encode(
                     "ascii",
                     "ignore"
                 )
             # Create a new exchange object for the current exchange data and
             # append it to the list of exchanges.
             exchange = Exchange(
-                utterance          = submissionTitle,
-                response           = commentTopText,
-                utteranceTimeUNIX  = submissionTimeUNIX,
-                responseTimeUNIX   = commentTopTimeUNIX,
-                utteranceReference = submissionURL,
-                responseReference  = commentTopURL,
-                exchangeReference  = subreddit
+                utterance           = submission_title,
+                response            = comment_top_text,
+                utterance_time_UNIX = submission_time_UNIX,
+                response_time_UNIX  = comment_top_time_UNIX,
+                utterance_reference = submission_URL,
+                response_reference  = comment_top_URL,
+                exchange_reference  = subreddit
             )
             exchanges.append(exchange)
             # Pause to avoid overtaxing Reddit.
@@ -322,21 +322,21 @@ def access_exchanges_Reddit(
 @shijian.timer
 def save_exchanges_to_database(
     exchanges = None,
-    fileName  = "database.db"
+    filename  = "database.db"
     ):
     # Check for the database. If it does not exist, create it.
-    if not os.path.isfile(fileName):
-        log.info("database {fileName} nonexistent".format(
-            fileName = fileName
+    if not os.path.isfile(filename):
+        log.info("database {filename} nonexistent".format(
+            filename = filename
         ))
-        log.info("create database {fileName}".format(
-            fileName = fileName
+        log.info("create database {filename}".format(
+            filename = filename
         ))
-        create_database(fileName = fileName)
+        create_database(filename = filename)
     # Access the database.
-    database = access_database(fileName = fileName)
+    database = access_database(filename = filename)
     # Access or create the exchanges table.
-    tableExchanges = database["exchanges"]
+    table_exchanges = database["exchanges"]
     # Access each exchange. Check the database for the utterance of the
     # exchange. If the utterance of the exchange is not in the database, save
     # the exchange to the database.
@@ -347,14 +347,14 @@ def save_exchanges_to_database(
             log.debug("save exchange \"{utterance}\"".format(
                 utterance = exchange.utterance
             ))
-            tableExchanges.insert(dict(
+            table_exchanges.insert(dict(
                 utterance          = str(exchange.utterance),
                 response           = str(exchange.response),
-                utteranceTimeUNIX  = str(exchange.utteranceTimeUNIX),
-                responseTimeUNIX   = str(exchange.responseTimeUNIX),
-                utteranceReference = str(exchange.utteranceReference),
-                responseReference  = str(exchange.responseReference),
-                exchangeReference  = str(exchange.exchangeReference)
+                utteranceTimeUNIX  = str(exchange.utterance_time_UNIX),
+                responseTimeUNIX   = str(exchange.response_time_UNIX),
+                utteranceReference = str(exchange.utterance_reference),
+                responseReference  = str(exchange.response_reference),
+                exchangeReference  = str(exchange.exchange_reference)
             ))
         else:
             log.debug("skip previously-saved exchange \"{utterance}\"".format(
@@ -363,39 +363,39 @@ def save_exchanges_to_database(
 
 @shijian.timer
 def load_word_vector_model(
-    fileName = None
+    filename = None
     ):
     # If an existing word vector model file does not exist, create it.
-    if not os.path.isfile(os.path.expandvars(fileName)):
-        log.error("file {fileName} does not exist".format(
-            fileName = fileName
+    if not os.path.isfile(os.path.expandvars(filename)):
+        log.error("file {filename} does not exist".format(
+            filename = filename
         ))
-        log.info("create word vector model and save to file {fileName}".format(
-            fileName = fileName
+        log.info("create word vector model and save to file {filename}".format(
+            filename = filename
         ))
         model_word2vec = model_word2vec_Brown_Corpus()
-        model_word2vec.save(fileName)
+        model_word2vec.save(filename)
     else:
-        log.info("access file {fileName}".format(
-            fileName = fileName
+        log.info("access file {filename}".format(
+            filename = filename
         ))
-        model_word2vec = Word2Vec.load(fileName)
+        model_word2vec = Word2Vec.load(filename)
     return model_word2vec
 
 @shijian.timer
-def ensure_file_existence(fileName):
-    log.debug("ensure existence of file {fileName}".format(
-        fileName = fileName
+def ensure_file_existence(filename):
+    log.debug("ensure existence of file {filename}".format(
+        filename = filename
     ))
-    if not os.path.isfile(os.path.expandvars(fileName)):
-        log.error("file {fileName} does not exist".format(
-            fileName = fileName
+    if not os.path.isfile(os.path.expandvars(filename)):
+        log.error("file {filename} does not exist".format(
+            filename = filename
         ))
         program.terminate()
         raise Exception
     else:
-        log.debug("file {fileName} found".format(
-            fileName = fileName
+        log.debug("file {filename} found".format(
+            filename = filename
         ))
 
 @shijian.timer
@@ -423,56 +423,56 @@ def composite_variable(x):
 
 @shijian.timer
 def add_exchange_word_vectors_to_database(
-    fileName       = "database.db",
+    filename       = "database.db",
     model_word2vec = None
     ):
     # Ensure that the database exists.
-    if not os.path.isfile(fileName):
-        log.info("database {fileName} nonexistent".format(
-            fileName = fileName
+    if not os.path.isfile(filename):
+        log.info("database {filename} nonexistent".format(
+            filename = filename
         ))
         program.terminate()
         raise Exception
     # Access the database.
-    database = access_database(fileName = fileName)
+    database = access_database(filename = filename)
     # Access or create the exchanges table.
-    tableExchanges = database["exchanges"]
+    table_exchanges = database["exchanges"]
     # Access exchanges.
-    tableName = "exchanges"
+    table_name = "exchanges"
     # progress
     progress = shijian.Progress()
     progress.engage_quick_calculation_mode()
-    numberOfEntries = len(database[tableName])
-    for entryIndex, entry in enumerate(database[tableName].all()):
-        uniqueIdentifier = str(entry["id"])
+    number_of_entries = len(database[table_name])
+    for entry_index, entry in enumerate(database[table_name].all()):
+        unique_identifier = str(entry["id"])
         # Create word vector representations of utterances and responses and
         # add them or update them in the database.
         try:
-            utteranceWordVectorNumPyArray = numpy.array_repr(
+            utterance_word_vector_NumPy_array = numpy.array_repr(
                 convert_sentence_string_to_word_vector(
-                    sentenceString = str(entry["utterance"]),
-                    model_word2vec = model_word2vec
+                    sentence_string = str(entry["utterance"]),
+                    model_word2vec  = model_word2vec
                 )
             )
-            responseWordVectorNumPyArray = numpy.array_repr(
+            response_word_vector_NumPy_array = numpy.array_repr(
                 convert_sentence_string_to_word_vector(
-                    sentenceString = str(entry["response"]),
-                    model_word2vec = model_word2vec
+                    sentence_string = str(entry["response"]),
+                    model_word2vec  = model_word2vec
                 )
             )
             data = dict(
-                id                  = uniqueIdentifier,
-                utteranceWordVector = utteranceWordVectorNumPyArray,
-                responseWordVector  = responseWordVectorNumPyArray
+                id                  = unique_identifier,
+                utteranceWordVector = utterance_word_vector_NumPy_array,
+                responseWordVector  = response_word_vector_NumPy_array
             )
         except:
             data = dict(
-                id                  = uniqueIdentifier,
+                id                  = unique_identifier,
                 utteranceWordVector = None,
                 responseWordVector  = None
             )
-        database[tableName].update(data, ["id"])
-        print progress.add_datum(fraction = entryIndex / numberOfEntries),
+        database[table_name].update(data, ["id"])
+        print progress.add_datum(fraction = entry_index / number_of_entries),
 
 @shijian.timer
 def draw_neural_network(

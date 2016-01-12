@@ -46,7 +46,7 @@ Options:
 """
 
 name    = "toywv-1"
-version = "2015-10-13T1132Z"
+version = "2016-01-12T2232Z"
 
 import os
 import sys
@@ -70,20 +70,20 @@ def main(options):
     program = Program(options = options)
 
     model_word2vec = abstraction.load_word_vector_model(
-        fileName = program.wordVectorModel
+        filename = program.word_vector_model
     )
 
     # Convert the expression to a word vector.
-    expressionWordVector =\
+    expression_word_vector =\
         abstraction.convert_sentence_string_to_word_vector(
-            sentenceString = program.expression,
-            model_word2vec = model_word2vec
+            sentence_string = program.expression,
+            model_word2vec  = model_word2vec
         )
     log.info(
         "word vector representation of expression \"{expression}\":"
-        "\n{expressionWordVector}".format(
-            expression           = program.expression,
-            expressionWordVector = expressionWordVector
+        "\n{expression_word_vector}".format(
+            expression             = program.expression,
+            expression_word_vector = expression_word_vector
         )
     )
 
@@ -91,9 +91,9 @@ def main(options):
 
     log.info(
         "word vector representation of expression \"{expression}\" as NumPy "
-        "array:\n{expressionNumPyArray}".format(
-            expression           = program.expression,
-            expressionNumPyArray = numpy.array_repr(expressionWordVector)
+        "array:\n{expression_NumPy_array}".format(
+            expression             = program.expression,
+            expression_NumPy_array = numpy.array_repr(expression_word_vector)
         )
     )
 
@@ -108,7 +108,7 @@ class Program(object):
         ):
 
         # internal options
-        self.displayLogo           = True
+        self.display_logo          = True
 
         # clock
         global clock
@@ -126,23 +126,23 @@ class Program(object):
         if "logo" in globals():
             self.logo              = logo
         elif "logo" not in globals() and hasattr(self, "name"):
-            self.logo              = pyprel.renderBanner(
+            self.logo              = pyprel.render_banner(
                                          text = self.name.upper()
                                      )
         else:
-            self.displayLogo       = False
+            self.display_logo      = False
             self.logo              = None
 
         # options
         self.options               = options
-        self.userName              = self.options["--username"]
+        self.username              = self.options["--username"]
         self.verbose               = self.options["--verbose"]
         self.expression            = self.options["--expression"]
-        self.wordVectorModel       = self.options["--wordvectormodel"]
+        self.word_vector_model     = self.options["--wordvectormodel"]
 
         # default values
-        if self.userName is None:
-            self.userName = os.getenv("USER")
+        if self.username is None:
+            self.username = os.getenv("USER")
 
         # logging
         global log
@@ -166,11 +166,11 @@ class Program(object):
     def engage(
         self
         ):
-        pyprel.printLine()
+        pyprel.print_line()
         # logo
-        if self.displayLogo:
-            log.info(pyprel.centerString(text = self.logo))
-            pyprel.printLine()
+        if self.display_logo:
+            log.info(pyprel.center_string(text = self.logo))
+            pyprel.print_line()
         # engage alert
         if self.name:
             log.info("initiate {name}".format(
@@ -182,7 +182,7 @@ class Program(object):
                 version = self.version
             ))
         log.info("initiation time: {time}".format(
-            time = clock.startTime()
+            time = clock.start_time()
         ))
 
     def terminate(
@@ -190,7 +190,7 @@ class Program(object):
         ):
         clock.stop()
         log.info("termination time: {time}".format(
-            time = clock.stopTime()
+            time = clock.stop_time()
         ))
         log.info("time full report:\n{report}".format(
             report = shijian.clocks.report(style = "full")
@@ -201,7 +201,7 @@ class Program(object):
         log.info("terminate {name}".format(
             name = self.name
         ))
-        pyprel.printLine()
+        pyprel.print_line()
 
 if __name__ == "__main__":
     options = docopt.docopt(__doc__)

@@ -49,7 +49,7 @@ Options:
 """
 
 name    = "vcodex"
-version = "2015-11-17T1306Z"
+version = "2016-01-12T2055Z"
 logo    = None
 
 import os
@@ -76,22 +76,22 @@ def main(options):
     from propyte import log
 
     # access options and arguments
-    database        = options["--database"]
-    wordVectorModel = options["--wordvectormodel"]
+    database          = options["--database"]
+    word_vector_model = options["--wordvectormodel"]
 
     log.info("")
 
     log.info("load word vector model {model}".format(
-        model = wordVectorModel
+        model = word_vector_model
     ))
     model_word2vec = abstraction.load_word_vector_model(
-        fileName = wordVectorModel
+        filename = word_vector_model
     )
     log.info("add exchange word vectors to database {database}".format(
         database = database
     ))
     abstraction.add_exchange_word_vectors_to_database(
-        fileName       = database,
+        filename       = database,
         model_word2vec = model_word2vec
     )
 

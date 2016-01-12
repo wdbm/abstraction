@@ -44,7 +44,7 @@ Options:
 """
 
 name    = "inspect-database"
-version = "2015-11-17T1256Z"
+version = "2016-01-12T2037Z"
 logo    = None
 
 import os
@@ -71,12 +71,12 @@ def main(options):
     from propyte import log
 
     # access options and arguments
-    databaseFileName = options["--database"]
+    database_filename = options["--database"]
 
     log.info("")
 
     database = abstraction.access_database(
-        fileName = databaseFileName
+        filename = database_filename
     )
 
     for table in database.tables:
@@ -84,13 +84,13 @@ def main(options):
             table = table
         ))
         for entry in database[table].all():
-            pyprel.printLine()
+            pyprel.print_line()
             for column in database[table].columns:
                 log.info("\n{column}: {content}".format(
                     column  = column,
                     content = str(entry[column])
                 ))
-        pyprel.printLine()
+        pyprel.print_line()
 
     log.info("")
 

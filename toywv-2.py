@@ -49,7 +49,7 @@ Options:
 """
 
 name    = "toywv-2"
-version = "2015-10-13T1132Z"
+version = "2016-01-12T2233Z"
 
 import os
 import sys
@@ -74,7 +74,7 @@ def main(options):
     program = Program(options = options)
 
     # Define a dictionary of natural language expressions and word vectors.
-    storedExpressions = {
+    stored_expressions = {
         "This is a test.":
             numpy.array([
                 -0.3828682,  -0.36397889,  0.46676171,
@@ -233,27 +233,27 @@ def main(options):
     }
 
     model_word2vec = abstraction.load_word_vector_model(
-        fileName = program.wordVectorModel
+        filename = program.word_vector_model
     )
 
-    workingExpressionNL = program.expression
+    working_expression_NL = program.expression
 
     # Convert the expression to a word vector.
-    workingExpressionWV =\
+    working_expression_WV =\
         abstraction.convert_sentence_string_to_word_vector(
-            sentenceString = workingExpressionNL,
-            model_word2vec = model_word2vec
+            sentence_string = working_expression_NL,
+            model_word2vec  = model_word2vec
         )
     log.info(
-        "word vector representation of expression \"{workingExpressionNL}\":"
-        "\n{workingExpressionWV}".format(
-            workingExpressionNL = workingExpressionNL,
-            workingExpressionWV = workingExpressionWV
+        "word vector representation of expression \"{working_expression_NL}\":"
+        "\n{working_expression_WV}".format(
+            working_expression_NL = working_expression_NL,
+            working_expression_WV = working_expression_WV
         )
     )
 
     # Define table headings.
-    tableContents = [[
+    table_contents = [[
         "working expression natural language",
         "stored expression natural language",
         "absolute magnitude difference between working amd stored expression "
@@ -263,42 +263,42 @@ def main(options):
 
     # Compare the expression word vector representation to existing word
     # vectors.
-    magnitude_differences   = []
-    angles                  = []
-    storedExpressionsNLList = []
-    magnitude_workingExpressionWV = abstraction.magnitude(workingExpressionWV)
-    for storedExpressionNL in storedExpressions:
-        storedExpressionWV = storedExpressions[storedExpressionNL]
-        magnitude_storedExpressionWV = abstraction.magnitude(storedExpressionWV)
-        magnitude_difference_workingExpressionWV_storedExpressionWV = abs(
-            magnitude_workingExpressionWV - magnitude_storedExpressionWV
+    magnitude_differences      = []
+    angles                     = []
+    stored_expressions_NL_list = []
+    magnitude_working_expression_WV = abstraction.magnitude(working_expression_WV)
+    for stored_expression_NL in stored_expressions:
+        stored_expression_WV = stored_expressions[stored_expression_NL]
+        magnitude_stored_expression_WV = abstraction.magnitude(stored_expression_WV)
+        magnitude_difference_working_expression_WV_stored_expression_WV = abs(
+            magnitude_working_expression_WV - magnitude_stored_expression_WV
         )
-        angle_workingExpressionWV_storedExpressionWV = abstraction.angle(
-            workingExpressionWV,
-            storedExpressionWV
+        angle_working_expression_WV_stored_expression_WV = abstraction.angle(
+            working_expression_WV,
+            stored_expression_WV
         )
         # Store comparison results in lists.
         magnitude_differences.append(
-            magnitude_difference_workingExpressionWV_storedExpressionWV
+            magnitude_difference_working_expression_WV_stored_expression_WV
         )
         angles.append(
-            angle_workingExpressionWV_storedExpressionWV
+            angle_working_expression_WV_stored_expression_WV
         )
-        storedExpressionsNLList.append(
-            storedExpressionNL
+        stored_expressions_NL_list.append(
+            stored_expression_NL
         )
         # Build table.
-        tableContents.append([
-            str(workingExpressionNL),
-            str(storedExpressionNL),
-            str(magnitude_difference_workingExpressionWV_storedExpressionWV),
-            str(angle_workingExpressionWV_storedExpressionWV)]
+        table_contents.append([
+            str(working_expression_NL),
+            str(stored_expression_NL),
+            str(magnitude_difference_working_expression_WV_stored_expression_WV),
+            str(angle_working_expression_WV_stored_expression_WV)]
         )
 
     # Record table.
     print(
         pyprel.Table(
-            contents = tableContents
+            contents = table_contents
         )
     )
 
@@ -311,9 +311,9 @@ def main(options):
     if abs(
         index_minimum_magnitude_differences - index_minimum_angles
     ) < index_minimum_match_width:
-        log.info("translation: {translationExpressionNL}".format(
-            translationExpressionNL =\
-                storedExpressionsNLList[index_minimum_angles]
+        log.info("translation: {translation_expression_NL}".format(
+            translation_expression_NL =\
+                stored_expressions_NL_list[index_minimum_angles]
         ))
     else:
         log.error("unable to translate")
@@ -331,7 +331,7 @@ class Program(object):
         ):
 
         # internal options
-        self.displayLogo           = True
+        self.display_logo          = True
 
         # clock
         global clock
@@ -349,23 +349,23 @@ class Program(object):
         if "logo" in globals():
             self.logo              = logo
         elif "logo" not in globals() and hasattr(self, "name"):
-            self.logo              = pyprel.renderBanner(
+            self.logo              = pyprel.render_banner(
                                          text = self.name.upper()
                                      )
         else:
-            self.displayLogo       = False
+            self.display_logo      = False
             self.logo              = None
 
         # options
         self.options               = options
-        self.userName              = self.options["--username"]
+        self.user_name             = self.options["--username"]
         self.verbose               = self.options["--verbose"]
         self.expression            = self.options["--expression"]
-        self.wordVectorModel       = self.options["--wordvectormodel"]
+        self.word_vector_model     = self.options["--wordvectormodel"]
 
         # default values
-        if self.userName is None:
-            self.userName = os.getenv("USER")
+        if self.user_name is None:
+            self.user_name = os.getenv("USER")
 
         # logging
         global log
@@ -389,11 +389,11 @@ class Program(object):
     def engage(
         self
         ):
-        pyprel.printLine()
+        pyprel.print_line()
         # logo
-        if self.displayLogo:
-            log.info(pyprel.centerString(text = self.logo))
-            pyprel.printLine()
+        if self.display_logo:
+            log.info(pyprel.center_string(text = self.logo))
+            pyprel.print_line()
         # engage alert
         if self.name:
             log.info("initiate {name}".format(
@@ -405,7 +405,7 @@ class Program(object):
                 version = self.version
             ))
         log.info("initiation time: {time}".format(
-            time = clock.startTime()
+            time = clock.start_time()
         ))
 
     def terminate(
@@ -413,7 +413,7 @@ class Program(object):
         ):
         clock.stop()
         log.info("termination time: {time}".format(
-            time = clock.stopTime()
+            time = clock.stop_time()
         ))
         log.info("time full report:\n{report}".format(
             report = shijian.clocks.report(style = "full")
@@ -424,7 +424,7 @@ class Program(object):
         log.info("terminate {name}".format(
             name = self.name
         ))
-        pyprel.printLine()
+        pyprel.print_line()
 
 if __name__ == "__main__":
     options = docopt.docopt(__doc__)

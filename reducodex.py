@@ -46,7 +46,7 @@ Options:
 """
 
 name    = "reducodex"
-version = "2015-10-13T1133Z"
+version = "2016-01-12T2228Z"
 
 import os
 import sys
@@ -68,50 +68,50 @@ def main(options):
     program = Program(options = options)
 
     # Access database.
-    database = abstraction.access_database(fileName = program.database)
+    database = abstraction.access_database(filename = program.database)
     log.info("database metadata:")
-    abstraction.log_database_metadata(fileName = program.database)
+    abstraction.log_database_metadata(filename = program.database)
     # Print the tables in the database.
     log.info("tables in database: {tables}".format(
         tables = database.tables
     ))
     # Access the exchanges table.
-    tableName = "exchanges"
-    log.info("access table \"{tableName}\"".format(
-        tableName = tableName
+    tablename = "exchanges"
+    log.info("access table \"{tablename}\"".format(
+        tablename = tablename
     ))
     # Print the columns of the table.
-    log.info("columns in table \"{tableName}\": {columns}".format(
-        tableName = tableName,
-        columns   = database[tableName].columns
+    log.info("columns in table \"{tablename}\": {columns}".format(
+        tablename = tablename,
+        columns   = database[tablename].columns
     ))
     # Print the number of rows of the table.
-    log.info("number of rows in table \"{tableName}\": {numberOfRows}".format(
-        tableName    = tableName,
-        numberOfRows = str(len(database[tableName]))
+    log.info("number of rows in table \"{tablename}\": {number_of_rows}".format(
+        tablename      = tablename,
+        number_of_rows = str(len(database[tablename]))
     ))
     # Build a list of unique exchanges.
     exchanges = []
-    for entry in database[tableName].all():
+    for entry in database[tablename].all():
         # Create a new exchange object for the existing exchange data, check its
         # utterance data against existing utterance data in the new list of
         # exchanges and append it to the new list of exchanges if it does not
         # exist in the list.
         exchange = abstraction.Exchange(
-            utterance          = entry["utterance"],
-            response           = entry["response"],
-            utteranceTimeUNIX  = entry["utteranceTimeUNIX"],
-            responseTimeUNIX   = entry["responseTimeUNIX"],
-            utteranceReference = entry["utteranceReference"],
-            responseReference  = entry["responseReference"],
-            exchangeReference  = entry["exchangeReference"]
+            utterance           = entry["utterance"],
+            response            = entry["response"],
+            utterance_time_UNIX = entry["utteranceTimeUNIX"],
+            response_time_UNIX  = entry["responseTimeUNIX"],
+            utterance_reference = entry["utteranceReference"],
+            response_reference  = entry["responseReference"],
+            exchange_reference  = entry["exchangeReference"]
         )
         # Check new exchange against exchanges in new list.
-        appendFlag = True
-        for exchangeInNewList in exchanges:
-            if exchange.utterance == exchangeInNewList.utterance:
-                appendFlag = False
-        if appendFlag is True:
+        append_flag = True
+        for exchange_in_new_list in exchanges:
+            if exchange.utterance == exchange_in_new_list.utterance:
+                append_flag = False
+        if append_flag is True:
             log.debug("keep exchange \"{utterance}\"".format(
                 utterance = exchange.utterance
             ))
@@ -124,10 +124,10 @@ def main(options):
     log.info("save exchanges to database (only those not saved previously)")
     abstraction.save_exchanges_to_database(
         exchanges = exchanges,
-        fileName  = program.databaseOut
+        filename  = program.database_out
     )
     # Save metadata to the new database.
-    abstraction.save_database_metadata(fileName = program.databaseOut)
+    abstraction.save_database_metadata(filename = program.database_out)
 
     program.terminate()
 
@@ -140,7 +140,7 @@ class Program(object):
         ):
 
         # internal options
-        self.displayLogo           = True
+        self.display_logo          = True
 
         # clock
         global clock
@@ -162,20 +162,22 @@ class Program(object):
                                          text = self.name.upper()
                                      )
         else:
-            self.displayLogo       = False
+            self.display_logo      = False
             self.logo              = None
 
         # options
         self.options               = options
-        self.userName              = self.options["--username"]
+        self.username              = self.options["--username"]
         self.database              = self.options["--inputdatabase"]
-        self.databaseOut           = self.options["--outputdatabase"]
+        self.database_out          = self.options["--outputdatabase"]
         self.verbose               = self.options["--verbose"]
 
         # default values
-        if self.userName is None:
-            self.userName = os.getenv("USER")
-        self.databaseOut = shijian.proposeFileName(fileName = self.databaseOut)
+        if self.username is None:
+            self.username = os.getenv("USER")
+        self.database_out = shijian.propose_filename(
+            filename = self.database_out
+        )
 
         # logging
         global log
@@ -199,11 +201,11 @@ class Program(object):
     def engage(
         self
         ):
-        pyprel.printLine()
+        pyprel.print_line()
         # logo
-        if self.displayLogo:
-            log.info(pyprel.centerString(text = self.logo))
-            pyprel.printLine()
+        if self.display_logo:
+            log.info(pyprel.center_string(text = self.logo))
+            pyprel.print_line()
         # engage alert
         if self.name:
             log.info("initiate {name}".format(
@@ -215,7 +217,7 @@ class Program(object):
                 version = self.version
             ))
         log.info("initiation time: {time}".format(
-            time = clock.startTime()
+            time = clock.start_time()
         ))
 
     def terminate(
@@ -223,7 +225,7 @@ class Program(object):
         ):
         clock.stop()
         log.info("termination time: {time}".format(
-            time = clock.stopTime()
+            time = clock.stop_time()
         ))
         log.info("time full report:\n{report}".format(
             report = shijian.clocks.report(style = "full")
@@ -234,7 +236,7 @@ class Program(object):
         log.info("terminate {name}".format(
             name = self.name
         ))
-        pyprel.printLine()
+        pyprel.print_line()
 
 if __name__ == "__main__":
 

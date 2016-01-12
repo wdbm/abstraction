@@ -42,7 +42,7 @@ Options:
 """
 
 name    = "es-1"
-version = "2015-11-17T1245Z"
+version = "2016-01-12T2224Z"
 logo    = None
 
 from cStringIO import StringIO
@@ -188,10 +188,10 @@ def main(options):
     from propyte import log
 
     # access options and arguments
-    inputImageFilename  = options["--inputImage"]
-    outputImageFilename = options["--outputImage"]
-    recursiveZoom       = bool(options["--recursiveZoom"])
-    GPU_mode            = bool(options["--gpu"])
+    input_image_filename  = options["--inputImage"]
+    output_image_filename = options["--outputImage"]
+    recursive_zoom        = bool(options["--recursiveZoom"])
+    GPU_mode              = bool(options["--gpu"])
 
     log.info("")
 
@@ -233,30 +233,30 @@ def main(options):
     #)
 
     log.info("access {filename}".format(
-        filename = inputImageFilename,
+        filename = input_image_filename,
     ))
-    inputImage = np.float32(PIL.Image.open(inputImageFilename))
+    input_image = np.float32(PIL.Image.open(input_image_filename))
 
     log.info("generate")
     
-    if recursiveZoom is not True:
-        outputImage = deepdream(net, inputImage, end = "inception_4c/output")
-        outputImage = np.uint8(outputImage)
+    if recursive_zoom is not True:
+        output_image = deepdream(net, input_image, end = "inception_4c/output")
+        output_image = np.uint8(output_image)
         log.info("save {filename}".format(
-            filename = outputImageFilename,
+            filename = output_image_filename,
         ))
-        PIL.Image.fromarray(outputImage, "RGB").save(outputImageFilename, "PNG")
+        PIL.Image.fromarray(output_image, "RGB").save(output_image_filename, "PNG")
     else:
         os.makedirs("frames")
-        frame = inputImage
+        frame = input_image
         frame_i = 0
 
         h, w = frame.shape[:2]
         s = 0.05 # scale coefficient
         for i in xrange(100):
             frame = deepdream(net, frame, end = "inception_4c/output")
-            outputFilename = "frames/{index}.jpg".format(index = frame_i)
-            PIL.Image.fromarray(np.uint8(frame)).save(outputFilename)
+            output_filename = "frames/{index}.jpg".format(index = frame_i)
+            PIL.Image.fromarray(np.uint8(frame)).save(output_filename)
             frame = nd.affine_transform(
                 frame,
                 [1-s, 1 - s, 1],

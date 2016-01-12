@@ -45,7 +45,7 @@ Options:
 """
 
 name    = "vecodex"
-version = "2015-03-31T2150Z"
+version = "2016-01-12T2238Z"
 
 import os
 import sys
@@ -69,27 +69,27 @@ def main(options):
     model_word2vec = abstraction.model_word2vec_Brown_Corpus()
 
     # Access database.
-    database = abstraction.access_database(fileName = program.database)
+    database = abstraction.access_database(filename = program.database)
     log.info("database metadata:")
-    abstraction.log_database_metadata(fileName = program.database)
+    abstraction.log_database_metadata(filename = program.database)
     # Print the tables in the database.
     log.info("tables in database: {tables}".format(
         tables = database.tables
     ))
     # Access the exchanges table.
-    tableName = "exchanges"
-    log.info("access table \"{tableName}\"".format(
-        tableName = tableName
+    table_name = "exchanges"
+    log.info("access table \"{table_name}\"".format(
+        table_name = table_name
     ))
     # Print the columns of the table.
-    log.info("columns in table \"{tableName}\": {columns}".format(
-        tableName = tableName,
-        columns   = database[tableName].columns
+    log.info("columns in table \"{table_name}\": {columns}".format(
+        table_name = table_name,
+        columns    = database[table_name].columns
     ))
     # Print the number of rows of the table.
-    log.info("number of rows in table \"{tableName}\": {numberOfRows}".format(
-        tableName    = tableName,
-        numberOfRows = str(len(database[tableName]))
+    log.info("number of rows in table \"{table_name}\": {number_of_rows}".format(
+        table_name     = table_name,
+        number_of_rows = str(len(database[table_name]))
     ))
     log.info(
         "create word vector representations of each utterance and response " +
@@ -97,31 +97,31 @@ def main(options):
     )
     # Create a vector representation of each utterance and response of all
     # exchanges.
-    for entry in database[tableName].all():
+    for entry in database[table_name].all():
         utterance = entry["utterance"]
-        utteranceWordVector =\
+        utterance_word_vector =\
             abstraction.convert_sentence_string_to_word_vector(
-                sentenceString = utterance,
-                model_word2vec = model_word2vec
+                sentence_string = utterance,
+                model_word2vec  = model_word2vec
             )
         log.info(
             "word vector representation of utterance \"{utterance}\":"
-            "\n{utteranceWordVector}".format(
-                utterance           = utterance,
-                utteranceWordVector = utteranceWordVector
+            "\n{utterance_word_vector}".format(
+                utterance             = utterance,
+                utterance_word_vector = utterance_word_vector
             )
         )
         response = entry["response"]
-        responseWordVector =\
+        response_word_vector =\
             abstraction.convert_sentence_string_to_word_vector(
-                sentenceString = response,
-                model_word2vec = model_word2vec
+                sentence_string = response,
+                model_word2vec  = model_word2vec
             )
         log.info(
             "word vector representation of response \"{response}\":"
-            "\n{responseWordVector}".format(
-                response           = response,
-                responseWordVector = responseWordVector
+            "\n{response_word_vector}".format(
+                response             = response,
+                response_word_vector = response_word_vector
             )
         )
 
@@ -136,7 +136,7 @@ class Program(object):
         ):
 
         # internal options
-        self.displayLogo           = True
+        self.display_logo          = True
 
         # clock
         global clock
@@ -154,22 +154,22 @@ class Program(object):
         if "logo" in globals():
             self.logo              = logo
         elif "logo" not in globals() and hasattr(self, "name"):
-            self.logo              = pyprel.renderBanner(
+            self.logo              = pyprel.render_banner(
                                          text = self.name.upper()
                                      )
         else:
-            self.displayLogo       = False
+            self.display_logo      = False
             self.logo              = None
 
         # options
         self.options               = options
-        self.userName              = self.options["--username"]
+        self.user_name             = self.options["--username"]
         self.database              = self.options["--database"]
         self.verbose               = self.options["--verbose"]
 
         # default values
-        if self.userName is None:
-            self.userName = os.getenv("USER")
+        if self.user_name is None:
+            self.user_name = os.getenv("USER")
 
         # logging
         global log
@@ -193,11 +193,11 @@ class Program(object):
     def engage(
         self
         ):
-        pyprel.printLine()
+        pyprel.print_line()
         # logo
-        if self.displayLogo:
+        if self.display_logo:
             log.info(pyprel.centerString(text = self.logo))
-            pyprel.printLine()
+            pyprel.print_line()
         # engage alert
         if self.name:
             log.info("initiate {name}".format(
@@ -209,7 +209,7 @@ class Program(object):
                 version = self.version
             ))
         log.info("initiation time: {time}".format(
-            time = clock.startTime()
+            time = clock.start_time()
         ))
 
     def terminate(
@@ -217,7 +217,7 @@ class Program(object):
         ):
         clock.stop()
         log.info("termination time: {time}".format(
-            time = clock.stopTime()
+            time = clock.stop_time()
         ))
         log.info("time full report:\n{report}".format(
             report = shijian.clocks.report(style = "full")
@@ -228,7 +228,7 @@ class Program(object):
         log.info("terminate {name}".format(
             name = self.name
         ))
-        pyprel.printLine()
+        pyprel.print_line()
 
 if __name__ == "__main__":
     options = docopt.docopt(__doc__)

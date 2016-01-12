@@ -47,7 +47,7 @@ Options:
 """
 
 name    = "arcodex"
-version = "2015-10-23T1450Z"
+version = "2016-01-12T2014Z"
 logo    = None
 
 import os
@@ -76,23 +76,23 @@ def main(options):
     from propyte import log
 
     # access options and arguments
-    subreddits         = options["--subreddits"].split(",")
-    numberOfUtterances = options["--numberOfUtterances"]
-    database           = options["--database"]
+    subreddits           = options["--subreddits"].split(",")
+    number_of_utterances = options["--numberOfUtterances"]
+    database             = options["--database"]
 
     log.info("access exchanges")
-    exchangesReddit = abstraction.access_exchanges_Reddit(
-        userAgent          = name,
-        subreddits         = subreddits,
-        numberOfUtterances = numberOfUtterances
+    exchanges_Reddit = abstraction.access_exchanges_Reddit(
+        user_agent           = name,
+        subreddits           = subreddits,
+        number_of_utterances = number_of_utterances
     )
     log.info("save exchanges to database (only those not saved previously)")
     abstraction.save_exchanges_to_database(
-        exchanges = exchangesReddit,
-        fileName  = database
+        exchanges = exchanges_Reddit,
+        filename  = database
     )
     abstraction.save_database_metadata(
-        fileName = database
+        filename = database
     )
 
     program.terminate()

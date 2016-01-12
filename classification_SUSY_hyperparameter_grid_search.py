@@ -46,7 +46,7 @@ options:
 from __future__ import division
 
 name    = "classification_SUSY_hyperparameter_grid_search"
-version = "2015-12-11T1211Z"
+version = "2016-01-12T2023Z"
 logo    = name
 
 import os
@@ -191,7 +191,7 @@ def main(options):
                 log.info("score test:     {score_test}".format(
                     score_test = 100 * score_test
                 ))
-                pyprel.printLine()
+                pyprel.print_line()
                 grid_search_map["epoch"].append(epoch)
                 grid_search_map["hidden_nodes"].append(hidden_nodes)
                 grid_search_map["score_training"].append(score_training)

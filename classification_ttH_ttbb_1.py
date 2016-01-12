@@ -183,7 +183,7 @@ def main(options):
     classifier = abstraction.Classification(
         number_of_classes = 2,
         hidden_nodes      = [200, 300, 300, 300, 200],
-        epochs            = 1000
+        epochs            = 9
     )
 
     # train model

@@ -26,6 +26,10 @@ sudo pip install git+git://github.com/google/skflow.git
 git clone https://github.com/wdbm/abstraction.git
 ```
 
+# upcoming
+
+Under consideration is a requirement for arcodex to ensure the existence of a response to an utterance before saving to database.
+
 # logging
 
 Updating logging procedures is under consideration because of logging conflicts. It could be beneficial currently to run using Bash anonymous pipes, in a way like the following:
