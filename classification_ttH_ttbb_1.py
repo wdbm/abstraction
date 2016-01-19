@@ -103,37 +103,21 @@ def main(options):
 
     # Plot the loaded datasets.
 
-    datavision.save_histogram_matplotlib(
-        values     = data_ttbb.values(name = "el_1_pt"),
-        color_fill = "#3861AA",
-        normalize  = True,
-        label_x    = "frequency",
-        label_y    = "pT",
-        title      = "el_1_pt_ttH",
-        filename   = "el_1_pt_ttH.png"
-    )
-
-    datavision.save_histogram_matplotlib(
-        values     = data_ttH.values(name = "el_1_pt"),
-        color_fill = "#FF0000",
-        normalize  = True,
-        label_x    = "frequency",
-        label_y    = "pT",
-        title      = "el_1_pt_ttbb",
-        filename   = "el_1_pt_ttbb.png"
-    )
-
-    datavision.save_histogram_comparison_matplotlib(
-        values_1      = data_ttbb.values(name = "el_1_pt"),
-        values_2      = data_ttH.values(name = "el_1_pt"),
-        label_1       = "el_1_pt_ttbb",
-        label_2       = "el_1_pt_ttH",
-        normalize     = True,
-        label_ratio_x = "frequency",
-        label_y       = "pT",
-        title         = "el_1_pt_ttbb_ttH",
-        filename      = "el_1_pt_ttbb_ttH.png"
-    )
+    for variable_name in data_ttbb.variables():
+        log.info("plot ttbb versus ttH comparison of {variable_name}".format(
+            variable_name = variable_name
+        ))
+        datavision.save_histogram_comparison_matplotlib(
+            values_1      = data_ttbb.values(name = variable_name),
+            values_2      = data_ttH.values(name = variable_name),
+            label_1       = variable_name + "_ttbb",
+            label_2       = variable_name + "_ttH",
+            normalize     = True,
+            label_ratio_x = "frequency",
+            label_y       = "",
+            title         = variable_name + "_ttbb_ttH",
+            filename      = variable_name + "_ttbb_ttH.png"
+        )
 
     # upcoming: consider data ordering
 
@@ -170,7 +154,7 @@ def main(options):
             data_ttbb.variable(name = "met_phi"),
             data_ttbb.variable(name = "nJets"),
             data_ttbb.variable(name = "Centrality_all"),
-            data_ttbb.variable(name = "Mbb_MindR")
+            #data_ttbb.variable(name = "Mbb_MindR")
         ])
         _data.append([
             data_ttbb.variable(name = "class")
@@ -192,7 +176,7 @@ def main(options):
             data_ttH.variable(name = "met_phi"),
             data_ttH.variable(name = "nJets"),
             data_ttH.variable(name = "Centrality_all"),
-            data_ttH.variable(name = "Mbb_MindR")
+            #data_ttH.variable(name = "Mbb_MindR")
         ])
         _data.append([
             data_ttH.variable(name = "class")
