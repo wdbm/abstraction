@@ -39,6 +39,7 @@ Options:
     -h, --help               display help message
     --version                display version and exit
     -v, --verbose            verbose logging
+    -s, --silent             silent
     -u, --username=USERNAME  username
     -d, --database=FILE      database [default: database.db]
     -t, --tableLimit=NUMBER  limit on number of table entries displayed
@@ -46,7 +47,8 @@ Options:
 """
 
 name    = "vicodex"
-version = "2016-01-12T2212Z"
+version = "2016-01-18T1611Z"
+logo    = None
 
 import os
 import sys
@@ -60,17 +62,34 @@ import abstraction
 import docopt
 import technicolor
 import shijian
+import propyte
 import pyprel
 
 def main(options):
 
     global program
-    program = Program(options = options)
+    program = propyte.Program(
+        options = options,
+        name    = name,
+        version = version,
+        logo    = logo
+        )
+    global log
+    from propyte import log
+
+    # access options and arguments
+    database_filename = options["--database"]
+    table_limit       = options["--tableLimit"]
+    if table_limit is not None:
+        table_limit = int(table_limit)
+    output_filename   = options["--outputFile"]
+    if output_filename is not None:
+        output_filename = str(output_filename)
 
     # Access database.
-    database = abstraction.access_database(filename = program.database)
+    database = abstraction.access_database(filename = database_filename)
     log.info("\ndatabase metadata:")
-    abstraction.log_database_metadata(filename = program.database)
+    abstraction.log_database_metadata(filename = database_filename)
     log.info("")
     # Print the tables in the database.
     log.info("tables in database: {tables}".format(
@@ -126,12 +145,12 @@ def main(options):
         )
         count_entries += 1
         # simple training representation
-        if program.output_file is not None:
+        if output_filename is not None:
             if simple_training_representation is "":
                 simple_training_representation = \
                     str(entry["utterance"]) + \
                     " => " + \
-                    str(entry["response"])                
+                    str(entry["response"])
             else:
                 simple_training_representation = \
                     simple_training_representation + \
@@ -139,8 +158,8 @@ def main(options):
                     str(entry["utterance"]) + \
                     " => " + \
                     str(entry["response"])
-        if program.table_limit is not None:
-            if count_entries >= program.table_limit:
+        if table_limit is not None:
+            if count_entries >= table_limit:
                 break
     # Record table.
     print(
@@ -149,122 +168,17 @@ def main(options):
         )
     )
     # Record to file, if specified.
-    if program.output_file is not None:
+    if output_filename is not None:
         log.info(
             "save simple training representation to file {filename}".format(
-                filename = program.output_file
+                filename = output_filename
             )
         )
-        output_file = open(program.output_file, "w")
+        output_file = open(output_filename, "w")
         output_file.write(simple_training_representation)
         output_file.close()
 
     program.terminate()
-
-class Program(object):
-
-    def __init__(
-        self,
-        parent  = None,
-        options = None
-        ):
-
-        # internal options
-        self.display_logo          = True
-
-        # clock
-        global clock
-        clock = shijian.Clock(name = "program run time")
-
-        # name, version, logo
-        if "name" in globals():
-            self.name              = name
-        else:
-            self.name              = None
-        if "version" in globals():
-            self.version           = version
-        else:
-            self.version           = None
-        if "logo" in globals():
-            self.logo              = logo
-        elif "logo" not in globals() and hasattr(self, "name"):
-            self.logo              = pyprel.render_banner(
-                                         text = self.name.upper()
-                                     )
-        else:
-            self.display_logo      = False
-            self.logo              = None
-
-        # options
-        self.options               = options
-        self.user_name             = self.options["--username"]
-        self.database              = self.options["--database"]
-        self.verbose               = self.options["--verbose"]
-        if self.options["--tableLimit"] is not None:
-            self.table_limit = int(self.options["--tableLimit"])
-        else:
-            self.table_limit = None
-        if self.options["--outputFile"] is not None:
-            self.output_file = str(self.options["--outputFile"])
-        else:
-            self.output_file = None
-
-        # default values
-        if self.user_name is None:
-            self.user_name = os.getenv("USER")
-
-        # logging
-        global log
-        log = logging.getLogger(__name__)
-        logging.root.addHandler(technicolor.ColorisingStreamHandler())
-
-        # logging level
-        if self.verbose:
-            logging.root.setLevel(logging.DEBUG)
-        else:
-            logging.root.setLevel(logging.INFO)
-
-        self.engage()
-
-    def engage(
-        self
-        ):
-        pyprel.print_line()
-        # logo
-        if self.display_logo:
-            log.info(pyprel.center_string(text = self.logo))
-            pyprel.print_line()
-        # engage alert
-        if self.name:
-            log.info("initiate {name}".format(
-                name = self.name
-            ))
-        # version
-        if self.version:
-            log.info("version: {version}".format(
-                version = self.version
-            ))
-        log.info("initiation time: {time}".format(
-            time = clock.start_time()
-        ))
-
-    def terminate(
-        self
-        ):
-        clock.stop()
-        log.info("termination time: {time}".format(
-            time = clock.stop_time()
-        ))
-        log.info("time full report:\n{report}".format(
-            report = shijian.clocks.report(style = "full")
-        ))
-        log.info("time statistics report:\n{report}".format(
-            report = shijian.clocks.report()
-        ))
-        log.info("terminate {name}".format(
-            name = self.name
-        ))
-        pyprel.print_line()
 
 if __name__ == "__main__":
 

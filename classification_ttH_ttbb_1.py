@@ -47,7 +47,7 @@ options:
 from __future__ import division
 
 name    = "classification_ttH_ttbb_1"
-version = "2016-01-06T1917Z"
+version = "2016-01-19T1524Z"
 logo    = name
 
 import os
@@ -99,6 +99,40 @@ def main(options):
         ROOT_filename            = ROOT_filename_ttH,
         tree_name                = "nominal",
         maximum_number_of_events = None
+    )
+
+    # Plot the loaded datasets.
+
+    datavision.save_histogram_matplotlib(
+        values     = data_ttbb.values(name = "el_1_pt"),
+        color_fill = "#3861AA",
+        normalize  = True,
+        label_x    = "frequency",
+        label_y    = "pT",
+        title      = "el_1_pt_ttH",
+        filename   = "el_1_pt_ttH.png"
+    )
+
+    datavision.save_histogram_matplotlib(
+        values     = data_ttH.values(name = "el_1_pt"),
+        color_fill = "#FF0000",
+        normalize  = True,
+        label_x    = "frequency",
+        label_y    = "pT",
+        title      = "el_1_pt_ttbb",
+        filename   = "el_1_pt_ttbb.png"
+    )
+
+    datavision.save_histogram_comparison_matplotlib(
+        values_1      = data_ttbb.values(name = "el_1_pt"),
+        values_2      = data_ttH.values(name = "el_1_pt"),
+        label_1       = "el_1_pt_ttbb",
+        label_2       = "el_1_pt_ttH",
+        normalize     = True,
+        label_ratio_x = "frequency",
+        label_y       = "pT",
+        title         = "el_1_pt_ttbb_ttH",
+        filename      = "el_1_pt_ttbb_ttH.png"
     )
 
     # upcoming: consider data ordering
@@ -183,7 +217,7 @@ def main(options):
     classifier = abstraction.Classification(
         number_of_classes = 2,
         hidden_nodes      = [200, 300, 300, 300, 200],
-        epochs            = 9
+        epochs            = 100
     )
 
     # train model

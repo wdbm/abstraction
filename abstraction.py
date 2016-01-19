@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-01-12T2339Z"
+version = "2016-01-18T1325Z"
 
 import os
 import sys
@@ -287,6 +287,7 @@ def access_exchanges_Reddit(
                 submission_title = submission_title
             ))
             comments = praw.helpers.flatten_tree(submission.comments)
+            # Save the exchange only if there is a response.
             if comments:
                 # Access the submission top comment.
                 comment_top_text = comments[0].body.encode(
@@ -303,18 +304,18 @@ def access_exchanges_Reddit(
                     "ascii",
                     "ignore"
                 )
-            # Create a new exchange object for the current exchange data and
-            # append it to the list of exchanges.
-            exchange = Exchange(
-                utterance           = submission_title,
-                response            = comment_top_text,
-                utterance_time_UNIX = submission_time_UNIX,
-                response_time_UNIX  = comment_top_time_UNIX,
-                utterance_reference = submission_URL,
-                response_reference  = comment_top_URL,
-                exchange_reference  = subreddit
-            )
-            exchanges.append(exchange)
+                # Create a new exchange object for the current exchange data and
+                # append it to the list of exchanges.
+                exchange = Exchange(
+                    utterance           = submission_title,
+                    response            = comment_top_text,
+                    utterance_time_UNIX = submission_time_UNIX,
+                    response_time_UNIX  = comment_top_time_UNIX,
+                    utterance_reference = submission_URL,
+                    response_reference  = comment_top_URL,
+                    exchange_reference  = subreddit
+                )
+                exchanges.append(exchange)
             # Pause to avoid overtaxing Reddit.
             #time.sleep(2)
     return exchanges
