@@ -43,11 +43,12 @@ options:
     -u, --username=USERNAME  username
     --datattH=FILENAME       input ROOT data file [default: output_ttH.root]
     --datattbb=FILENAME      input ROOT data file [default: output_ttbb.root]
+    --plot=BOOL              plot variables       [default: true]
 """
 from __future__ import division
 
 name    = "classification_ttH_ttbb_1"
-version = "2016-01-19T1524Z"
+version = "2016-01-20T0010Z"
 logo    = name
 
 import os
@@ -77,8 +78,9 @@ def main(options):
     log.info("")
 
     # access options and arguments
-    ROOT_filename_ttH = options["--datattH"]
+    ROOT_filename_ttH  = options["--datattH"]
     ROOT_filename_ttbb = options["--datattbb"]
+    engage_plotting    = string_to_bool(options["--plot"])
 
     log.info("ttH data file: {filename}".format(
         filename = ROOT_filename_ttH
@@ -101,23 +103,25 @@ def main(options):
         maximum_number_of_events = None
     )
 
-    # Plot the loaded datasets.
+    if engage_plotting is True:
 
-    for variable_name in data_ttbb.variables():
-        log.info("plot ttbb versus ttH comparison of {variable_name}".format(
-            variable_name = variable_name
-        ))
-        datavision.save_histogram_comparison_matplotlib(
-            values_1      = data_ttbb.values(name = variable_name),
-            values_2      = data_ttH.values(name = variable_name),
-            label_1       = variable_name + "_ttbb",
-            label_2       = variable_name + "_ttH",
-            normalize     = True,
-            label_ratio_x = "frequency",
-            label_y       = "",
-            title         = variable_name + "_ttbb_ttH",
-            filename      = variable_name + "_ttbb_ttH.png"
-        )
+        # Plot the loaded datasets.
+
+        for variable_name in data_ttbb.variables():
+            log.info("plot ttbb versus ttH comparison of {variable_name}".format(
+                variable_name = variable_name
+            ))
+            datavision.save_histogram_comparison_matplotlib(
+                values_1      = data_ttbb.values(name = variable_name),
+                values_2      = data_ttH.values(name = variable_name),
+                label_1       = variable_name + "_ttbb",
+                label_2       = variable_name + "_ttH",
+                normalize     = True,
+                label_ratio_x = "frequency",
+                label_y       = "",
+                title         = variable_name + "_ttbb_ttH",
+                filename      = variable_name + "_ttbb_ttH.png"
+            )
 
     # upcoming: consider data ordering
 
@@ -139,44 +143,44 @@ def main(options):
     _data = []
     for index in data_ttbb.indices():
         _data.append([
-            data_ttbb.variable(name = "el_1_pt"),
-            data_ttbb.variable(name = "el_1_eta"),
-            data_ttbb.variable(name = "el_1_phi"),
-            data_ttbb.variable(name = "jet_1_pt"),
-            data_ttbb.variable(name = "jet_1_eta"),
-            data_ttbb.variable(name = "jet_1_phi"),
-            data_ttbb.variable(name = "jet_1_e"),
-            data_ttbb.variable(name = "jet_2_pt"),
-            data_ttbb.variable(name = "jet_2_eta"),
-            data_ttbb.variable(name = "jet_2_phi"),
-            data_ttbb.variable(name = "jet_2_e"),
-            data_ttbb.variable(name = "met"),
-            data_ttbb.variable(name = "met_phi"),
-            data_ttbb.variable(name = "nJets"),
-            data_ttbb.variable(name = "Centrality_all"),
-            #data_ttbb.variable(name = "Mbb_MindR")
+            data_ttbb.variable(index = index, name = "el_1_pt"),
+            data_ttbb.variable(index = index, name = "el_1_eta"),
+            data_ttbb.variable(index = index, name = "el_1_phi"),
+            data_ttbb.variable(index = index, name = "jet_1_pt"),
+            data_ttbb.variable(index = index, name = "jet_1_eta"),
+            data_ttbb.variable(index = index, name = "jet_1_phi"),
+            data_ttbb.variable(index = index, name = "jet_1_e"),
+            data_ttbb.variable(index = index, name = "jet_2_pt"),
+            data_ttbb.variable(index = index, name = "jet_2_eta"),
+            data_ttbb.variable(index = index, name = "jet_2_phi"),
+            data_ttbb.variable(index = index, name = "jet_2_e"),
+            data_ttbb.variable(index = index, name = "met"),
+            data_ttbb.variable(index = index, name = "met_phi"),
+            data_ttbb.variable(index = index, name = "nJets"),
+            data_ttbb.variable(index = index, name = "Centrality_all"),
+            #data_ttbb.variable(index = index, name = "Mbb_MindR")
         ])
         _data.append([
             data_ttbb.variable(name = "class")
         ])
     for index in data_ttH.indices():
         _data.append([
-            data_ttH.variable(name = "el_1_pt"),
-            data_ttH.variable(name = "el_1_eta"),
-            data_ttH.variable(name = "el_1_phi"),
-            data_ttH.variable(name = "jet_1_pt"),
-            data_ttH.variable(name = "jet_1_eta"),
-            data_ttH.variable(name = "jet_1_phi"),
-            data_ttH.variable(name = "jet_1_e"),
-            data_ttH.variable(name = "jet_2_pt"),
-            data_ttH.variable(name = "jet_2_eta"),
-            data_ttH.variable(name = "jet_2_phi"),
-            data_ttH.variable(name = "jet_2_e"),
-            data_ttH.variable(name = "met"),
-            data_ttH.variable(name = "met_phi"),
-            data_ttH.variable(name = "nJets"),
-            data_ttH.variable(name = "Centrality_all"),
-            #data_ttH.variable(name = "Mbb_MindR")
+            data_ttH.variable(index = index, name = "el_1_pt"),
+            data_ttH.variable(index = index, name = "el_1_eta"),
+            data_ttH.variable(index = index, name = "el_1_phi"),
+            data_ttH.variable(index = index, name = "jet_1_pt"),
+            data_ttH.variable(index = index, name = "jet_1_eta"),
+            data_ttH.variable(index = index, name = "jet_1_phi"),
+            data_ttH.variable(index = index, name = "jet_1_e"),
+            data_ttH.variable(index = index, name = "jet_2_pt"),
+            data_ttH.variable(index = index, name = "jet_2_eta"),
+            data_ttH.variable(index = index, name = "jet_2_phi"),
+            data_ttH.variable(index = index, name = "jet_2_e"),
+            data_ttH.variable(index = index, name = "met"),
+            data_ttH.variable(index = index, name = "met_phi"),
+            data_ttH.variable(index = index, name = "nJets"),
+            data_ttH.variable(index = index, name = "Centrality_all"),
+            #data_ttH.variable(index = index, name = "Mbb_MindR")
         ])
         _data.append([
             data_ttH.variable(name = "class")
@@ -201,7 +205,7 @@ def main(options):
     classifier = abstraction.Classification(
         number_of_classes = 2,
         hidden_nodes      = [200, 300, 300, 300, 200],
-        epochs            = 100
+        epochs            = 100000
     )
 
     # train model
@@ -232,6 +236,9 @@ def main(options):
     log.info("")
 
     program.terminate()
+
+def string_to_bool(x):
+    return x.lower() in ("yes", "true", "t", "1")
 
 if __name__ == "__main__":
     options = docopt.docopt(__doc__)
