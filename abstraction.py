@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-01-18T1325Z"
+version = "2016-01-20T1359Z"
 
 import os
 import sys
@@ -593,45 +593,63 @@ class Classification(object):
 
     def __init__(
         self,
-        number_of_classes = None,
-        hidden_nodes      = [10, 20, 10],
-        epochs            = 5000,
-        batch_size        = 32,
-        optimizer         = "SGD",
-        learning_rate     = 0.1,
-        seed              = 42,
-        continue_training = True
+        number_of_classes   = None,
+        hidden_nodes        = [10, 20, 10],
+        epochs              = 5000,
+        batch_size          = 32,
+        optimizer           = "SGD",
+        learning_rate       = 0.1,
+        seed                = 42,
+        continue_training   = True,
+        load_from_directory = None
     ):
         """
         batch_size: number of training examples to use per training step
         """
-        self._model = skflow.TensorFlowDNNClassifier(
-            n_classes         = number_of_classes,
-            hidden_units      = hidden_nodes,
-            steps             = epochs,
-            batch_size        = batch_size,
-            optimizer         = optimizer,
-            learning_rate     = learning_rate,
-            tf_random_seed    = seed,
-            continue_training = True
-        )
+        if load_from_directory is None:
+            self._model = skflow.TensorFlowDNNClassifier(
+                n_classes         = number_of_classes,
+                hidden_units      = hidden_nodes,
+                steps             = epochs,
+                batch_size        = batch_size,
+                optimizer         = optimizer,
+                learning_rate     = learning_rate,
+                tf_random_seed    = seed,
+                continue_training = True
+            )
+        else:
+            self.load(
+                directory = load_from_directory
+            )
 
     def model(self):
         return self._model
 
     def save(
         self,
-        filename = "classifier.abs"
+        directory = "abstraction_classifier",
+        overwrite = False
     ):
-        with open(filename, "wb") as output_file:
-            pickle.dump(self._model, output_file, pickle.HIGHEST_PROTOCOL)
+        if directory is None:
+            directory = shijian.propose_filename(
+                filename  = "abstraction_model",
+                overwrite = overwrite
+            )
+        log.info("save model to {directory}".format(
+            directory = directory
+        ))
+        self._model.save(directory)
 
     def load(
         self,
-        filename = "classifier.abs"
+        directory = "abstraction_classifier"
     ):
-        with open(filename, "rb") as input_file:
-            self._model = pickle.load(input_file)
+        log.info("load model from {directory}".format(
+            directory = directory
+        ))
+        self._model = skflow.TensorFlowEstimator.restore(directory)
+        # upcoming:
+        # update Classifier instance data attributes from loaded model
 
 @shijian.timer
 def access_SUSY_dataset_format_file(filename):
@@ -842,6 +860,8 @@ def load_HEP_data(
     # counters
     number_of_events_loaded = 0
 
+    log.info("")
+
     for index, event in enumerate(tree):
 
         if maximum_number_of_events is not None and\
@@ -873,5 +893,7 @@ def load_HEP_data(
             data.variable(index = index, name = "nJets",          value = event.nJets)
             data.variable(index = index, name = "Centrality_all", value = event.Centrality_all)
             #data.variable(index = index, name = "Mbb_MindR",      value = event.Mbb_MindR)
+
+    log.info("")
 
     return data

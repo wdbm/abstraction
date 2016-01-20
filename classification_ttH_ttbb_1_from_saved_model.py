@@ -3,7 +3,7 @@
 """
 ################################################################################
 #                                                                              #
-# classification_ttH_ttbb_1                                                    #
+# classification_ttH_ttbb_1_from_saved_model                                   #
 #                                                                              #
 ################################################################################
 #                                                                              #
@@ -47,8 +47,8 @@ options:
 """
 from __future__ import division
 
-name    = "classification_ttH_ttbb_1"
-version = "2016-01-20T1400Z"
+name    = "classification_ttH_ttbb_1_from_saved_model"
+version = "2016-01-20T1357Z"
 logo    = name
 
 import os
@@ -57,6 +57,7 @@ import time
 import docopt
 import logging
 import propyte
+import pyprel
 import shijian
 import datavision
 import abstraction
@@ -103,29 +104,7 @@ def main(options):
         maximum_number_of_events = None
     )
 
-    if engage_plotting is True:
-
-        # Plot the loaded datasets.
-
-        for variable_name in data_ttbb.variables():
-            log.info("plot ttbb versus ttH comparison of {variable_name}".format(
-                variable_name = variable_name
-            ))
-            datavision.save_histogram_comparison_matplotlib(
-                values_1      = data_ttbb.values(name = variable_name),
-                values_2      = data_ttH.values(name = variable_name),
-                label_1       = variable_name + "_ttbb",
-                label_2       = variable_name + "_ttH",
-                normalize     = True,
-                label_ratio_x = "frequency",
-                label_y       = "",
-                title         = variable_name + "_ttbb_ttH",
-                filename      = variable_name + "_ttbb_ttH.png"
-            )
-
-    # upcoming: consider data ordering
-
-    # Preprocess all data (to be updated).
+    # Preprocess all data.
 
     data_ttbb.preprocess_all()
     data_ttH.preprocess_all()
@@ -187,10 +166,12 @@ def main(options):
         ])
     dataset = abstraction.Dataset(data = _data)
 
-    log.info("")
+    log.info("load classification model")
 
-    # define data
-    
+    classifier = abstraction.Classification(
+        load_from_directory = "abstraction_classifier"
+    )
+
     log.info("split data for cross-validation")
     features_train, features_test, targets_train, targets_test =\
         cross_validation.train_test_split(
@@ -198,27 +179,6 @@ def main(options):
             dataset.targets(),
             train_size = 0.7
         )
-    log.info("define classification model")
-
-    # define model
-
-    classifier = abstraction.Classification(
-        number_of_classes = 2,
-        hidden_nodes      = [200, 300, 300, 300, 200],
-        epochs            = 10000
-    )
-
-    # train model
-
-    log.info("fit classification model to dataset features and targets")
-    classifier._model.fit(
-        features_train,
-        targets_train,
-        #logdir = "log"
-    )
-    #classifier.save()
-
-    # predict and cross-validate training
 
     log.info("test trained classification model on training dataset")
     score = metrics.accuracy_score(
@@ -237,7 +197,17 @@ def main(options):
         percentage = 100 * score
     ))
 
-    classifier.save()
+    table_contents = [["target", "prediction"]]
+    for value_target, value_prediction in zip(
+        dataset.targets(),
+        list(classifier._model.predict(dataset.features()))
+    ):
+        row = [str(value_target[0]), str(value_prediction)]
+        table_contents.append(row)
+    print(pyprel.Table(
+        contents              = table_contents,
+        table_width_requested = 22
+    ))
 
     log.info("")
 

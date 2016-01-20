@@ -32,7 +32,7 @@ Under consideration is a requirement for arcodex to ensure the existence of a re
 
 # logging
 
-Updating logging procedures is under consideration because of logging conflicts. It could be beneficial currently to run using Bash anonymous pipes, in a way like the following:
+Updating logging procedures is under consideration because of possible logging conflicts. It could be beneficial currently to run using Bash anonymous pipes, in a way like the following:
 
 ```Bash
 python script.py 2> >(grep -E -v "INFO|DEBUG")
