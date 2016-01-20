@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-# coding=utf-8
 
 """
 ################################################################################
 #                                                                              #
-# classification_SUSY_hyperparameter_grid_search                               #
+# classification_ttH_ttbb_1_hyperparameter_grid_search                         #
 #                                                                              #
 ################################################################################
 #                                                                              #
 # LICENCE INFORMATION                                                          #
 #                                                                              #
-# This program is a classification example using the SUSY data set.            #
+# This program is for classification training on ttH and ttbb HEP MC           #
+# events.                                                                      #
 #                                                                              #
 # copyright (C) 2015 William Breaden Madden                                    #
 #                                                                              #
@@ -41,12 +41,14 @@ options:
     -v, --verbose            verbose logging
     -s, --silent             silent
     -u, --username=USERNAME  username
-    --data=FILENAME          input data filename [default: SUSY_100k.csv]
+    --datattH=FILENAME       input ROOT data file [default: output_ttH.root]
+    --datattbb=FILENAME      input ROOT data file [default: output_ttbb.root]
+    --plot=BOOL              plot variables       [default: true]
 """
 from __future__ import division
 
-name    = "classification_SUSY_hyperparameter_grid_search"
-version = "2016-01-20T0749Z"
+name    = "classification_ttH_ttbb_1_hyperparameter_grid_search"
+version = "2016-01-20T0012Z"
 logo    = name
 
 import os
@@ -54,15 +56,14 @@ import sys
 import time
 import docopt
 import logging
-import pickle
+import matplotlib
 import propyte
 import pyprel
 import shijian
-import matplotlib
-import matplotlib.pyplot
+import datavision
+import abstraction
 from sklearn import metrics
 from sklearn import cross_validation
-import abstraction
 
 def main(options):
 
@@ -79,41 +80,119 @@ def main(options):
     log.info("")
 
     # access options and arguments
-    input_data_filename = options["--data"]
+    ROOT_filename_ttH  = options["--datattH"]
+    ROOT_filename_ttbb = options["--datattbb"]
+    engage_plotting    = string_to_bool(options["--plot"])
 
-    # define dataset
+    log.info("ttH data file: {filename}".format(
+        filename = ROOT_filename_ttH
+    ))
+    log.info("ttbb data file: {filename}".format(
+        filename = ROOT_filename_ttbb
+    ))
 
-    # Load the SUSY dataset (https://archive.ics.uci.edu/ml/datasets/SUSY). 
-    # The first column is the class label (1 for signal, 0 for background),
-    # followed by 18 features (8 low-level features and 10 high-level features):
-    #
-    # - lepton 1 pT
-    # - lepton 1 eta
-    # - lepton 1 phi
-    # - lepton 2 pT
-    # - lepton 2 eta
-    # - lepton 2 phi
-    # - missing energy magnitude
-    # - missing energy phi
-    # - MET_rel
-    # - axial MET
-    # - M_R
-    # - M_TR_2
-    # - R
-    # - MT2
-    # - S_R
-    # - M_Delta_R
-    # - dPhi_r_b
-    # - cos(theta_r1)
+    # Access data for event classes ttbb and ttH.
 
-    data = abstraction.access_SUSY_dataset_format_file(input_data_filename)
-
-    dataset = abstraction.Dataset(
-        data = data
+    data_ttbb = abstraction.load_HEP_data(
+        ROOT_filename            = ROOT_filename_ttbb,
+        tree_name                = "nominal",
+        maximum_number_of_events = None
     )
 
-    # define data
+    data_ttH = abstraction.load_HEP_data(
+        ROOT_filename            = ROOT_filename_ttH,
+        tree_name                = "nominal",
+        maximum_number_of_events = None
+    )
 
+    if engage_plotting is True:
+
+        # Plot the loaded datasets.
+
+        for variable_name in data_ttbb.variables():
+            log.info("plot ttbb versus ttH comparison of {variable_name}".format(
+                variable_name = variable_name
+            ))
+            datavision.save_histogram_comparison_matplotlib(
+                values_1      = data_ttbb.values(name = variable_name),
+                values_2      = data_ttH.values(name = variable_name),
+                label_1       = variable_name + "_ttbb",
+                label_2       = variable_name + "_ttH",
+                normalize     = True,
+                label_ratio_x = "frequency",
+                label_y       = "",
+                title         = variable_name + "_ttbb_ttH",
+                filename      = variable_name + "_ttbb_ttH.png"
+            )
+
+    # upcoming: consider data ordering
+
+    # Preprocess all data (to be updated).
+
+    data_ttbb.preprocess_all()
+    data_ttH.preprocess_all()
+
+    # Add class labels to the data sets, 0 for ttbb and 1 for ttH.
+
+    for index in data_ttbb.indices():
+        data_ttbb.variable(index = index, name = "class", value = 0)
+
+    for index in data_ttH.indices():
+        data_ttH.variable(index = index, name = "class", value = 1)
+
+    # Convert the data sets to a simple list format with the first column
+    # containing the class label.
+    _data = []
+    for index in data_ttbb.indices():
+        _data.append([
+            data_ttbb.variable(index = index, name = "el_1_pt"),
+            data_ttbb.variable(index = index, name = "el_1_eta"),
+            data_ttbb.variable(index = index, name = "el_1_phi"),
+            data_ttbb.variable(index = index, name = "jet_1_pt"),
+            data_ttbb.variable(index = index, name = "jet_1_eta"),
+            data_ttbb.variable(index = index, name = "jet_1_phi"),
+            data_ttbb.variable(index = index, name = "jet_1_e"),
+            data_ttbb.variable(index = index, name = "jet_2_pt"),
+            data_ttbb.variable(index = index, name = "jet_2_eta"),
+            data_ttbb.variable(index = index, name = "jet_2_phi"),
+            data_ttbb.variable(index = index, name = "jet_2_e"),
+            data_ttbb.variable(index = index, name = "met"),
+            data_ttbb.variable(index = index, name = "met_phi"),
+            data_ttbb.variable(index = index, name = "nJets"),
+            data_ttbb.variable(index = index, name = "Centrality_all"),
+            #data_ttbb.variable(index = index, name = "Mbb_MindR")
+        ])
+        _data.append([
+            data_ttbb.variable(name = "class")
+        ])
+    for index in data_ttH.indices():
+        _data.append([
+            data_ttH.variable(index = index, name = "el_1_pt"),
+            data_ttH.variable(index = index, name = "el_1_eta"),
+            data_ttH.variable(index = index, name = "el_1_phi"),
+            data_ttH.variable(index = index, name = "jet_1_pt"),
+            data_ttH.variable(index = index, name = "jet_1_eta"),
+            data_ttH.variable(index = index, name = "jet_1_phi"),
+            data_ttH.variable(index = index, name = "jet_1_e"),
+            data_ttH.variable(index = index, name = "jet_2_pt"),
+            data_ttH.variable(index = index, name = "jet_2_eta"),
+            data_ttH.variable(index = index, name = "jet_2_phi"),
+            data_ttH.variable(index = index, name = "jet_2_e"),
+            data_ttH.variable(index = index, name = "met"),
+            data_ttH.variable(index = index, name = "met_phi"),
+            data_ttH.variable(index = index, name = "nJets"),
+            data_ttH.variable(index = index, name = "Centrality_all"),
+            #data_ttH.variable(index = index, name = "Mbb_MindR")
+        ])
+        _data.append([
+            data_ttH.variable(name = "class")
+        ])
+    dataset = abstraction.Dataset(data = _data)
+
+    log.info("")
+
+    # define data
+    
     log.info("split data for cross-validation")
     features_train, features_test, targets_train, targets_test =\
         cross_validation.train_test_split(
@@ -121,13 +200,12 @@ def main(options):
             dataset.targets(),
             train_size = 0.7
         )
-
     # grid search
 
     import itertools
 
-    epochs       = [10, 100, 500, 1000]
-    architecture = [200, 300, 300, 300, 200]
+    epochs       = [100, 100000]
+    architecture = [200, 300, 300, 200]
 
     grid_search_map = {}
     grid_search_map["epoch"]          = []
@@ -200,7 +278,7 @@ def main(options):
                 # save current grid search map
                 shijian.export_object(
                     grid_search_map,
-                    filename = "grid_search_map.pkl",
+                    filename  = "grid_search_map.pkl",
                     overwrite = True
                 )
 
@@ -290,6 +368,9 @@ def main(options):
     log.info("")
 
     program.terminate()
+
+def string_to_bool(x):
+    return x.lower() in ("yes", "true", "t", "1")
 
 if __name__ == "__main__":
     options = docopt.docopt(__doc__)

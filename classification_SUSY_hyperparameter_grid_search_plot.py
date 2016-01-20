@@ -47,7 +47,7 @@ options:
 from __future__ import division
 
 name    = "classification_SUSY_hyperparameter_grid_search_plot"
-version = "2015-12-11T1213Z"
+version = "2016-01-20T0746Z"
 logo    = name
 
 import os
@@ -138,16 +138,16 @@ def main(options):
         matplotlib.pyplot.plot(epochs, score_test, label = key)
     
     matplotlib.pyplot.legend(
-        loc = "bottom right",
+        loc = "best",
         prop={'size': 10}
     )
 
-    matplotlib.pyplot.show()
-    #matplotlib.pyplot.savefig(
-    #    "hyperparameter_map.eps",
-    #    bbox_inches = "tight",
-    #    format      = "eps"
-    #)
+    #matplotlib.pyplot.show()
+    matplotlib.pyplot.savefig(
+        "hyperparameter_map.eps",
+        bbox_inches = "tight",
+        format      = "eps"
+    )
 
     # find best-scoring models
 
