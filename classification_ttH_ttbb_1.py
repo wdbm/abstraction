@@ -48,7 +48,7 @@ options:
 from __future__ import division
 
 name    = "classification_ttH_ttbb_1"
-version = "2016-01-20T1400Z"
+version = "2016-01-23T0046Z"
 logo    = name
 
 import os
@@ -101,6 +101,17 @@ def main(options):
         ROOT_filename            = ROOT_filename_ttH,
         tree_name                = "nominal",
         maximum_number_of_events = None
+    )
+
+    # Analyse variable correlations.
+    variables_names  = data_ttH.variables()
+    variables_values = []
+    for variable_name in variables_names:
+        variables_values.append(data_ttH.values(name = variable_name))
+    datavision.analyze_correlations(
+        variables            = variables_values,
+        variables_names      = variables_names,
+        table_order_variable = "p_value"
     )
 
     if engage_plotting is True:
@@ -216,7 +227,6 @@ def main(options):
         targets_train,
         #logdir = "log"
     )
-    #classifier.save()
 
     # predict and cross-validate training
 
