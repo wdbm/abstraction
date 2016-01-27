@@ -9,7 +9,7 @@ The following Bash commands, that have been tested on Ubuntu 15.10, should insta
 ```Bash
 sudo pip install datavision
 sudo pip install propyte
-sudo pip install git+https://github.com/wdbm/pyprel.git
+sudo pip install pyprel
 sudo pip install shijian
 sudo pip install technicolor
 sudo pip install docopt
