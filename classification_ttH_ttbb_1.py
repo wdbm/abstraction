@@ -36,14 +36,15 @@ usage:
     program [options]
 
 options:
-    -h, --help               display help message
-    --version                display version and exit
-    -v, --verbose            verbose logging
-    -s, --silent             silent
-    -u, --username=USERNAME  username
-    --datattH=FILENAME       input ROOT data file [default: output_ttH.root]
-    --datattbb=FILENAME      input ROOT data file [default: output_ttbb.root]
-    --plot=BOOL              plot variables       [default: true]
+    -h, --help                    display help message
+    --version                     display version and exit
+    -v, --verbose                 verbose logging
+    -s, --silent                  silent
+    -u, --username=USERNAME       username
+    --datattH=FILENAME            input ROOT data file [default: output_ttH.root]
+    --datattbb=FILENAME           input ROOT data file [default: output_ttbb.root]
+    --plot=BOOL                   plot variables       [default: true]
+    --analyzecorrelations = BOOL  analyze correlations [default: true]
 """
 from __future__ import division
 
@@ -78,9 +79,10 @@ def main(options):
     log.info("")
 
     # access options and arguments
-    ROOT_filename_ttH  = options["--datattH"]
-    ROOT_filename_ttbb = options["--datattbb"]
-    engage_plotting    = string_to_bool(options["--plot"])
+    ROOT_filename_ttH            = options["--datattH"]
+    ROOT_filename_ttbb           = options["--datattbb"]
+    engage_plotting              = string_to_bool(options["--plot"])
+    engage_correlations_analysis = string_to_bool(options["--analyzecorrelations"])
 
     log.info("ttH data file: {filename}".format(
         filename = ROOT_filename_ttH
@@ -103,20 +105,13 @@ def main(options):
         maximum_number_of_events = None
     )
 
-    # Analyse variable correlations.
-    variables_names  = data_ttH.variables()
-    variables_values = []
-    for variable_name in variables_names:
-        variables_values.append(data_ttH.values(name = variable_name))
-    datavision.analyze_correlations(
-        variables            = variables_values,
-        variables_names      = variables_names,
-        table_order_variable = "p_value"
-    )
+    log.info("\nnumber of ttbb and ttH events: {number_of_events}\n".format(
+        number_of_events = len(data_ttbb.indices()) + len(data_ttH.indices())
+    ))
+
+    # Plot comparisons of variables of the two datasets.
 
     if engage_plotting is True:
-
-        # Plot the loaded datasets.
 
         for variable_name in data_ttbb.variables():
             log.info("plot ttbb versus ttH comparison of {variable_name}".format(
@@ -131,12 +126,26 @@ def main(options):
                 label_ratio_x = "frequency",
                 label_y       = "",
                 title         = variable_name + "_ttbb_ttH",
-                filename      = variable_name + "_ttbb_ttH.png"
+                filename      = variable_name + "_ttbb_ttH.png",
+                directory     = "variables_comparisons"
             )
 
-    # upcoming: consider data ordering
+    # Analyse variable correlations.
 
-    # Preprocess all data (to be updated).
+    if engage_correlations_analysis is True:
+
+        variables_names  = data_ttH.variables()
+        variables_values = []
+        for variable_name in variables_names:
+            variables_values.append(data_ttH.values(name = variable_name))
+        datavision.analyze_correlations(
+            variables            = variables_values,
+            variables_names      = variables_names,
+            table_order_variable = "p_value"
+        )
+
+    # Preprocess all data: standardize a dataset by centering it to mean and
+    # scaling it to unit variance.
 
     data_ttbb.preprocess_all()
     data_ttH.preprocess_all()
@@ -151,52 +160,9 @@ def main(options):
 
     # Convert the data sets to a simple list format with the first column
     # containing the class label.
-    _data = []
-    for index in data_ttbb.indices():
-        _data.append([
-            data_ttbb.variable(index = index, name = "el_1_pt"),
-            data_ttbb.variable(index = index, name = "el_1_eta"),
-            data_ttbb.variable(index = index, name = "el_1_phi"),
-            data_ttbb.variable(index = index, name = "jet_1_pt"),
-            data_ttbb.variable(index = index, name = "jet_1_eta"),
-            data_ttbb.variable(index = index, name = "jet_1_phi"),
-            data_ttbb.variable(index = index, name = "jet_1_e"),
-            data_ttbb.variable(index = index, name = "jet_2_pt"),
-            data_ttbb.variable(index = index, name = "jet_2_eta"),
-            data_ttbb.variable(index = index, name = "jet_2_phi"),
-            data_ttbb.variable(index = index, name = "jet_2_e"),
-            data_ttbb.variable(index = index, name = "met"),
-            data_ttbb.variable(index = index, name = "met_phi"),
-            data_ttbb.variable(index = index, name = "nJets"),
-            data_ttbb.variable(index = index, name = "Centrality_all"),
-            #data_ttbb.variable(index = index, name = "Mbb_MindR")
-        ])
-        _data.append([
-            data_ttbb.variable(name = "class")
-        ])
-    for index in data_ttH.indices():
-        _data.append([
-            data_ttH.variable(index = index, name = "el_1_pt"),
-            data_ttH.variable(index = index, name = "el_1_eta"),
-            data_ttH.variable(index = index, name = "el_1_phi"),
-            data_ttH.variable(index = index, name = "jet_1_pt"),
-            data_ttH.variable(index = index, name = "jet_1_eta"),
-            data_ttH.variable(index = index, name = "jet_1_phi"),
-            data_ttH.variable(index = index, name = "jet_1_e"),
-            data_ttH.variable(index = index, name = "jet_2_pt"),
-            data_ttH.variable(index = index, name = "jet_2_eta"),
-            data_ttH.variable(index = index, name = "jet_2_phi"),
-            data_ttH.variable(index = index, name = "jet_2_e"),
-            data_ttH.variable(index = index, name = "met"),
-            data_ttH.variable(index = index, name = "met_phi"),
-            data_ttH.variable(index = index, name = "nJets"),
-            data_ttH.variable(index = index, name = "Centrality_all"),
-            #data_ttH.variable(index = index, name = "Mbb_MindR")
-        ])
-        _data.append([
-            data_ttH.variable(name = "class")
-        ])
-    dataset = abstraction.Dataset(data = _data)
+    dataset = abstraction.convert_HEP_datasets_from_datavision_datasets_to_abstraction_datasets(
+        datasets = [data_ttbb, data_ttH]
+    )
 
     log.info("")
 
@@ -215,8 +181,8 @@ def main(options):
 
     classifier = abstraction.Classification(
         number_of_classes = 2,
-        hidden_nodes      = [200, 300, 300, 300, 200],
-        epochs            = 10000
+        hidden_nodes      = [50, 200, 400, 50, 300], #[200, 300, 300, 300, 200],
+        epochs            = 30000
     )
 
     # train model

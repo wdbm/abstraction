@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-01-20T1359Z"
+version = "2016-02-03T1409Z"
 
 import os
 import sys
@@ -604,6 +604,9 @@ class Classification(object):
         load_from_directory = None
     ):
         """
+        Create a fully-connected neural network classifier with rectified linear
+        unit activators.
+
         batch_size: number of training examples to use per training step
         """
         if load_from_directory is None:
@@ -649,7 +652,72 @@ class Classification(object):
         ))
         self._model = skflow.TensorFlowEstimator.restore(directory)
         # upcoming:
-        # update Classifier instance data attributes from loaded model
+        # update model instance data attributes from loaded model
+
+class Regression(object):
+
+    def __init__(
+        self,
+        number_of_classes   = 0,
+        hidden_nodes        = [10, 20, 10],
+        epochs              = 5000,
+        batch_size          = 32,
+        optimizer           = "SGD",
+        learning_rate       = 0.1,
+        seed                = 42,
+        continue_training   = True,
+        load_from_directory = None
+    ):
+        """
+        Create a fully-connected neural network regressor with rectified linear
+        unit activators.
+
+        batch_size: number of training examples to use per training step
+        """
+        if load_from_directory is None:
+            self._model = skflow.TensorFlowDNNRegressor(
+                n_classes         = number_of_classes,
+                hidden_units      = hidden_nodes,
+                steps             = epochs,
+                batch_size        = batch_size,
+                optimizer         = optimizer,
+                learning_rate     = learning_rate,
+                tf_random_seed    = seed,
+                continue_training = True
+            )
+        else:
+            self.load(
+                directory = load_from_directory
+            )
+
+    def model(self):
+        return self._model
+
+    def save(
+        self,
+        directory = "abstraction_regressor",
+        overwrite = False
+    ):
+        if directory is None:
+            directory = shijian.propose_filename(
+                filename  = "abstraction_model",
+                overwrite = overwrite
+            )
+        log.info("save model to {directory}".format(
+            directory = directory
+        ))
+        self._model.save(directory)
+
+    def load(
+        self,
+        directory = "abstraction_regressor"
+    ):
+        log.info("load model from {directory}".format(
+            directory = directory
+        ))
+        self._model = skflow.TensorFlowEstimator.restore(directory)
+        # upcoming:
+        # update model instance data attributes from loaded model
 
 @shijian.timer
 def access_SUSY_dataset_format_file(filename):
@@ -873,7 +941,6 @@ def load_HEP_data(
                 )
             )
             break
-        number_of_events_loaded += 1
         print progress.add_datum(fraction = (index + 2) / number_of_events),
     
         if select_event(event):
@@ -893,7 +960,81 @@ def load_HEP_data(
             data.variable(index = index, name = "nJets",          value = event.nJets)
             data.variable(index = index, name = "Centrality_all", value = event.Centrality_all)
             #data.variable(index = index, name = "Mbb_MindR",      value = event.Mbb_MindR)
+            number_of_events_loaded += 1
 
     log.info("")
 
     return data
+
+@shijian.timer
+def load_sklearn_dataset_to_datavision_dataset(
+    sklearn_dataset = None
+    ):
+    data = datavision.Dataset()
+
+    # Define variable names.
+    if not hasattr(sklearn_dataset, "feature_names"):
+        feature_names = ["feature_" + str(count) for count in range(0, len(sklearn_dataset.data[0]))]
+    else:
+        feature_names = sklearn_dataset.feature_names
+    if not hasattr(sklearn_dataset, "target_names"):
+        target_names = "target"
+    else:
+        target_names = sklearn_dataset.target_names
+
+    for index_entry, (features_entry, targets_entry) in enumerate(zip(
+        sklearn_dataset.data,
+        sklearn_dataset.target
+    )):
+        for index_variable, variable_name in enumerate(feature_names):
+            data.variable(index = index_entry, name = variable_name, value = sklearn_dataset.data[index_entry][index_variable])
+        data.variable(index = index_entry, name = target_names, value = sklearn_dataset.target[index_entry])
+    return data
+
+@shijian.timer
+def load_sklearn_dataset_to_abstraction_dataset(
+    sklearn_dataset = None
+    ):
+    _data = []
+    for features_entry, targets_entry in zip(
+        sklearn_dataset.data,
+        sklearn_dataset.target
+    ):
+        _data.extend([features_entry])
+        _data.extend([targets_entry])
+    dataset = Dataset(data = _data)
+    return dataset
+
+@shijian.timer
+def convert_HEP_datasets_from_datavision_datasets_to_abstraction_datasets(
+    datasets    = None, # a single dataset or a list of datasets
+    apply_class = True
+    ):
+    # If one dataset is specified, contain it in a list.
+    if not isinstance(datasets, list):
+        datasets = [datasets]
+    _data = []
+    for dataset in datasets:
+        for index in dataset.indices():
+            _data.append([
+                dataset.variable(index = index, name = "el_1_pt"),
+                dataset.variable(index = index, name = "el_1_eta"),
+                dataset.variable(index = index, name = "el_1_phi"),
+                dataset.variable(index = index, name = "jet_1_pt"),
+                dataset.variable(index = index, name = "jet_1_eta"),
+                dataset.variable(index = index, name = "jet_1_phi"),
+                dataset.variable(index = index, name = "jet_1_e"),
+                dataset.variable(index = index, name = "jet_2_pt"),
+                dataset.variable(index = index, name = "jet_2_eta"),
+                dataset.variable(index = index, name = "jet_2_phi"),
+                dataset.variable(index = index, name = "jet_2_e"),
+                dataset.variable(index = index, name = "met"),
+                dataset.variable(index = index, name = "met_phi"),
+                dataset.variable(index = index, name = "nJets"),
+                dataset.variable(index = index, name = "Centrality_all")
+            ])
+            if apply_class is True:
+                _data.append([
+                    dataset.variable(name = "class")
+                ])
+    return Dataset(data = _data)
