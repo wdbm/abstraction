@@ -40,13 +40,15 @@ Options:
     -h, --help                 Show this help message.
     --version                  Show the version and exit.
     -v, --verbose              Show verbose logging.
+    -s, --silent               silent
     -u, --username=USERNAME    username
     -d, --inputdatabase=FILE   database [default: database.db]
     -d, --outputdatabase=FILE  database [default: database_1.db]
 """
 
 name    = "reducodex"
-version = "2016-01-12T2228Z"
+version = "2016-02-03T1445Z"
+logo    = None
 
 import os
 import sys
@@ -57,6 +59,7 @@ import logging
 import technicolor
 import inspect
 import docopt
+import propyte
 import pyprel
 import shijian
 import dataset
@@ -65,12 +68,23 @@ import abstraction
 def main(options):
 
     global program
-    program = Program(options = options)
+    program = propyte.Program(
+        options = options,
+        name    = name,
+        version = version,
+        logo    = logo
+        )
+    global log
+    from propyte import log
+
+    # access options and arguments
+    database     = options["--inputdatabase"]
+    database_out = options["--outputdatabase"]
 
     # Access database.
-    database = abstraction.access_database(filename = program.database)
+    database = abstraction.access_database(filename = database)
     log.info("database metadata:")
-    abstraction.log_database_metadata(filename = program.database)
+    abstraction.log_database_metadata(filename = database)
     # Print the tables in the database.
     log.info("tables in database: {tables}".format(
         tables = database.tables
@@ -124,119 +138,12 @@ def main(options):
     log.info("save exchanges to database (only those not saved previously)")
     abstraction.save_exchanges_to_database(
         exchanges = exchanges,
-        filename  = program.database_out
+        filename  = database_out
     )
     # Save metadata to the new database.
-    abstraction.save_database_metadata(filename = program.database_out)
+    abstraction.save_database_metadata(filename = database_out)
 
     program.terminate()
-
-class Program(object):
-
-    def __init__(
-        self,
-        parent  = None,
-        options = None
-        ):
-
-        # internal options
-        self.display_logo          = True
-
-        # clock
-        global clock
-        clock = shijian.Clock(name = "program run time")
-
-        # name, version, logo
-        if "name" in globals():
-            self.name              = name
-        else:
-            self.name              = None
-        if "version" in globals():
-            self.version           = version
-        else:
-            self.version           = None
-        if "logo" in globals():
-            self.logo              = logo
-        elif "logo" not in globals() and hasattr(self, "name"):
-            self.logo              = pyprel.renderBanner(
-                                         text = self.name.upper()
-                                     )
-        else:
-            self.display_logo      = False
-            self.logo              = None
-
-        # options
-        self.options               = options
-        self.username              = self.options["--username"]
-        self.database              = self.options["--inputdatabase"]
-        self.database_out          = self.options["--outputdatabase"]
-        self.verbose               = self.options["--verbose"]
-
-        # default values
-        if self.username is None:
-            self.username = os.getenv("USER")
-        self.database_out = shijian.propose_filename(
-            filename = self.database_out
-        )
-
-        # logging
-        global log
-        log = logging.getLogger(__name__)
-        logging.root.addHandler(technicolor.ColorisingStreamHandler())
-
-        # logging level
-        if self.verbose:
-            logging.root.setLevel(logging.DEBUG)
-        else:
-            logging.root.setLevel(logging.INFO)
-
-        # logging level
-        if self.verbose:
-            log.setLevel(logging.DEBUG)
-        else:
-            log.setLevel(logging.INFO)
-
-        self.engage()
-
-    def engage(
-        self
-        ):
-        pyprel.print_line()
-        # logo
-        if self.display_logo:
-            log.info(pyprel.center_string(text = self.logo))
-            pyprel.print_line()
-        # engage alert
-        if self.name:
-            log.info("initiate {name}".format(
-                name = self.name
-            ))
-        # version
-        if self.version:
-            log.info("version: {version}".format(
-                version = self.version
-            ))
-        log.info("initiation time: {time}".format(
-            time = clock.start_time()
-        ))
-
-    def terminate(
-        self
-        ):
-        clock.stop()
-        log.info("termination time: {time}".format(
-            time = clock.stop_time()
-        ))
-        log.info("time full report:\n{report}".format(
-            report = shijian.clocks.report(style = "full")
-        ))
-        log.info("time statistics report:\n{report}".format(
-            report = shijian.clocks.report()
-        ))
-        log.info("terminate {name}".format(
-            name = self.name
-        ))
-        pyprel.print_line()
 
 if __name__ == "__main__":
 
