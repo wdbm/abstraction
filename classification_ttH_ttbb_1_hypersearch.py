@@ -3,7 +3,7 @@
 """
 ################################################################################
 #                                                                              #
-# classification_ttH_ttbb_1                                                    #
+# classification_ttH_ttbb_1_hypersearch                                        #
 #                                                                              #
 ################################################################################
 #                                                                              #
@@ -12,7 +12,7 @@
 # This program is for classification training on ttH and ttbb HEP MC           #
 # events.                                                                      #
 #                                                                              #
-# copyright (C) 2015 William Breaden Madden                                    #
+# copyright (C) 2016 William Breaden Madden                                    #
 #                                                                              #
 # This software is released under the terms of the GNU General Public License  #
 # version 3 (GPLv3).                                                           #
@@ -43,26 +43,27 @@ options:
     -u, --username=USERNAME     username
     --datattH=FILENAME          input ROOT data file [default: output_ttH.root]
     --datattbb=FILENAME         input ROOT data file [default: output_ttbb.root]
-    --plot=BOOL                 plot variables       [default: true]
-    --analyzecorrelations=BOOL  analyze correlations [default: true]
+    --plot=BOOL                 plot variables       [default: false]
+    --analyzecorrelations=BOOL  analyze correlations [default: false]
 """
 from __future__ import division
 
-name    = "classification_ttH_ttbb_1"
-version = "2016-02-05T1538Z"
+name    = "classification_ttH_ttbb_1_hypersearch"
+version = "2016-02-05T1531Z"
 logo    = name
 
+import docopt
+import logging
 import os
 import sys
 import time
-import docopt
-import logging
-import propyte
-import shijian
-import datavision
+
 import abstraction
-from sklearn import metrics
-from sklearn import cross_validation
+import datavision
+import matplotlib
+import propyte
+import pyprel
+import shijian
 
 def main(options):
 
@@ -79,9 +80,9 @@ def main(options):
     log.info("")
 
     # access options and arguments
-    ROOT_filename_ttH            = options["--datattH"]
-    ROOT_filename_ttbb           = options["--datattbb"]
-    engage_plotting              = string_to_bool(options["--plot"])
+    ROOT_filename_ttH  = options["--datattH"]
+    ROOT_filename_ttbb = options["--datattbb"]
+    engage_plotting    = string_to_bool(options["--plot"])
     engage_correlations_analysis = string_to_bool(options["--analyzecorrelations"])
 
     log.info("ttH data file: {filename}".format(
@@ -105,13 +106,13 @@ def main(options):
         maximum_number_of_events = None
     )
 
-    log.info("\nnumber of ttbb and ttH events: {number_of_events}\n".format(
+    log.info("\nnumber of ttbb and ttH events: {number_of_events}".format(
         number_of_events = len(data_ttbb.indices()) + len(data_ttH.indices())
     ))
 
-    # Plot comparisons of variables of the two datasets.
-
     if engage_plotting is True:
+
+        # Plot the loaded datasets.
 
         for variable_name in data_ttbb.variables():
             log.info("plot ttbb versus ttH comparison of {variable_name}".format(
@@ -126,8 +127,7 @@ def main(options):
                 label_ratio_x = "frequency",
                 label_y       = "",
                 title         = variable_name + "_ttbb_ttH",
-                filename      = variable_name + "_ttbb_ttH.png",
-                directory     = "variables_comparisons"
+                filename      = variable_name + "_ttbb_ttH.png"
             )
 
     # Analyse variable correlations.
@@ -141,7 +141,7 @@ def main(options):
         datavision.analyze_correlations(
             variables            = variables_values,
             variables_names      = variables_names,
-            table_order_variable = "p_value"
+            table_order_variable = "r"
         )
 
     # Preprocess all data: standardize a dataset by centering it to mean and
@@ -166,55 +166,22 @@ def main(options):
 
     log.info("")
 
-    # define data
-    
-    log.info("split data for cross-validation")
-    features_train, features_test, targets_train, targets_test =\
-        cross_validation.train_test_split(
-            dataset.features(),
-            dataset.targets(),
-            train_size = 0.7
-        )
-    log.info("define classification model")
+    # search
 
-    # define model
-
-    classifier = abstraction.Classification(
-        number_of_classes = 2,
-        hidden_nodes      = [50, 150, 250, 300, 400],
-        epochs            = 300000
+    # Define search parameters: epochs, architectures
+    #elements_specification = [[300000], [50, 100], [100, 150], [200, 250], [300, 350], [400, 450]]
+    elements_specification = [[30000], [50], [150], [250], [300, 325, 350], [400, 425, 450]]
+    hyperpoints = datavision.list_element_combinations_variadic(
+        elements_specification
     )
+    # Remove hyperpoints with undefined architectures.
+    hyperpoints = [hyperpoint for hyperpoint in hyperpoints if len(hyperpoint) > 1]
+    # Remove variadic hyperpoints.
+    hyperpoints = [hyperpoint for hyperpoint in hyperpoints if len(hyperpoint) == len(elements_specification)]
 
-    # train model
-
-    log.info("fit classification model to dataset features and targets")
-    classifier._model.fit(
-        features_train,
-        targets_train,
-        #logdir = "log"
-    )
-
-    # predict and cross-validate training
-
-    log.info("test trained classification model on training dataset")
-    score = metrics.accuracy_score(
-        classifier._model.predict(features_train),
-        targets_train
-    )
-    log.info("prediction accuracy on training dataset: {percentage}".format(
-        percentage = 100 * score
-    ))
-    log.info("accuracy of classifier on test dataset:")
-    score = metrics.accuracy_score(
-        classifier._model.predict(features_test),
-        targets_test
-    )
-    log.info("prediction accuracy on test dataset: {percentage}".format(
-        percentage = 100 * score
-    ))
-
-    classifier.save(
-        directory = "abstraction_classifier_ttH_ttbb_300000_50_150_250_300_400"
+    abstraction.hypersearch(
+        hyperpoints = hyperpoints,
+        dataset     = dataset
     )
 
     log.info("")

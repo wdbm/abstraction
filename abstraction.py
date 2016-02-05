@@ -30,35 +30,36 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-02-03T1409Z"
+version = "2016-02-05T1536Z"
 
+import csv
+import datetime
+import inspect
+import itertools
+import logging
+import math
 import os
+import pickle
+import re
 import sys
 import subprocess
 import time
-import datetime
-import re
-import csv
-import itertools
-import logging
-import inspect
-import pickle
+
+import dataset
+import datavision
+from gensim.models import Word2Vec
+import nltk
+import numpy
+import praw
 import propyte
 import pyprel
-import shijian
-import datavision
-import dataset
-import praw
-import math
-import numpy
 import matplotlib
 import matplotlib.pyplot
-from gensim.models import Word2Vec
-from sklearn import datasets
-from sklearn import metrics
-from sklearn import cross_validation
 import skflow
-import nltk
+import sklearn.cross_validation
+import sklearn.metrics
+import sklearn
+import shijian
 with propyte.import_ganzfeld():
     from ROOT import *
 
@@ -958,6 +959,7 @@ def load_HEP_data(
             data.variable(index = index, name = "met",            value = event.met_met)
             data.variable(index = index, name = "met_phi",        value = event.met_phi)
             data.variable(index = index, name = "nJets",          value = event.nJets)
+            data.variable(index = index, name = "nBTags",         value = event.nBTags)
             data.variable(index = index, name = "Centrality_all", value = event.Centrality_all)
             #data.variable(index = index, name = "Mbb_MindR",      value = event.Mbb_MindR)
             number_of_events_loaded += 1
@@ -1031,6 +1033,7 @@ def convert_HEP_datasets_from_datavision_datasets_to_abstraction_datasets(
                 dataset.variable(index = index, name = "met"),
                 dataset.variable(index = index, name = "met_phi"),
                 dataset.variable(index = index, name = "nJets"),
+                dataset.variable(index = index, name = "nBTags"),
                 dataset.variable(index = index, name = "Centrality_all")
             ])
             if apply_class is True:
@@ -1038,3 +1041,249 @@ def convert_HEP_datasets_from_datavision_datasets_to_abstraction_datasets(
                     dataset.variable(name = "class")
                 ])
     return Dataset(data = _data)
+
+@shijian.timer
+def hypersearch(
+    hyperpoints = None,
+    dataset     = None,
+    train_size  = 0.7,  # fraction of data for training (not testing)
+    ):
+
+    log.info("split data for cross-validation")
+    features_train, features_test, targets_train, targets_test =\
+        sklearn.cross_validation.train_test_split(
+            dataset.features(),
+            dataset.targets(),
+            train_size = 0.7
+        )
+
+    pyprel.print_line()
+    log.info("\nengage hypersearch\n")
+    pyprel.print_line()
+
+    log.info("number of hyperpoints: {number_of_hyperpoints}".format(
+        number_of_hyperpoints = len(hyperpoints)
+    ))
+    log.info("hyperpoints: {hyperpoints}".format(
+        hyperpoints = hyperpoints
+    ))
+    pyprel.print_line()
+
+    # Define hypermap.
+    hypermap = {}
+    hypermap["epoch"]          = []
+    hypermap["hidden_nodes"]   = []
+    hypermap["score_training"] = []
+    hypermap["score_test"]     = []
+
+    progress = shijian.Progress()
+    progress.engage_quick_calculation_mode()
+    for index, hyperpoint in enumerate(hyperpoints):
+        log.info("\nhyperpoint: {hyperpoint}".format(hyperpoint = hyperpoint))
+
+        epoch        = hyperpoint[0]
+        hidden_nodes = hyperpoint[1:]
+
+        # define model
+
+        log.info("define classification model")
+        classifier = Classification(
+            number_of_classes = 2,
+            hidden_nodes      = hidden_nodes,
+            epochs            = epoch
+        )
+
+        # train model
+
+        log.info("fit model to dataset features and targets")
+        classifier._model.fit(features_train, targets_train)
+        #classifier.save()
+
+        # predict and cross-validate training
+
+        log.info("test trained model on training dataset")
+        score_training = sklearn.metrics.accuracy_score(
+            classifier._model.predict(features_train),
+            targets_train
+        )
+        score_test = sklearn.metrics.accuracy_score(
+            classifier._model.predict(features_test),
+            targets_test
+        )
+        log.info("\ntraining-testing instance complete:")
+        log.info("epoch:          {epoch}".format(
+            epoch = epoch
+        ))
+        log.info("architecture:   {architecture}".format(
+            architecture = hidden_nodes
+        ))
+        log.info("score training: {score_training}".format(
+            score_training = 100 * score_training
+        ))
+        log.info("score test:     {score_test}".format(
+            score_test = 100 * score_test
+        ))
+        hypermap["epoch"].append(epoch)
+        hypermap["hidden_nodes"].append(hidden_nodes)
+        hypermap["score_training"].append(score_training)
+        hypermap["score_test"].append(score_test)
+
+        # save current search results
+        shijian.export_object(
+            hypermap,
+            filename  = "hypermap.pkl",
+            overwrite = True
+        )
+
+        print(progress.add_datum(fraction = (index + 1) / len(hyperpoints)))
+        pyprel.print_line()
+
+def analyze_hypermap(
+    hypermap                    = None,
+    number_of_best_score_models = 6
+    ):
+
+    number_of_entries = len(hypermap["epoch"])
+    log.info("number of entries: {number_of_entries}".format(
+        number_of_entries = number_of_entries
+    ))
+
+    # hypermap table
+
+    table_contents = [
+        ["epoch", "architecture", "score training", "score testing"]
+    ]
+    for index in range(0, number_of_entries):
+        table_contents.append(
+            [
+                str(hypermap["epoch"][index]),
+                str(hypermap["hidden_nodes"][index]),
+                str(hypermap["score_training"][index]),
+                str(hypermap["score_test"][index])
+            ]
+        )
+    log.info("\nhypersearch map:\n")
+    log.info(
+        pyprel.Table(
+            contents = table_contents,
+        )
+    )
+
+    # hypermap table of best score models
+
+    best_models = sorted(zip(
+        hypermap["score_test"],
+        hypermap["hidden_nodes"]),
+        reverse = True
+    )[:number_of_best_score_models]
+    table_contents = [["architecture", "score testing"]]
+    for model in best_models:
+        table_contents.append([str(model[1]), str(model[0])])
+    log.info("\nbest-scoring models:\n")
+    log.info(
+        pyprel.Table(
+            contents = table_contents,
+        )
+    )
+
+    # parallel coordinates plot
+
+    number_of_entries = len(hypermap["epoch"])
+    datasets = []
+    for index in range(0, number_of_entries):
+        row = []
+        architecture_padded =\
+            hypermap["hidden_nodes"][index] +\
+            [0] * (5 - len(hypermap["hidden_nodes"][index]))
+        row.append(hypermap["epoch"][index])
+        row.extend(architecture_padded)
+        row.append(hypermap["score_training"][index])
+        row.append(hypermap["score_test"][index])
+        datasets.append(row)
+
+    datavision.save_parallel_coordinates_matplotlib(
+        datasets[::-1],
+        filename  = "parallel_coordinates.png",
+        directory = "hypermap"
+    )
+
+    # parallel coordinates plot of best-scoring models
+
+    best_models = sorted(zip(
+        hypermap["score_test"],
+        hypermap["score_training"],
+        hypermap["hidden_nodes"]),
+        reverse = True
+    )[:number_of_best_score_models]
+    datasets = []
+    for model in best_models:
+        row = []
+        architecture_padded = model[2] + [0] * (5 - len(model[2]))
+        row.extend(architecture_padded)
+        row.append(model[1])
+        row.append(model[0])
+        datasets.append(row)
+
+    datavision.save_parallel_coordinates_matplotlib(
+        datasets,
+        filename  =\
+            "parallel_coordinates_"          +\
+            str(number_of_best_score_models) +\
+            "_best_score_models.png",
+        directory = "hypermap"
+    )
+
+    # progressive parallel coordinates plots of best-scoring models
+
+    for number_of_datasets_plotted in range(1, number_of_best_score_models):
+        datavision.save_parallel_coordinates_matplotlib(
+            datasets[:number_of_datasets_plotted],
+            filename  =\
+                "parallel_coordinates_"           +\
+                str(number_of_best_score_models)  +\
+                "_best_score_models_progressive_" +\
+                str(number_of_datasets_plotted)   +\
+                ".png",
+            directory = "hypermap"
+        )
+
+    ## plot
+    #
+    #architectures = shijian.unique_list_elements(hypermap["hidden_nodes"])
+    #
+    #architecture_epoch_score = {}
+    #for architecture in architectures:
+    #    architecture_epoch_score[str(architecture)] = []
+    #    for index in range(0, number_of_entries):
+    #        if hypermap["hidden_nodes"][index] == architecture:
+    #            architecture_epoch_score[str(architecture)].append(
+    #                [
+    #                    hypermap["epoch"][index],
+    #                    hypermap["score_test"][index]
+    #                ]
+    #            )
+    #
+    #figure = matplotlib.pyplot.figure()
+    #figure.set_size_inches(10, 10)
+    #axes = figure.add_subplot(1, 1, 1)
+    #axes.set_xscale("log")
+    #figure.suptitle("hyperparameter map", fontsize = 20)
+    #matplotlib.pyplot.xlabel("epochs")
+    #matplotlib.pyplot.ylabel("training test score")
+    #
+    #for key, value in architecture_epoch_score.iteritems():
+    #    epochs     = [element[0] for element in value]
+    #    score_test = [element[1] for element in value]
+    #    matplotlib.pyplot.plot(epochs, score_test, label = key)
+    #
+    #matplotlib.pyplot.legend(
+    #    loc            = "center left",
+    #    bbox_to_anchor = (1, 0.5),
+    #    fontsize       = 10
+    #)
+    #
+    #matplotlib.pyplot.savefig(
+    #    "hyperparameter_map.eps",
+    #    bbox_inches = "tight",
+    #    format      = "eps"
+    #)
