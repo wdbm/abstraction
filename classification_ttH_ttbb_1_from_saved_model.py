@@ -41,28 +41,26 @@ options:
     -v, --verbose            verbose logging
     -s, --silent             silent
     -u, --username=USERNAME  username
-    --datattH=FILENAME       input ROOT data file [default: output_ttH.root]
-    --datattbb=FILENAME      input ROOT data file [default: output_ttbb.root]
-    --plot=BOOL              plot variables       [default: true]
+    --data=FILENAME          input ROOT data file [default: output_ttH.root]
 """
 from __future__ import division
 
 name    = "classification_ttH_ttbb_1_from_saved_model"
-version = "2016-01-20T1357Z"
+version = "2016-02-05T1623Z"
 logo    = name
 
+import docopt
+import logging
 import os
 import sys
 import time
-import docopt
-import logging
+
 import propyte
 import pyprel
 import shijian
 import datavision
 import abstraction
-from sklearn import metrics
-from sklearn import cross_validation
+import ROOT
 
 def main(options):
 
@@ -79,135 +77,41 @@ def main(options):
     log.info("")
 
     # access options and arguments
-    ROOT_filename_ttH  = options["--datattH"]
-    ROOT_filename_ttbb = options["--datattbb"]
-    engage_plotting    = string_to_bool(options["--plot"])
-
-    log.info("ttH data file: {filename}".format(
-        filename = ROOT_filename_ttH
-    ))
-    log.info("ttbb data file: {filename}".format(
-        filename = ROOT_filename_ttbb
-    ))
-
-    # Access data for event classes ttbb and ttH.
-
-    data_ttbb = abstraction.load_HEP_data(
-        ROOT_filename            = ROOT_filename_ttbb,
-        tree_name                = "nominal",
-        maximum_number_of_events = None
-    )
-
-    data_ttH = abstraction.load_HEP_data(
-        ROOT_filename            = ROOT_filename_ttH,
-        tree_name                = "nominal",
-        maximum_number_of_events = None
-    )
-
-    # Preprocess all data.
-
-    data_ttbb.preprocess_all()
-    data_ttH.preprocess_all()
-
-    # Add class labels to the data sets, 0 for ttbb and 1 for ttH.
-
-    for index in data_ttbb.indices():
-        data_ttbb.variable(index = index, name = "class", value = 0)
-
-    for index in data_ttH.indices():
-        data_ttH.variable(index = index, name = "class", value = 1)
-
-    # Convert the data sets to a simple list format with the first column
-    # containing the class label.
-    _data = []
-    for index in data_ttbb.indices():
-        _data.append([
-            data_ttbb.variable(index = index, name = "el_1_pt"),
-            data_ttbb.variable(index = index, name = "el_1_eta"),
-            data_ttbb.variable(index = index, name = "el_1_phi"),
-            data_ttbb.variable(index = index, name = "jet_1_pt"),
-            data_ttbb.variable(index = index, name = "jet_1_eta"),
-            data_ttbb.variable(index = index, name = "jet_1_phi"),
-            data_ttbb.variable(index = index, name = "jet_1_e"),
-            data_ttbb.variable(index = index, name = "jet_2_pt"),
-            data_ttbb.variable(index = index, name = "jet_2_eta"),
-            data_ttbb.variable(index = index, name = "jet_2_phi"),
-            data_ttbb.variable(index = index, name = "jet_2_e"),
-            data_ttbb.variable(index = index, name = "met"),
-            data_ttbb.variable(index = index, name = "met_phi"),
-            data_ttbb.variable(index = index, name = "nJets"),
-            data_ttbb.variable(index = index, name = "Centrality_all"),
-            #data_ttbb.variable(index = index, name = "Mbb_MindR")
-        ])
-        _data.append([
-            data_ttbb.variable(name = "class")
-        ])
-    for index in data_ttH.indices():
-        _data.append([
-            data_ttH.variable(index = index, name = "el_1_pt"),
-            data_ttH.variable(index = index, name = "el_1_eta"),
-            data_ttH.variable(index = index, name = "el_1_phi"),
-            data_ttH.variable(index = index, name = "jet_1_pt"),
-            data_ttH.variable(index = index, name = "jet_1_eta"),
-            data_ttH.variable(index = index, name = "jet_1_phi"),
-            data_ttH.variable(index = index, name = "jet_1_e"),
-            data_ttH.variable(index = index, name = "jet_2_pt"),
-            data_ttH.variable(index = index, name = "jet_2_eta"),
-            data_ttH.variable(index = index, name = "jet_2_phi"),
-            data_ttH.variable(index = index, name = "jet_2_e"),
-            data_ttH.variable(index = index, name = "met"),
-            data_ttH.variable(index = index, name = "met_phi"),
-            data_ttH.variable(index = index, name = "nJets"),
-            data_ttH.variable(index = index, name = "Centrality_all"),
-            #data_ttH.variable(index = index, name = "Mbb_MindR")
-        ])
-        _data.append([
-            data_ttH.variable(name = "class")
-        ])
-    dataset = abstraction.Dataset(data = _data)
+    ROOT_filename  = options["--data"]
 
     log.info("load classification model")
 
     classifier = abstraction.Classification(
-        load_from_directory = "abstraction_classifier"
+        load_from_directory = "abstraction_classifier_ttH_ttbb_300000_50_200_400_50_300"
+        #load_from_directory = "abstraction_classifier_ttH_ttbb_300000_50_150_250_300_400"
+        #load_from_directory = "abstraction_classifier"
     )
 
-    log.info("split data for cross-validation")
-    features_train, features_test, targets_train, targets_test =\
-        cross_validation.train_test_split(
-            dataset.features(),
-            dataset.targets(),
-            train_size = 0.7
-        )
-
-    log.info("test trained classification model on training dataset")
-    score = metrics.accuracy_score(
-        classifier._model.predict(features_train),
-        targets_train
+    # Access data.
+    data = abstraction.load_HEP_data(
+        ROOT_filename            = ROOT_filename,
+        tree_name                = "nominal",
+        maximum_number_of_events = 5000
     )
-    log.info("prediction accuracy on training dataset: {percentage}".format(
-        percentage = 100 * score
-    ))
-    log.info("accuracy of classifier on test dataset:")
-    score = metrics.accuracy_score(
-        classifier._model.predict(features_test),
-        targets_test
+    # Add class labels.
+    if "ttH" in ROOT_filename:
+        class_value = 1
+    if "ttbb" in ROOT_filename:
+        class_value = 0
+    for index in data.indices():
+        data.variable(index = index, name = "class", value = class_value)
+    # Preprocess all data.
+    data.preprocess_all()
+    # Convert the datavision dataset to an abstraction dataset.
+    dataset = abstraction.convert_HEP_datasets_from_datavision_datasets_to_abstraction_datasets(
+        datasets = data
     )
-    log.info("prediction accuracy on test dataset: {percentage}".format(
-        percentage = 100 * score
-    ))
+    # Classify data and add the results to the datavision dataset.
+    results = list(classifier._model.predict(dataset.features()))
+    for count, index in enumerate(data.indices()):
+        data.variable(index = index, name = "abstraction1", value = results[count])
 
-    table_contents = [["target", "prediction"]]
-    for value_target, value_prediction in zip(
-        dataset.targets(),
-        list(classifier._model.predict(dataset.features()))
-    ):
-        row = [str(value_target[0]), str(value_prediction)]
-        table_contents.append(row)
-    print(pyprel.Table(
-        contents              = table_contents,
-        table_width_requested = 22
-    ))
+    log.info(data.table())
 
     log.info("")
 

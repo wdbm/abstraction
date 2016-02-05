@@ -428,3 +428,7 @@ reducodex.py --inputdatabase="database.db" --outputdatabase="database_1.db"
 ```Bash
 ./vicodex.py --database=2015-10-12T1612Z.db
 ```
+
+# saving models
+
+Note that the file `checkpoint` in the saved model directory contains full paths.

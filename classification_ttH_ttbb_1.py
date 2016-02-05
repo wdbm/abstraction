@@ -49,18 +49,20 @@ options:
 from __future__ import division
 
 name    = "classification_ttH_ttbb_1"
-version = "2016-02-05T1538Z"
+version = "2016-02-05T1624Z"
 logo    = name
 
+import docopt
 import os
 import sys
 import time
-import docopt
+
+import abstraction
+import datavision
 import logging
 import propyte
 import shijian
-import datavision
-import abstraction
+import sklearn
 from sklearn import metrics
 from sklearn import cross_validation
 
@@ -170,7 +172,7 @@ def main(options):
     
     log.info("split data for cross-validation")
     features_train, features_test, targets_train, targets_test =\
-        cross_validation.train_test_split(
+        sklearn.cross_validation.train_test_split(
             dataset.features(),
             dataset.targets(),
             train_size = 0.7
@@ -197,7 +199,7 @@ def main(options):
     # predict and cross-validate training
 
     log.info("test trained classification model on training dataset")
-    score = metrics.accuracy_score(
+    score = sklearn.metrics.accuracy_score(
         classifier._model.predict(features_train),
         targets_train
     )
@@ -205,7 +207,7 @@ def main(options):
         percentage = 100 * score
     ))
     log.info("accuracy of classifier on test dataset:")
-    score = metrics.accuracy_score(
+    score = sklearn.metrics.accuracy_score(
         classifier._model.predict(features_test),
         targets_test
     )
