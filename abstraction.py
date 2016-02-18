@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-02-05T1536Z"
+version = "2016-02-08T2250Z"
 
 import csv
 import datetime
@@ -931,7 +931,8 @@ def load_HEP_data(
 
     log.info("")
 
-    for index, event in enumerate(tree):
+    index = 0
+    for event in tree:
 
         if maximum_number_of_events is not None and\
             number_of_events_loaded >= int(maximum_number_of_events):
@@ -945,6 +946,9 @@ def load_HEP_data(
         print progress.add_datum(fraction = (index + 2) / number_of_events),
     
         if select_event(event):
+            index += 1
+            #event.GetReadEntry()
+            data.variable(index = index, name = "eventNumber",    value = event.eventNumber)
             data.variable(index = index, name = "el_1_pt",        value = event.el_pt[0])
             data.variable(index = index, name = "el_1_eta",       value = event.el_eta[0])
             data.variable(index = index, name = "el_1_phi",       value = event.el_phi[0])
@@ -1019,6 +1023,7 @@ def convert_HEP_datasets_from_datavision_datasets_to_abstraction_datasets(
     for dataset in datasets:
         for index in dataset.indices():
             _data.append([
+                #dataset.variable(index = index, name = "eventNumber"),
                 dataset.variable(index = index, name = "el_1_pt"),
                 dataset.variable(index = index, name = "el_1_eta"),
                 dataset.variable(index = index, name = "el_1_phi"),
@@ -1054,7 +1059,7 @@ def hypersearch(
         sklearn.cross_validation.train_test_split(
             dataset.features(),
             dataset.targets(),
-            train_size = 0.7
+            train_size = train_size
         )
 
     pyprel.print_line()

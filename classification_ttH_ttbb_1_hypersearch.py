@@ -49,7 +49,7 @@ options:
 from __future__ import division
 
 name    = "classification_ttH_ttbb_1_hypersearch"
-version = "2016-02-05T1531Z"
+version = "2016-02-12T0451Z"
 logo    = name
 
 import docopt
@@ -106,13 +106,13 @@ def main(options):
         maximum_number_of_events = None
     )
 
-    log.info("\nnumber of ttbb and ttH events: {number_of_events}".format(
+    log.info("\nnumber of ttbb and ttH events: {number_of_events}\n".format(
         number_of_events = len(data_ttbb.indices()) + len(data_ttH.indices())
     ))
 
-    if engage_plotting is True:
+    # Plot comparisons of variables of the two datasets.
 
-        # Plot the loaded datasets.
+    if engage_plotting is True:
 
         for variable_name in data_ttbb.variables():
             log.info("plot ttbb versus ttH comparison of {variable_name}".format(
@@ -127,7 +127,8 @@ def main(options):
                 label_ratio_x = "frequency",
                 label_y       = "",
                 title         = variable_name + "_ttbb_ttH",
-                filename      = variable_name + "_ttbb_ttH.png"
+                filename      = variable_name + "_ttbb_ttH.png",
+                directory     = "variables_comparisons"
             )
 
     # Analyse variable correlations.
@@ -141,14 +142,8 @@ def main(options):
         datavision.analyze_correlations(
             variables            = variables_values,
             variables_names      = variables_names,
-            table_order_variable = "r"
+            table_order_variable = "p_value"
         )
-
-    # Preprocess all data: standardize a dataset by centering it to mean and
-    # scaling it to unit variance.
-
-    data_ttbb.preprocess_all()
-    data_ttH.preprocess_all()
 
     # Add class labels to the data sets, 0 for ttbb and 1 for ttH.
 
@@ -158,10 +153,19 @@ def main(options):
     for index in data_ttH.indices():
         data_ttH.variable(index = index, name = "class", value = 1)
 
+    # With classes now defined, combine the datasets before preprocessing them.
+
+    data_ttbb.add(dataset = data_ttH)
+
+    # Preprocess all data: standardize the dataset by centering its variables to
+    # mean and scaling its variables to unit variance.
+
+    data_ttbb.preprocess_all()
+
     # Convert the data sets to a simple list format with the first column
     # containing the class label.
     dataset = abstraction.convert_HEP_datasets_from_datavision_datasets_to_abstraction_datasets(
-        datasets = [data_ttbb, data_ttH]
+        datasets = [data_ttbb]
     )
 
     log.info("")
@@ -170,7 +174,17 @@ def main(options):
 
     # Define search parameters: epochs, architectures
     #elements_specification = [[300000], [50, 100], [100, 150], [200, 250], [300, 350], [400, 450]]
-    elements_specification = [[30000], [50], [150], [250], [300, 325, 350], [400, 425, 450]]
+    elements_specification = [
+        [300],
+        [1000, 10000],
+        [1000, 10000],
+        [1000, 10000],
+        [1000, 10000],
+        [1000, 10000]
+    ]
+    log.info("hyperpoints specification: {elements_secification}".format(
+        elements_specification = elements_specification
+    ))
     hyperpoints = datavision.list_element_combinations_variadic(
         elements_specification
     )

@@ -49,7 +49,7 @@ options:
 from __future__ import division
 
 name    = "classification_ttH_ttbb_1"
-version = "2016-02-05T1624Z"
+version = "2016-02-12T1450Z"
 logo    = name
 
 import docopt
@@ -146,12 +146,6 @@ def main(options):
             table_order_variable = "p_value"
         )
 
-    # Preprocess all data: standardize a dataset by centering it to mean and
-    # scaling it to unit variance.
-
-    data_ttbb.preprocess_all()
-    data_ttH.preprocess_all()
-
     # Add class labels to the data sets, 0 for ttbb and 1 for ttH.
 
     for index in data_ttbb.indices():
@@ -160,10 +154,19 @@ def main(options):
     for index in data_ttH.indices():
         data_ttH.variable(index = index, name = "class", value = 1)
 
+    # With classes now defined, combine the datasets before preprocessing them.
+
+    data_ttbb.add(dataset = data_ttH)
+
+    # Preprocess all data: standardize the dataset by centering its variables to
+    # mean and scaling its variables to unit variance.
+
+    data_ttbb.preprocess_all()
+
     # Convert the data sets to a simple list format with the first column
     # containing the class label.
     dataset = abstraction.convert_HEP_datasets_from_datavision_datasets_to_abstraction_datasets(
-        datasets = [data_ttbb, data_ttH]
+        datasets = [data_ttbb]
     )
 
     log.info("")
@@ -181,10 +184,12 @@ def main(options):
 
     # define model
 
+    architecture = [10000, 10000, 1000, 10000, 1000]
+    # [50, 150, 250, 300, 400]
     classifier = abstraction.Classification(
         number_of_classes = 2,
-        hidden_nodes      = [50, 150, 250, 300, 400],
-        epochs            = 300000
+        hidden_nodes      = architecture,
+        epochs            = 60
     )
 
     # train model
@@ -216,7 +221,9 @@ def main(options):
     ))
 
     classifier.save(
-        directory = "abstraction_classifier_ttH_ttbb_300000_50_150_250_300_400"
+        directory = "abstraction_classifier_ttH_ttbb_{architecture}".format(
+            architecture = str(architecture).replace(" ", "_")
+        )
     )
 
     log.info("")

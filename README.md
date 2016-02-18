@@ -7,6 +7,7 @@
 The following Bash commands, that have been tested on Ubuntu 15.10, should install prerequisites and check out abstraction.
 
 ```Bash
+# Install ROOT.
 sudo pip install datavision
 sudo pip install propyte
 sudo pip install pyprel
