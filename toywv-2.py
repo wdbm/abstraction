@@ -50,7 +50,7 @@ Options:
 """
 
 name    = "toywv-2"
-version = "2016-02-03T1437Z"
+version = "2016-03-02T1105Z"
 logo    = None
 
 import os
@@ -66,6 +66,7 @@ import propyte
 import shijian
 import dataset
 import abstraction
+import datavision
 from gensim.models import Word2Vec
 import math
 import numpy
@@ -280,14 +281,14 @@ def main(options):
     magnitude_differences      = []
     angles                     = []
     stored_expressions_NL_list = []
-    magnitude_working_expression_WV = abstraction.magnitude(working_expression_WV)
+    magnitude_working_expression_WV = datavision.magnitude(working_expression_WV)
     for stored_expression_NL in stored_expressions:
         stored_expression_WV = stored_expressions[stored_expression_NL]
-        magnitude_stored_expression_WV = abstraction.magnitude(stored_expression_WV)
+        magnitude_stored_expression_WV = datavision.magnitude(stored_expression_WV)
         magnitude_difference_working_expression_WV_stored_expression_WV = abs(
             magnitude_working_expression_WV - magnitude_stored_expression_WV
         )
-        angle_working_expression_WV_stored_expression_WV = abstraction.angle(
+        angle_working_expression_WV_stored_expression_WV = datavision.angle(
             working_expression_WV,
             stored_expression_WV
         )

@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-02-08T2250Z"
+version = "2016-03-02T1123Z"
 
 import csv
 import datetime
@@ -65,51 +65,23 @@ with propyte.import_ganzfeld():
 
 log = logging.getLogger(__name__)
 
+################################################################################
+#                                                                              #
+# setup                                                                        #
+#                                                                              #
+################################################################################
+
 @shijian.timer
 def setup():
     # Download NLTK data.
     downloader = nltk.downloader.Downloader("http://nltk.github.com/nltk_data/")
     downloader.download("all")
 
-@shijian.timer
-def model_word2vec_Brown_Corpus():
-    model_word2vec = Word2Vec(nltk.corpus.brown.sents())
-    return model_word2vec
-
-@shijian.timer
-def convert_word_string_to_word_vector(
-    word_string    = None,
-    model_word2vec = None
-    ):
-    if word_string in model_word2vec:
-        return model_word2vec[word_string]
-    else:
-        log.debug("word string \"{word_string}\" not in word2vec model".format(
-            word_string = word_string
-        ))
-        return None
-
-@shijian.timer
-def convert_sentence_string_to_word_vector(
-    sentence_string = None,
-    model_word2vec  = None
-    ):
-    # Convert the sentence string to a list of word strings.
-    word_strings = word_list = re.sub("[^\w]", " ",  sentence_string).split()
-    # Build a list of word vectors.
-    word_vectors = []
-    for word_string in word_strings:
-        word_vector = convert_word_string_to_word_vector(
-            word_string    = word_string,
-            model_word2vec = model_word2vec
-        )
-        if word_vector is not None:
-            word_vectors.append(word_vector)
-        else:
-            log.debug("skip undefined word vector")
-    # Combine all of the word vectors into one word vector by summation.
-    sentence_word_vector = sum(word_vectors)
-    return sentence_word_vector
+################################################################################
+#                                                                              #
+# databases                                                                    #
+#                                                                              #
+################################################################################
 
 @shijian.timer
 def create_database(
@@ -185,6 +157,261 @@ def log_database_metadata(
     ):
     metadata = database_metadata(filename = filename)
     log.info(pyprel.dictionary_string(dictionary = metadata))
+
+@shijian.timer
+def add_exchange_word_vectors_to_database(
+    filename       = "database.db",
+    model_word2vec = None
+    ):
+    # Ensure that the database exists.
+    if not os.path.isfile(filename):
+        log.info("database {filename} nonexistent".format(
+            filename = filename
+        ))
+        program.terminate()
+        raise Exception
+    # Access the database.
+    database = access_database(filename = filename)
+    # Access or create the exchanges table.
+    table_exchanges = database["exchanges"]
+    # Access exchanges.
+    table_name = "exchanges"
+    # progress
+    progress = shijian.Progress()
+    progress.engage_quick_calculation_mode()
+    number_of_entries = len(database[table_name])
+    for entry_index, entry in enumerate(database[table_name].all()):
+        unique_identifier = str(entry["id"])
+        # Create word vector representations of utterances and responses and
+        # add them or update them in the database.
+        try:
+            utterance_word_vector_NumPy_array = numpy.array_repr(
+                convert_sentence_string_to_word_vector(
+                    sentence_string = str(entry["utterance"]),
+                    model_word2vec  = model_word2vec
+                )
+            )
+            response_word_vector_NumPy_array = numpy.array_repr(
+                convert_sentence_string_to_word_vector(
+                    sentence_string = str(entry["response"]),
+                    model_word2vec  = model_word2vec
+                )
+            )
+            data = dict(
+                id                  = unique_identifier,
+                utteranceWordVector = utterance_word_vector_NumPy_array,
+                responseWordVector  = response_word_vector_NumPy_array
+            )
+        except:
+            data = dict(
+                id                  = unique_identifier,
+                utteranceWordVector = None,
+                responseWordVector  = None
+            )
+        database[table_name].update(data, ["id"])
+        print progress.add_datum(fraction = entry_index / number_of_entries),
+
+################################################################################
+#                                                                              #
+# physics data                                                                 #
+#                                                                              #
+################################################################################
+
+@shijian.timer
+def open_ROOT_file(
+    filename,
+    ):
+    ensure_file_existence(filename)
+    log.info("access file {filename}".format(
+        filename = filename
+    ))
+    return TFile.Open(filename)
+
+@shijian.timer
+def access_SUSY_dataset_format_file(filename):
+    """
+    This function accesses a CSV file containing data of the form of the [SUSY
+    dataset](https://archive.ics.uci.edu/ml/datasets/SUSY), i.e. with the first
+    column being class labels and other columns being features.
+    """
+    # Load the CSV file to a list.
+    with open(filename, "rb") as dataset_file:
+        dataset_CSV = [row for row in csv.reader(dataset_file, delimiter = ",")]
+        # Reorganise the data.
+        return [
+            i for i in itertools.chain(*[list((element[1:],
+            [int(float(element[0]))])) for element in dataset_CSV])
+        ]
+
+@shijian.timer
+def load_HEP_data(
+    ROOT_filename            = "output.root",
+    tree_name                = "nominal",
+    maximum_number_of_events = None
+    ):
+    """
+    Load HEP data and return dataset.
+    """
+    ROOT_file        = open_ROOT_file(ROOT_filename)
+    tree             = ROOT_file.Get(tree_name)
+    number_of_events = tree.GetEntries()
+    data             = datavision.Dataset()
+
+    progress = shijian.Progress()
+    progress.engage_quick_calculation_mode()
+    # counters
+    number_of_events_loaded = 0
+
+    log.info("")
+
+    index = 0
+    for event in tree:
+
+        if maximum_number_of_events is not None and\
+            number_of_events_loaded >= int(maximum_number_of_events):
+            log.info(
+                "loaded maximum requested number of events " +
+                "({maximum_number_of_events})\r".format(
+                    maximum_number_of_events = maximum_number_of_events
+                )
+            )
+            break
+        print progress.add_datum(fraction = (index + 2) / number_of_events),
+    
+        if select_event(event):
+            index += 1
+            #event.GetReadEntry()
+            #data.variable(index = index, name = "eventNumber",        value = event.eventNumber)
+            data.variable(index = index, name = "el_1_pt",            value = event.el_pt[0])
+            #data.variable(index = index, name = "el_1_eta",           value = event.el_eta[0])
+            #data.variable(index = index, name = "el_1_phi",           value = event.el_phi[0])
+            ##data.variable(index = index, name = "jet_1_pt",           value = event.jet_pt[0])
+            #data.variable(index = index, name = "jet_1_eta",          value = event.jet_eta[0])
+            #data.variable(index = index, name = "jet_1_phi",          value = event.jet_phi[0])
+            ##data.variable(index = index, name = "jet_1_e",            value = event.jet_e[0])
+            ##data.variable(index = index, name = "jet_2_pt",           value = event.jet_pt[1])
+            #data.variable(index = index, name = "jet_2_eta",          value = event.jet_eta[1])
+            #data.variable(index = index, name = "jet_2_phi",          value = event.jet_phi[1])
+            ##data.variable(index = index, name = "jet_2_e",            value = event.jet_e[1])
+            #data.variable(index = index, name = "nJets",              value = event.nJets)
+            ##data.variable(index = index, name = "nBTags",             value = event.nBTags)
+            ##data.variable(index = index, name = "nLjets",             value = event.nLjets)
+            ##data.variable(index = index, name = "ljet_1_m",           value = event.ljet_m[0])
+            #data.variable(index = index, name = "met",                value = event.met_met)
+            #data.variable(index = index, name = "met_phi",            value = event.met_phi)
+            #data.variable(index = index, name = "Centrality_all",     value = event.Centrality_all)
+            #data.variable(index = index, name = "Mbb_MindR",          value = event.Mbb_MindR)
+            #data.variable(index = index, name = "ljet_tau21",         value = event.ljet_tau21),
+            #data.variable(index = index, name = "ljet_tau32",         value = event.ljet_tau32),
+            #data.variable(index = index, name = "Aplan_bjets",        value = event.Aplan_bjets),
+            #data.variable(index = index, name = "H4_all",             value = event.H4_all),
+            #data.variable(index = index, name = "NBFricoNN_6jin4bin", value = event.NBFricoNN_6jin4bin),
+            #data.variable(index = index, name = "NBFricoNN_6jin3bex", value = event.NBFricoNN_6jin3bex),
+            #data.variable(index = index, name = "NBFricoNN_5jex4bin", value = event.NBFricoNN_5jex4bin),
+            #data.variable(index = index, name = "NBFricoNN_3jex3bex", value = event.NBFricoNN_3jex3bex),
+            #data.variable(index = index, name = "NBFricoNN_4jin3bex", value = event.NBFricoNN_4jin3bex),
+            #data.variable(index = index, name = "NBFricoNN_4jin4bin", value = event.NBFricoNN_4jin4bin)
+
+            number_of_events_loaded += 1
+
+    log.info("")
+
+    return data
+
+@shijian.timer
+def load_sklearn_dataset_to_datavision_dataset(
+    sklearn_dataset = None
+    ):
+    data = datavision.Dataset()
+
+    # Define variable names.
+    if not hasattr(sklearn_dataset, "feature_names"):
+        feature_names = ["feature_" + str(count) for count in range(0, len(sklearn_dataset.data[0]))]
+    else:
+        feature_names = sklearn_dataset.feature_names
+    if not hasattr(sklearn_dataset, "target_names"):
+        target_names = "target"
+    else:
+        target_names = sklearn_dataset.target_names
+
+    for index_entry, (features_entry, targets_entry) in enumerate(zip(
+        sklearn_dataset.data,
+        sklearn_dataset.target
+    )):
+        for index_variable, variable_name in enumerate(feature_names):
+            data.variable(index = index_entry, name = variable_name, value = sklearn_dataset.data[index_entry][index_variable])
+        data.variable(index = index_entry, name = target_names, value = sklearn_dataset.target[index_entry])
+    return data
+
+@shijian.timer
+def load_sklearn_dataset_to_abstraction_dataset(
+    sklearn_dataset = None
+    ):
+    _data = []
+    for features_entry, targets_entry in zip(
+        sklearn_dataset.data,
+        sklearn_dataset.target
+    ):
+        _data.extend([features_entry])
+        _data.extend([targets_entry])
+    dataset = Dataset(data = _data)
+    return dataset
+
+@shijian.timer
+def convert_HEP_datasets_from_datavision_datasets_to_abstraction_datasets(
+    datasets    = None, # a single dataset or a list of datasets
+    apply_class = True
+    ):
+    # If one dataset is specified, contain it in a list.
+    if not isinstance(datasets, list):
+        datasets = [datasets]
+    _data = []
+    for dataset in datasets:
+        for index in dataset.indices():
+            _data.append([
+                #dataset.variable(index = index, name = "eventNumber"),
+                dataset.variable(index = index, name = "el_1_pt"),
+                #dataset.variable(index = index, name = "el_1_eta"),
+                #dataset.variable(index = index, name = "el_1_phi"),
+                ##dataset.variable(index = index, name = "jet_1_pt"),
+                #dataset.variable(index = index, name = "jet_1_eta"),
+                #dataset.variable(index = index, name = "jet_1_phi"),
+                ##dataset.variable(index = index, name = "jet_1_e"),
+                ##dataset.variable(index = index, name = "jet_2_pt"),
+                #dataset.variable(index = index, name = "jet_2_eta"),
+                #dataset.variable(index = index, name = "jet_2_phi"),
+                ##dataset.variable(index = index, name = "jet_2_e"),
+                #dataset.variable(index = index, name = "nJets"),
+                ##dataset.variable(index = index, name = "nBTags"),
+                ##dataset.variable(index = index, name = "nLjets"),
+                ##dataset.variable(index = index, name = "ljet_1_m"),
+                #dataset.variable(index = index, name = "met"),
+                #dataset.variable(index = index, name = "met_phi"),
+                #dataset.variable(index = index, name = "Centrality_all"),
+                #dataset.variable(index = index, name = "Mbb_MindR"),            
+                #dataset.variable(index = index, name = "ljet_sd23"),
+                #dataset.variable(index = index, name = "ljet_tau21"),
+                #dataset.variable(index = index, name = "ljet_tau32"),
+                #dataset.variable(index = index, name = "Aplan_bjets"),
+                #dataset.variable(index = index, name = "H4_all"),
+                #dataset.variable(index = index, name = "NBFricoNN_6jin4bin"),
+                #dataset.variable(index = index, name = "NBFricoNN_6jin3bex"),
+                #dataset.variable(index = index, name = "NBFricoNN_5jex4bin"),
+                #dataset.variable(index = index, name = "NBFricoNN_3jex3bex"),
+                #dataset.variable(index = index, name = "NBFricoNN_4jin3bex"),
+                #dataset.variable(index = index, name = "NBFricoNN_4jin4bin")
+            ])
+            if apply_class is True:
+                _data.append([
+                    dataset.variable(name = "class")
+                ])
+    return Dataset(data = _data)
+
+################################################################################
+#                                                                              #
+# exchanges data                                                               #
+#                                                                              #
+################################################################################
 
 class Exchange(object):
 
@@ -363,202 +590,11 @@ def save_exchanges_to_database(
                 utterance = exchange.utterance
             ))
 
-@shijian.timer
-def load_word_vector_model(
-    filename = None
-    ):
-    # If an existing word vector model file does not exist, create it.
-    if not os.path.isfile(os.path.expandvars(filename)):
-        log.error("file {filename} does not exist".format(
-            filename = filename
-        ))
-        log.info("create word vector model and save to file {filename}".format(
-            filename = filename
-        ))
-        model_word2vec = model_word2vec_Brown_Corpus()
-        model_word2vec.save(filename)
-    else:
-        log.info("access file {filename}".format(
-            filename = filename
-        ))
-        model_word2vec = Word2Vec.load(filename)
-    return model_word2vec
-
-@shijian.timer
-def ensure_file_existence(filename):
-    log.debug("ensure existence of file {filename}".format(
-        filename = filename
-    ))
-    if not os.path.isfile(os.path.expandvars(filename)):
-        log.error("file {filename} does not exist".format(
-            filename = filename
-        ))
-        program.terminate()
-        raise Exception
-    else:
-        log.debug("file {filename} found".format(
-            filename = filename
-        ))
-
-@shijian.timer
-def dot_product(v1, v2):
-    return(sum((a*b) for a, b in zip(v1, v2)))
-
-@shijian.timer
-def magnitude(v):
-    return(numpy.linalg.norm(v))
-    #return(math.sqrt(dot_product(v, v)))
-
-@shijian.timer
-def angle(v1, v2):
-    cosine = dot_product(v1, v2) / (magnitude(v1) * magnitude(v2))
-    cosine = 1 if cosine > 1 else cosine
-    return(math.acos(cosine))
-
-@shijian.timer
-def composite_variable(x):
-    k = len(x) + 1
-    variable = 0
-    for index, element in enumerate(x):
-        variable += k**(index - 1) * element
-    return variable
-
-@shijian.timer
-def add_exchange_word_vectors_to_database(
-    filename       = "database.db",
-    model_word2vec = None
-    ):
-    # Ensure that the database exists.
-    if not os.path.isfile(filename):
-        log.info("database {filename} nonexistent".format(
-            filename = filename
-        ))
-        program.terminate()
-        raise Exception
-    # Access the database.
-    database = access_database(filename = filename)
-    # Access or create the exchanges table.
-    table_exchanges = database["exchanges"]
-    # Access exchanges.
-    table_name = "exchanges"
-    # progress
-    progress = shijian.Progress()
-    progress.engage_quick_calculation_mode()
-    number_of_entries = len(database[table_name])
-    for entry_index, entry in enumerate(database[table_name].all()):
-        unique_identifier = str(entry["id"])
-        # Create word vector representations of utterances and responses and
-        # add them or update them in the database.
-        try:
-            utterance_word_vector_NumPy_array = numpy.array_repr(
-                convert_sentence_string_to_word_vector(
-                    sentence_string = str(entry["utterance"]),
-                    model_word2vec  = model_word2vec
-                )
-            )
-            response_word_vector_NumPy_array = numpy.array_repr(
-                convert_sentence_string_to_word_vector(
-                    sentence_string = str(entry["response"]),
-                    model_word2vec  = model_word2vec
-                )
-            )
-            data = dict(
-                id                  = unique_identifier,
-                utteranceWordVector = utterance_word_vector_NumPy_array,
-                responseWordVector  = response_word_vector_NumPy_array
-            )
-        except:
-            data = dict(
-                id                  = unique_identifier,
-                utteranceWordVector = None,
-                responseWordVector  = None
-            )
-        database[table_name].update(data, ["id"])
-        print progress.add_datum(fraction = entry_index / number_of_entries),
-
-@shijian.timer
-def draw_neural_network(
-    axes        = None,
-    left        = None,
-    right       = None,
-    bottom      = None,
-    top         = None,
-    layer_sizes = None
-    ):
-    """
-    # abstract
-
-    This function draws a neural network representation diagram using
-    matplotilb.
-
-    # arguments
-
-    |*argument* |*description*                                                 |
-    |-----------|--------------------------------------------------------------|
-    |axes       |matplotlib.axes.AxesSubplot: the axes on which to plot the    |
-    |           |diagram (returned by matplotlib.pyplot.gca())                 |
-    |left       |float: the position of the centers of the left nodes          |
-    |right      |float: the position of the centers of the right nodes         |
-    |bottom     |float: the position of the centers of the bottom nodes        |
-    |top        |float: the position of the centers of the top nodes           |
-    |layer_sizes|list of integers: list of layer sizes, including input and    |
-    |           |output dimensionality                                         |
-
-    # example
-
-    ```Python
-    figure = matplotlib.pyplot.figure(figsize = (12, 12))
-    abstraction.draw_neural_network(
-        axes        = figure.gca(),
-        left        = .1,
-        right       = .9,
-        bottom      = .1,
-        top         = .9,
-        layer_sizes = [4, 7, 2]
-    )
-    figure.savefig("neural_network_diagram.png")
-    ```
-    """
-    spacing_vertical   = (top - bottom) / float(max(layer_sizes))
-    spacing_horizontal = (right - left) / float(len(layer_sizes) - 1)
-    # nodes
-    for n, layer_size in enumerate(layer_sizes):
-        layer_top = spacing_vertical * (layer_size - 1)/2 + (top + bottom) / 2
-        for m in xrange(layer_size):
-            circle = matplotlib.pyplot.Circle(
-                (
-                    n * spacing_horizontal + left,
-                    layer_top - m * spacing_vertical
-                ),
-                spacing_vertical / 4,
-                color  = "w",
-                ec     = "k",
-                zorder = 4
-            )
-            axes.add_artist(circle)
-    # edges
-    for n, (layer_size_a, layer_size_b) in enumerate(zip(
-        layer_sizes[:-1],
-        layer_sizes[1:]
-        )):
-        layer_top_a =\
-            spacing_vertical * (layer_size_a - 1) / 2 + (top + bottom) / 2
-        layer_top_b =\
-            spacing_vertical * (layer_size_b - 1) / 2 + (top + bottom) / 2
-        for m in xrange(layer_size_a):
-            for o in xrange(layer_size_b):
-                line = matplotlib.pyplot.Line2D(
-                    [
-                        n * spacing_horizontal + left,
-                        (n + 1) * spacing_horizontal + left
-                    ],
-                    [
-                        layer_top_a - m * spacing_vertical,
-                        layer_top_b - o * spacing_vertical
-                    ],
-                    c = "k"
-                )
-                axes.add_artist(line)
+################################################################################
+#                                                                              #
+# neural networks data                                                         #
+#                                                                              #
+################################################################################
 
 class Dataset(object):
 
@@ -590,176 +626,11 @@ class Dataset(object):
             else:
                 raise Exception("unknown format requested")
 
-class Classification(object):
-
-    def __init__(
-        self,
-        number_of_classes   = None,
-        hidden_nodes        = [10, 20, 10],
-        epochs              = 5000,
-        batch_size          = 32,
-        optimizer           = "SGD",
-        learning_rate       = 0.1,
-        seed                = 42,
-        continue_training   = True,
-        load_from_directory = None
-    ):
-        """
-        Create a fully-connected neural network classifier with rectified linear
-        unit activators.
-
-        batch_size: number of training examples to use per training step
-        """
-        if load_from_directory is None:
-            self._model = skflow.TensorFlowDNNClassifier(
-                n_classes         = number_of_classes,
-                hidden_units      = hidden_nodes,
-                steps             = epochs,
-                batch_size        = batch_size,
-                optimizer         = optimizer,
-                learning_rate     = learning_rate,
-                tf_random_seed    = seed,
-                continue_training = True
-            )
-        else:
-            self.load(
-                directory = load_from_directory
-            )
-
-    def model(self):
-        return self._model
-
-    def save(
-        self,
-        directory = "abstraction_classifier",
-        overwrite = False
-    ):
-        if directory is None:
-            directory = shijian.propose_filename(
-                filename  = "abstraction_model",
-                overwrite = overwrite
-            )
-        log.info("save model to {directory}".format(
-            directory = directory
-        ))
-        self._model.save(directory)
-
-    def load(
-        self,
-        directory = "abstraction_classifier"
-    ):
-        log.info("load model from {directory}".format(
-            directory = directory
-        ))
-        self._model = skflow.TensorFlowEstimator.restore(directory)
-        # upcoming:
-        # update model instance data attributes from loaded model
-
-class Regression(object):
-
-    def __init__(
-        self,
-        number_of_classes   = 0,
-        hidden_nodes        = [10, 20, 10],
-        epochs              = 5000,
-        batch_size          = 32,
-        optimizer           = "SGD",
-        learning_rate       = 0.1,
-        seed                = 42,
-        continue_training   = True,
-        load_from_directory = None
-    ):
-        """
-        Create a fully-connected neural network regressor with rectified linear
-        unit activators.
-
-        batch_size: number of training examples to use per training step
-        """
-        if load_from_directory is None:
-            self._model = skflow.TensorFlowDNNRegressor(
-                n_classes         = number_of_classes,
-                hidden_units      = hidden_nodes,
-                steps             = epochs,
-                batch_size        = batch_size,
-                optimizer         = optimizer,
-                learning_rate     = learning_rate,
-                tf_random_seed    = seed,
-                continue_training = True
-            )
-        else:
-            self.load(
-                directory = load_from_directory
-            )
-
-    def model(self):
-        return self._model
-
-    def save(
-        self,
-        directory = "abstraction_regressor",
-        overwrite = False
-    ):
-        if directory is None:
-            directory = shijian.propose_filename(
-                filename  = "abstraction_model",
-                overwrite = overwrite
-            )
-        log.info("save model to {directory}".format(
-            directory = directory
-        ))
-        self._model.save(directory)
-
-    def load(
-        self,
-        directory = "abstraction_regressor"
-    ):
-        log.info("load model from {directory}".format(
-            directory = directory
-        ))
-        self._model = skflow.TensorFlowEstimator.restore(directory)
-        # upcoming:
-        # update model instance data attributes from loaded model
-
-@shijian.timer
-def access_SUSY_dataset_format_file(filename):
-    """
-    This function accesses a CSV file containing data of the form of the [SUSY
-    dataset](https://archive.ics.uci.edu/ml/datasets/SUSY), i.e. with the first
-    column being class labels and other columns being features.
-    """
-    # Load the CSV file to a list.
-    with open(filename, "rb") as dataset_file:
-        dataset_CSV = [row for row in csv.reader(dataset_file, delimiter = ",")]
-        # Reorganise the data.
-        return [
-            i for i in itertools.chain(*[list((element[1:],
-            [int(float(element[0]))])) for element in dataset_CSV])
-        ]
-
-@shijian.timer
-def ensure_file_existence(filename):
-    log.debug("ensure existence of file {filename}".format(
-        filename = filename
-    ))
-    if not os.path.isfile(os.path.expandvars(filename)):
-        log.fatal("file {filename} does not exist".format(
-            filename = filename
-        ))
-        raise(IOError)
-    else:
-        log.debug("file {filename} found".format(
-            filename = filename
-        ))
-
-@shijian.timer
-def open_ROOT_file(
-    filename,
-    ):
-    ensure_file_existence(filename)
-    log.info("access file {filename}".format(
-        filename = filename
-    ))
-    return TFile.Open(filename)
+################################################################################
+#                                                                              #
+# physics objects                                                              #
+#                                                                              #
+################################################################################
 
 class ROOT_Variable(numpy.ndarray):
  
@@ -905,147 +776,304 @@ def select_event(
         # Require >= 4 jets.
         if \
             0 < len(event.el_pt) < 2 and \
-            len(event.jet_pt) >= 4:
+            len(event.jet_pt) >= 4 and \
+            len(event.ljet_m) >= 1:
             return True
         else:
             return False
 
+################################################################################
+#                                                                              #
+# word vectors                                                                 #
+#                                                                              #
+################################################################################
+
 @shijian.timer
-def load_HEP_data(
-    ROOT_filename            = "output.root",
-    tree_name                = "nominal",
-    maximum_number_of_events = None
+def model_word2vec_Brown_Corpus():
+    model_word2vec = Word2Vec(nltk.corpus.brown.sents())
+    return model_word2vec
+
+@shijian.timer
+def load_word_vector_model(
+    filename = None
+    ):
+    # If an existing word vector model file does not exist, create it.
+    if not os.path.isfile(os.path.expandvars(filename)):
+        log.error("file {filename} does not exist".format(
+            filename = filename
+        ))
+        log.info("create word vector model and save to file {filename}".format(
+            filename = filename
+        ))
+        model_word2vec = model_word2vec_Brown_Corpus()
+        model_word2vec.save(filename)
+    else:
+        log.info("access file {filename}".format(
+            filename = filename
+        ))
+        model_word2vec = Word2Vec.load(filename)
+    return model_word2vec
+
+@shijian.timer
+def convert_word_string_to_word_vector(
+    word_string    = None,
+    model_word2vec = None
+    ):
+    if word_string in model_word2vec:
+        return model_word2vec[word_string]
+    else:
+        log.debug("word string \"{word_string}\" not in word2vec model".format(
+            word_string = word_string
+        ))
+        return None
+
+@shijian.timer
+def convert_sentence_string_to_word_vector(
+    sentence_string = None,
+    model_word2vec  = None
+    ):
+    # Convert the sentence string to a list of word strings.
+    word_strings = word_list = re.sub("[^\w]", " ",  sentence_string).split()
+    # Build a list of word vectors.
+    word_vectors = []
+    for word_string in word_strings:
+        word_vector = convert_word_string_to_word_vector(
+            word_string    = word_string,
+            model_word2vec = model_word2vec
+        )
+        if word_vector is not None:
+            word_vectors.append(word_vector)
+        else:
+            log.debug("skip undefined word vector")
+    # Combine all of the word vectors into one word vector by summation.
+    sentence_word_vector = sum(word_vectors)
+    return sentence_word_vector
+
+################################################################################
+#                                                                              #
+# neural network objects                                                       #
+#                                                                              #
+################################################################################
+
+@shijian.timer
+def draw_neural_network(
+    axes        = None,
+    left        = None,
+    right       = None,
+    bottom      = None,
+    top         = None,
+    layer_sizes = None
     ):
     """
-    Load HEP data and return dataset.
+    # abstract
+
+    This function draws a neural network representation diagram using
+    matplotilb.
+
+    # arguments
+
+    |*argument* |*description*                                                 |
+    |-----------|--------------------------------------------------------------|
+    |axes       |matplotlib.axes.AxesSubplot: the axes on which to plot the    |
+    |           |diagram (returned by matplotlib.pyplot.gca())                 |
+    |left       |float: the position of the centers of the left nodes          |
+    |right      |float: the position of the centers of the right nodes         |
+    |bottom     |float: the position of the centers of the bottom nodes        |
+    |top        |float: the position of the centers of the top nodes           |
+    |layer_sizes|list of integers: list of layer sizes, including input and    |
+    |           |output dimensionality                                         |
+
+    # example
+
+    ```Python
+    figure = matplotlib.pyplot.figure(figsize = (12, 12))
+    abstraction.draw_neural_network(
+        axes        = figure.gca(),
+        left        = .1,
+        right       = .9,
+        bottom      = .1,
+        top         = .9,
+        layer_sizes = [4, 7, 2]
+    )
+    figure.savefig("neural_network_diagram.png")
+    ```
     """
-    ROOT_file        = open_ROOT_file(ROOT_filename)
-    tree             = ROOT_file.Get(tree_name)
-    number_of_events = tree.GetEntries()
-    data             = datavision.Dataset()
-
-    progress = shijian.Progress()
-    progress.engage_quick_calculation_mode()
-    # counters
-    number_of_events_loaded = 0
-
-    log.info("")
-
-    index = 0
-    for event in tree:
-
-        if maximum_number_of_events is not None and\
-            number_of_events_loaded >= int(maximum_number_of_events):
-            log.info(
-                "loaded maximum requested number of events " +
-                "({maximum_number_of_events})\r".format(
-                    maximum_number_of_events = maximum_number_of_events
-                )
+    spacing_vertical   = (top - bottom) / float(max(layer_sizes))
+    spacing_horizontal = (right - left) / float(len(layer_sizes) - 1)
+    # nodes
+    for n, layer_size in enumerate(layer_sizes):
+        layer_top = spacing_vertical * (layer_size - 1)/2 + (top + bottom) / 2
+        for m in xrange(layer_size):
+            circle = matplotlib.pyplot.Circle(
+                (
+                    n * spacing_horizontal + left,
+                    layer_top - m * spacing_vertical
+                ),
+                spacing_vertical / 4,
+                color  = "w",
+                ec     = "k",
+                zorder = 4
             )
-            break
-        print progress.add_datum(fraction = (index + 2) / number_of_events),
-    
-        if select_event(event):
-            index += 1
-            #event.GetReadEntry()
-            data.variable(index = index, name = "eventNumber",    value = event.eventNumber)
-            data.variable(index = index, name = "el_1_pt",        value = event.el_pt[0])
-            data.variable(index = index, name = "el_1_eta",       value = event.el_eta[0])
-            data.variable(index = index, name = "el_1_phi",       value = event.el_phi[0])
-            data.variable(index = index, name = "jet_1_pt",       value = event.jet_pt[0])
-            data.variable(index = index, name = "jet_1_eta",      value = event.jet_eta[0])
-            data.variable(index = index, name = "jet_1_phi",      value = event.jet_phi[0])
-            data.variable(index = index, name = "jet_1_e",        value = event.jet_e[0])
-            data.variable(index = index, name = "jet_2_pt",       value = event.jet_pt[1])
-            data.variable(index = index, name = "jet_2_eta",      value = event.jet_eta[1])
-            data.variable(index = index, name = "jet_2_phi",      value = event.jet_phi[1])
-            data.variable(index = index, name = "jet_2_e",        value = event.jet_e[1])
-            data.variable(index = index, name = "met",            value = event.met_met)
-            data.variable(index = index, name = "met_phi",        value = event.met_phi)
-            data.variable(index = index, name = "nJets",          value = event.nJets)
-            data.variable(index = index, name = "nBTags",         value = event.nBTags)
-            data.variable(index = index, name = "Centrality_all", value = event.Centrality_all)
-            #data.variable(index = index, name = "Mbb_MindR",      value = event.Mbb_MindR)
-            number_of_events_loaded += 1
+            axes.add_artist(circle)
+    # edges
+    for n, (layer_size_a, layer_size_b) in enumerate(zip(
+        layer_sizes[:-1],
+        layer_sizes[1:]
+        )):
+        layer_top_a =\
+            spacing_vertical * (layer_size_a - 1) / 2 + (top + bottom) / 2
+        layer_top_b =\
+            spacing_vertical * (layer_size_b - 1) / 2 + (top + bottom) / 2
+        for m in xrange(layer_size_a):
+            for o in xrange(layer_size_b):
+                line = matplotlib.pyplot.Line2D(
+                    [
+                        n * spacing_horizontal + left,
+                        (n + 1) * spacing_horizontal + left
+                    ],
+                    [
+                        layer_top_a - m * spacing_vertical,
+                        layer_top_b - o * spacing_vertical
+                    ],
+                    c = "k"
+                )
+                axes.add_artist(line)
 
-    log.info("")
+class Classification(object):
 
-    return data
-
-@shijian.timer
-def load_sklearn_dataset_to_datavision_dataset(
-    sklearn_dataset = None
+    def __init__(
+        self,
+        number_of_classes   = None,
+        hidden_nodes        = [10, 20, 10],
+        epochs              = 5000,
+        batch_size          = 32,
+        optimizer           = "SGD",
+        learning_rate       = 0.1,
+        seed                = 42,
+        continue_training   = True,
+        load_from_directory = None
     ):
-    data = datavision.Dataset()
+        """
+        Create a fully-connected neural network classifier with rectified linear
+        unit activators.
 
-    # Define variable names.
-    if not hasattr(sklearn_dataset, "feature_names"):
-        feature_names = ["feature_" + str(count) for count in range(0, len(sklearn_dataset.data[0]))]
-    else:
-        feature_names = sklearn_dataset.feature_names
-    if not hasattr(sklearn_dataset, "target_names"):
-        target_names = "target"
-    else:
-        target_names = sklearn_dataset.target_names
+        batch_size: number of training examples to use per training step
+        """
+        if load_from_directory is None:
+            self._model = skflow.TensorFlowDNNClassifier(
+                n_classes         = number_of_classes,
+                hidden_units      = hidden_nodes,
+                steps             = epochs,
+                batch_size        = batch_size,
+                optimizer         = optimizer,
+                learning_rate     = learning_rate,
+                tf_random_seed    = seed,
+                continue_training = True
+            )
+        else:
+            self.load(
+                directory = load_from_directory
+            )
 
-    for index_entry, (features_entry, targets_entry) in enumerate(zip(
-        sklearn_dataset.data,
-        sklearn_dataset.target
-    )):
-        for index_variable, variable_name in enumerate(feature_names):
-            data.variable(index = index_entry, name = variable_name, value = sklearn_dataset.data[index_entry][index_variable])
-        data.variable(index = index_entry, name = target_names, value = sklearn_dataset.target[index_entry])
-    return data
+    def model(self):
+        return self._model
 
-@shijian.timer
-def load_sklearn_dataset_to_abstraction_dataset(
-    sklearn_dataset = None
+    def save(
+        self,
+        directory = "abstraction_classifier",
+        overwrite = False
     ):
-    _data = []
-    for features_entry, targets_entry in zip(
-        sklearn_dataset.data,
-        sklearn_dataset.target
-    ):
-        _data.extend([features_entry])
-        _data.extend([targets_entry])
-    dataset = Dataset(data = _data)
-    return dataset
+        if directory is None:
+            directory = shijian.propose_filename(
+                filename  = "abstraction_model",
+                overwrite = overwrite
+            )
+        log.info("save model to {directory}".format(
+            directory = directory
+        ))
+        self._model.save(directory)
 
-@shijian.timer
-def convert_HEP_datasets_from_datavision_datasets_to_abstraction_datasets(
-    datasets    = None, # a single dataset or a list of datasets
-    apply_class = True
+    def load(
+        self,
+        directory = "abstraction_classifier"
     ):
-    # If one dataset is specified, contain it in a list.
-    if not isinstance(datasets, list):
-        datasets = [datasets]
-    _data = []
-    for dataset in datasets:
-        for index in dataset.indices():
-            _data.append([
-                #dataset.variable(index = index, name = "eventNumber"),
-                dataset.variable(index = index, name = "el_1_pt"),
-                dataset.variable(index = index, name = "el_1_eta"),
-                dataset.variable(index = index, name = "el_1_phi"),
-                dataset.variable(index = index, name = "jet_1_pt"),
-                dataset.variable(index = index, name = "jet_1_eta"),
-                dataset.variable(index = index, name = "jet_1_phi"),
-                dataset.variable(index = index, name = "jet_1_e"),
-                dataset.variable(index = index, name = "jet_2_pt"),
-                dataset.variable(index = index, name = "jet_2_eta"),
-                dataset.variable(index = index, name = "jet_2_phi"),
-                dataset.variable(index = index, name = "jet_2_e"),
-                dataset.variable(index = index, name = "met"),
-                dataset.variable(index = index, name = "met_phi"),
-                dataset.variable(index = index, name = "nJets"),
-                dataset.variable(index = index, name = "nBTags"),
-                dataset.variable(index = index, name = "Centrality_all")
-            ])
-            if apply_class is True:
-                _data.append([
-                    dataset.variable(name = "class")
-                ])
-    return Dataset(data = _data)
+        log.info("load model from {directory}".format(
+            directory = directory
+        ))
+        self._model = skflow.TensorFlowEstimator.restore(directory)
+        # upcoming:
+        # update model instance data attributes from loaded model
+
+class Regression(object):
+
+    def __init__(
+        self,
+        number_of_classes   = 0,
+        hidden_nodes        = [10, 20, 10],
+        epochs              = 5000,
+        batch_size          = 32,
+        optimizer           = "SGD",
+        learning_rate       = 0.1,
+        seed                = 42,
+        continue_training   = True,
+        load_from_directory = None
+    ):
+        """
+        Create a fully-connected neural network regressor with rectified linear
+        unit activators.
+
+        batch_size: number of training examples to use per training step
+        """
+        if load_from_directory is None:
+            self._model = skflow.TensorFlowDNNRegressor(
+                n_classes         = number_of_classes,
+                hidden_units      = hidden_nodes,
+                steps             = epochs,
+                batch_size        = batch_size,
+                optimizer         = optimizer,
+                learning_rate     = learning_rate,
+                tf_random_seed    = seed,
+                continue_training = True
+            )
+        else:
+            self.load(
+                directory = load_from_directory
+            )
+
+    def model(self):
+        return self._model
+
+    def save(
+        self,
+        directory = "abstraction_regressor",
+        overwrite = False
+    ):
+        if directory is None:
+            directory = shijian.propose_filename(
+                filename  = "abstraction_model",
+                overwrite = overwrite
+            )
+        log.info("save model to {directory}".format(
+            directory = directory
+        ))
+        self._model.save(directory)
+
+    def load(
+        self,
+        directory = "abstraction_regressor"
+    ):
+        log.info("load model from {directory}".format(
+            directory = directory
+        ))
+        self._model = skflow.TensorFlowEstimator.restore(directory)
+        # upcoming:
+        # update model instance data attributes from loaded model
+
+################################################################################
+#                                                                              #
+# neural network training                                                      #
+#                                                                              #
+################################################################################
 
 @shijian.timer
 def hypersearch(
