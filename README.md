@@ -1,5 +1,9 @@
 [![project abstraction](http://img.youtube.com/vi/v9zJ9noLeok/0.jpg)](https://www.youtube.com/watch?v=v9zJ9noLeok)
 
+# NOTE
+
+Please note that abstraction is a *project*, not a finished product.
+
 # setup
 
 ## quick start
