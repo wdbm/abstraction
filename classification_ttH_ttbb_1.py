@@ -49,7 +49,7 @@ options:
 from __future__ import division
 
 name    = "classification_ttH_ttbb_1"
-version = "2016-02-12T1450Z"
+version = "2016-03-28T1819Z"
 logo    = name
 
 import docopt
@@ -83,8 +83,8 @@ def main(options):
     # access options and arguments
     ROOT_filename_ttH            = options["--datattH"]
     ROOT_filename_ttbb           = options["--datattbb"]
-    engage_plotting              = string_to_bool(options["--plot"])
-    engage_correlations_analysis = string_to_bool(options["--analyzecorrelations"])
+    engage_plotting              = shijian.string_to_bool(options["--plot"])
+    engage_correlations_analysis = shijian.string_to_bool(options["--analyzecorrelations"])
 
     log.info("ttH data file: {filename}".format(
         filename = ROOT_filename_ttH
@@ -184,12 +184,13 @@ def main(options):
 
     # define model
 
-    architecture = [10000, 10000, 1000, 10000, 1000]
-    # [50, 150, 250, 300, 400]
+    #architecture = [10000, 10000, 1000, 10000, 1000]
+    architecture = [10000, 10000, 10000, 10000, 1000]
+    #architecture = [50, 150, 250, 300, 400]
     classifier = abstraction.Classification(
         number_of_classes = 2,
         hidden_nodes      = architecture,
-        epochs            = 60
+        epochs            = 30
     )
 
     # train model
@@ -229,9 +230,6 @@ def main(options):
     log.info("")
 
     program.terminate()
-
-def string_to_bool(x):
-    return x.lower() in ("yes", "true", "t", "1")
 
 if __name__ == "__main__":
     options = docopt.docopt(__doc__)

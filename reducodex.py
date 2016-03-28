@@ -47,23 +47,24 @@ Options:
 """
 
 name    = "reducodex"
-version = "2016-02-03T1445Z"
+version = "2016-03-28T1804Z"
 logo    = None
 
-import os
-import sys
-import subprocess
-import time
 import datetime
-import logging
-import technicolor
-import inspect
 import docopt
+import inspect
+import logging
+import os
+import subprocess
+import sys
+import time
+
+import abstraction
+import dataset
 import propyte
 import pyprel
 import shijian
-import dataset
-import abstraction
+import technicolor
 
 def main(options):
 

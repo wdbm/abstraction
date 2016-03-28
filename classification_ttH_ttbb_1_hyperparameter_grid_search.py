@@ -48,20 +48,21 @@ options:
 from __future__ import division
 
 name    = "classification_ttH_ttbb_1_hyperparameter_grid_search"
-version = "2016-01-20T0012Z"
+version = "2016-03-28T1816Z"
 logo    = name
 
-import os
-import sys
-import time
 import docopt
 import logging
 import matplotlib
+import os
+import sys
+import time
+
+import abstraction
+import datavision
 import propyte
 import pyprel
 import shijian
-import datavision
-import abstraction
 from sklearn import metrics
 from sklearn import cross_validation
 

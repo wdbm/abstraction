@@ -47,15 +47,15 @@ options:
 from __future__ import division
 
 name    = "classification_ttH_ttbb_1_hypersearch_plot"
-version = "2016-02-05T1525Z"
+version = "2016-03-28T1815Z"
 logo    = name
 
-import os
-import sys
-import time
 import docopt
 import logging
+import os
 import pickle
+import sys
+import time
 
 import abstraction
 import datavision

@@ -47,23 +47,24 @@ Options:
 """
 
 name    = "vicodex"
-version = "2016-01-18T1611Z"
+version = "2016-03-28T1751Z"
 logo    = None
 
-import os
-import sys
-import subprocess
-import time
 import datetime
-import logging
-import inspect
-import dataset
-import abstraction
 import docopt
-import technicolor
-import shijian
+import inspect
+import logging
+import os
+import subprocess
+import sys
+import time
+
+import abstraction
+import dataset
 import propyte
 import pyprel
+import shijian
+import technicolor
 
 def main(options):
 

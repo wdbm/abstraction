@@ -53,23 +53,24 @@ Options:
 """
 
 name    = "imconv-3"
-version = "2016-01-12T2225Z"
+version = "2016-03-28T1809Z"
 logo    = None
 
-import os
-import sys
-import logging
-import urllib
-import imp
-import time
-from PIL import Image
-import re
 import ast
 import docopt
-import technicolor
-import shijian
-import pyprel
+import imp
+import logging
+import os
+from PIL import Image
+import re
+import sys
+import time
+import urllib
+
 import propyte
+import pyprel
+import shijian
+import technicolor
 
 @shijian.timer
 def main(options):

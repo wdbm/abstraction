@@ -44,18 +44,19 @@ Options:
 """
 
 name    = "inspect-database"
-version = "2016-01-12T2037Z"
+version = "2016-03-28T1809Z"
 logo    = None
 
+import docopt
+import logging
 import os
 import sys
-import logging
-import docopt
-import technicolor
-import shijian
-import pyprel
-import propyte
+
 import abstraction
+import propyte
+import pyprel
+import shijian
+import technicolor
 
 @shijian.timer
 def main(options):

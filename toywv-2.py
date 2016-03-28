@@ -50,26 +50,28 @@ Options:
 """
 
 name    = "toywv-2"
-version = "2016-03-02T1105Z"
+version = "2016-03-28T1758Z"
 logo    = None
 
-import os
-import sys
-import subprocess
-import time
 import datetime
-import logging
-import technicolor
-import inspect
 import docopt
-import propyte
-import shijian
-import dataset
-import abstraction
-import datavision
-from gensim.models import Word2Vec
+import inspect
+import logging
 import math
 import numpy
+import os
+import subprocess
+import sys
+import time
+
+import abstraction
+import dataset
+import datavision
+from gensim.models import Word2Vec
+import propyte
+import shijian
+import technicolor
+
 import pyprel
 
 def main(options):
