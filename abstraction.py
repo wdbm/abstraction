@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-03-02T1123Z"
+version = "2016-04-17T2008Z"
 
 import csv
 import datetime
@@ -101,7 +101,7 @@ def access_database(
     log.debug("access database \"{filename}\"".format(
         filename = filename
     ))
-    database = dataset.connect("sqlite:///" + filename)
+    database = dataset.connect("sqlite:///" + str(filename))
     return database
 
 @shijian.timer
@@ -210,6 +210,68 @@ def add_exchange_word_vectors_to_database(
             )
         database[table_name].update(data, ["id"])
         print progress.add_datum(fraction = entry_index / number_of_entries),
+
+@shijian.timer
+def load_exchange_word_vectors(
+    filename                 = "database.db",
+    maximum_number_of_events = None
+    ):
+    """
+    Load exchange data and return dataset.
+    """
+    log.info("load word vectors of database {filename}".format(
+        filename = filename
+    ))
+    # Ensure that the database exists.
+    if not os.path.isfile(filename):
+        log.info("database {filename} nonexistent".format(
+            filename = filename
+        ))
+        program.terminate()
+        raise Exception
+    # Access the database.
+    database = access_database(filename = filename)
+    # Access or create the exchanges table.
+    table_exchanges = database["exchanges"]
+    # Access exchanges.
+    table_name = "exchanges"
+    # Create a datavision dataset.
+    data = datavision.Dataset()
+    # progress
+    progress = shijian.Progress()
+    progress.engage_quick_calculation_mode()
+    number_of_entries = len(database[table_name])
+    index = 0
+    for index_entry, entry in enumerate(database[table_name].all()):
+        if maximum_number_of_events is not None and\
+            index >= int(maximum_number_of_events):
+            log.info(
+                "loaded maximum requested number of events " +
+                "({maximum_number_of_events})\r".format(
+                    maximum_number_of_events = maximum_number_of_events
+                )
+            )
+            break
+        #unique_identifier = str(entry["id"])
+        utteranceWordVector = str(entry["utteranceWordVector"])
+        responseWordVector = str(entry["responseWordVector"])
+        if utteranceWordVector != "None" and responseWordVector != "None":
+            index += 1
+
+            utteranceWordVector = eval("numpy." + utteranceWordVector.replace("float32", "numpy.float32"))
+            responseWordVector  = eval("numpy." + responseWordVector.replace("float32", "numpy.float32"))
+            data.variable(index = index, name = "utteranceWordVector", value = utteranceWordVector)
+            data.variable(index = index, name = "responseWordVector",  value = responseWordVector )
+
+            #utteranceWordVector = list(eval("numpy." + utteranceWordVector.replace("float32", "numpy.float32")))
+            #responseWordVector  = list(eval("numpy." + responseWordVector.replace("float32", "numpy.float32")))
+            #for index_component, component in enumerate(utteranceWordVector):
+            #    data.variable(index = index, name = "uwv" + str(index_component), value = component)
+            #for index_component, component in enumerate(responseWordVector):
+            #    data.variable(index = index, name = "rwv" + str(index_component), value = component)
+
+        print progress.add_datum(fraction = index_entry / number_of_entries),
+    return data
 
 ################################################################################
 #                                                                              #
@@ -589,6 +651,31 @@ def save_exchanges_to_database(
             log.debug("skip previously-saved exchange \"{utterance}\"".format(
                 utterance = exchange.utterance
             ))
+
+@shijian.timer
+def convert_exchange_datasets_from_datavision_datasets_to_abstraction_datasets(
+    datasets    = None, # a single dataset or a list of datasets
+    apply_class = True
+    ):
+    # If one dataset is specified, contain it in a list.
+    if not isinstance(datasets, list):
+        datasets = [datasets]
+    _data = []
+    for dataset in datasets:
+        for index in dataset.indices():
+            #for variable_name in dataset.variables():
+            #    _data.append([
+            #        dataset.variable(index = index, name = variable_name),
+            #    ])
+            _data.append([
+                dataset.variable(index = index, name = "utteranceWordVector"),
+                dataset.variable(index = index, name = "responseWordVector")
+            ])
+            if apply_class is True:
+                _data.append([
+                    dataset.variable(name = "class")
+                ])
+    return Dataset(data = _data)
 
 ################################################################################
 #                                                                              #
@@ -1024,10 +1111,11 @@ class Regression(object):
 
         batch_size: number of training examples to use per training step
         """
+        self.hidden_nodes = hidden_nodes
         if load_from_directory is None:
-            self._model = skflow.TensorFlowDNNRegressor(
+            self._model = skflow.TensorFlowEstimator(
+                model_fn          = self.tanh_dnn,
                 n_classes         = number_of_classes,
-                hidden_units      = hidden_nodes,
                 steps             = epochs,
                 batch_size        = batch_size,
                 optimizer         = optimizer,
@@ -1039,6 +1127,20 @@ class Regression(object):
             self.load(
                 directory = load_from_directory
             )
+
+    def tanh_dnn(
+        features     = None,
+        targets      = None,
+        hidden_nodes = None
+    ):
+        if hidden_nodes is None:
+            hidden_nodes = self.hidden_nodes
+        features = skflow.ops.dnn(
+            features,
+            hidden_units = hidden_nodes,
+            activation = skflow.tf.tanh
+        )
+        return skflow.models.linear_regression(features, targets)
 
     def model(self):
         return self._model

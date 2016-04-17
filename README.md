@@ -6,29 +6,21 @@ Please note that abstraction is a *project*, not a finished product.
 
 # setup
 
-## quick start
-
 The following Bash commands, that have been tested on Ubuntu 15.10, should install prerequisites and check out abstraction.
 
 ```Bash
 # Install ROOT.
-sudo pip install datavision
-sudo pip install propyte
-sudo pip install pyprel
-sudo pip install shijian
-sudo pip install technicolor
-sudo pip install docopt
-sudo pip install pyfiglet
-sudo pip install praw
 sudo apt-get -y install sqlite
-sudo pip install dataset
 sudo apt-get -y install python-nltk
 sudo python -m nltk.downloader all
 sudo easy_install -U gensim
 sudo pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp27-none-linux_x86_64.whl
 sudo pip install git+git://github.com/google/skflow.git
+sudo pip install abstraction
 git clone https://github.com/wdbm/abstraction.git
 ```
+
+The function `abstraction.setup()` should be run.
 
 # upcoming
 
@@ -41,26 +33,6 @@ Updating logging procedures is under consideration because of possible logging c
 ```Bash
 python script.py 2> >(grep -E -v "INFO|DEBUG")
 ```
-
-# prerequisites
-
-|**prerequisite**|**comment**                                                                                        |
-|----------------|---------------------------------------------------------------------------------------------------|
-|docopt          |`sudo pip install docopt`                                                                          |
-|pyfiglet        |`sudo pip install pyfiglet`                                                                        |
-|propyte         |[propyte](https://github.com/wdbm/propyte), `sudo pip install propyte`                             |
-|pyprel          |[pyprel](https://github.com/wdbm/pyprel), `sudo pip install git+https://github.com/wdbm/pyprel.git`|
-|shijian         |[shijian](https://github.com/wdbm/shijian), `sudo pip install shijian`                             |
-|technicolor     |[technicolor](https://github.com/wdbm/technicolor), `sudo pip install technicolor`                 |
-|datavision      |[datavision](https://github.com/wdbm/datavision), `sudo pip install datavision`                    |
-|PRAW            |`sudo pip install praw`                                                                            |
-|SQLite          |`sudo apt-get -y install sqlite`                                                                   |
-|dataset         |`sudo pip install dataset`                                                                         |
-|NLTK            |`sudo apt-get -y install python-nltk`                                                              |
-|NLTK data       |`sudo python -m nltk.downloader all`                                                               |
-|gensim          |`sudo easy_install -U gensim`                                                                      |
-
-The function `abstraction.setup()` should be run.
 
 # data
 
