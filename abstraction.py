@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-06-01T1600Z"
+version = "2016-06-01T1601Z"
 
 import csv
 import datetime
