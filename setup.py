@@ -9,7 +9,7 @@ def main():
 
     setuptools.setup(
         name             = "abstraction",
-        version          = "2016.06.01.1541",
+        version          = "2016.06.01.1600",
         description      = "machine learning framework",
         long_description = pypandoc.convert("README.md", "rst"),
         url              = "https://github.com/wdbm/abstraction",
@@ -25,7 +25,7 @@ def main():
                            "numpy",
                            "matplotlib",
                            "praw",
-                           "propyte".
+                           "propyte",
                            "pyprel",
                            "skflow",
                            "sklearn",
