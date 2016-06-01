@@ -9,7 +9,7 @@ def main():
 
     setuptools.setup(
         name             = "abstraction",
-        version          = "2016.06.01.1601",
+        version          = "2016.06.01.1602",
         description      = "machine learning framework",
         long_description = pypandoc.convert("README.md", "rst"),
         url              = "https://github.com/wdbm/abstraction",
@@ -22,6 +22,7 @@ def main():
         install_requires = [
                            "dataset",
                            "datavision",
+                           "flask",
                            "numpy",
                            "matplotlib",
                            "praw",
