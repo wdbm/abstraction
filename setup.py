@@ -9,7 +9,7 @@ def main():
 
     setuptools.setup(
         name             = "abstraction",
-        version          = "2016.04.17.2008",
+        version          = "2016.06.01.1541",
         description      = "machine learning framework",
         long_description = pypandoc.convert("README.md", "rst"),
         url              = "https://github.com/wdbm/abstraction",
@@ -23,15 +23,18 @@ def main():
                            "dataset",
                            "datavision",
                            "numpy",
+                           "matplotlib",
                            "praw",
                            "propyte".
                            "pyprel",
-                           "matplotlib",
                            "skflow",
                            "sklearn",
                            "shijian",
                            "technicolor"
                            ],
+        scripts          = [
+                           "abstraction_interface.py"
+                           ]
         entry_points     = """
             [console_scripts]
             abstraction = abstraction:abstraction

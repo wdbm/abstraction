@@ -14,7 +14,7 @@ sudo apt-get -y install sqlite
 sudo apt-get -y install python-nltk
 sudo python -m nltk.downloader all
 sudo easy_install -U gensim
-sudo pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp27-none-linux_x86_64.whl
+sudo pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.8.0-cp27-none-linux_x86_64.whl
 sudo pip install git+git://github.com/google/skflow.git
 sudo pip install abstraction
 git clone https://github.com/wdbm/abstraction.git
@@ -370,6 +370,16 @@ The program inspect-database provides a simple, comprehensive printout of the co
 
 ```Bash
 inspect-database.py --database="database.db"
+```
+
+The program Sqliteman can be used to provide a view of database information:
+
+```Bash
+sqliteman database.db
+```
+
+```
+SELECT * FROM exchanges;
 ```
 
 # vcodex: word vectors 

@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-04-17T2008Z"
+version = "2016-06-01T1541Z"
 
 import csv
 import datetime
@@ -49,16 +49,16 @@ import dataset
 import datavision
 from gensim.models import Word2Vec
 import nltk
+import matplotlib
+import matplotlib.pyplot
 import numpy
 import praw
 import propyte
 import pyprel
-import matplotlib
-import matplotlib.pyplot
 import skflow
+import sklearn
 import sklearn.cross_validation
 import sklearn.metrics
-import sklearn
 import shijian
 with propyte.import_ganzfeld():
     from ROOT import *
@@ -76,6 +76,21 @@ def setup():
     # Download NLTK data.
     downloader = nltk.downloader.Downloader("http://nltk.github.com/nltk_data/")
     downloader.download("all")
+
+################################################################################
+#                                                                              #
+# interfaces                                                                   #
+#                                                                              #
+################################################################################
+
+def generate_response(
+    utterance = None,
+    style     = "2016-05-20T0902Z"
+    ):
+    if style == "2016-05-20T0902Z":
+        return "hello world"
+    else:
+        return "hello world"
 
 ################################################################################
 #                                                                              #

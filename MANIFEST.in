@@ -2,3 +2,4 @@ include LICENSE
 include README.md
 include setup.py
 include abstraction.py
+include abstraction_interface.py
