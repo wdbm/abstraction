@@ -41,13 +41,13 @@ Options:
     -v, --verbose            verbose logging
     -s, --silent             silent
     -u, --username=USERNAME  username
-    -d, --database=FILE      database [default: database.db]
-    -t, --tableLimit=NUMBER  limit on number of table entries displayed
-    -t, --outputFile=NAME    optional output file for simple training
+    --database=FILE          database [default: database.db]
+    --tableLimit=NUMBER      limit on number of table entries displayed
+    --outputFile=NAME        optional output file for simple training
 """
 
 name    = "vicodex"
-version = "2016-03-28T1751Z"
+version = "2016-06-02T1335Z"
 logo    = None
 
 import datetime

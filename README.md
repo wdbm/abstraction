@@ -354,14 +354,14 @@ The standard run 2014-10-28T202832Z is as follows:
 arcodex.py --numberOfUtterances 200 --subreddits=askreddit,changemyview,lgbt,machinelearning,particlephysics,technology,worldnews --verbose
 ```
 
-# vicodex: view collated exchanges
+# vicodex, vicodex_2: view collated exchanges
 
-The program vicodex is a viewing program specialised to conversational exchanges. It can be used to access and view a database of exchanges.
+The program vicodex_2 (and vicodex) is a viewing program specialised to conversational exchanges. It can be used to access and view a database of exchanges.
 
 The following example accesses database "database.db" and displays its exchanges data:
 
 ```Bash
-vicodex.py --database="database.db"
+vicodex_2.py --database="database.db"
 ```
 
 # inspect-database: quick printout of database
