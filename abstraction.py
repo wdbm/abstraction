@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-06-02T1354Z"
+version = "2016-06-02T1540Z"
 
 import csv
 import datetime
@@ -135,7 +135,7 @@ def save_database_metadata(
         name                   = "abstraction",
         description            = "project abstraction conversation "
                                  "utterance-response data",
-        version                = "2015-01-06T172242Z",
+        version                = "2016-06-02T1508Z",
         last_modification_time = current_time
     )
     log.debug("database metadata:")
@@ -508,11 +508,11 @@ class Exchange(object):
         self.response              = response
         self.utterance_time_UNIX   = utterance_time_UNIX
         self.response_time_UNIX    = response_time_UNIX
-        self.utterance_word_vector = utterance_word_vector,
-        self.response_word_vector  = response_word_vector,
-        self.utterance_reference   = utterance_reference,
-        self.response_reference    = response_reference,
-        self.exchange_reference    = exchange_reference,
+        self.utterance_word_vector = utterance_word_vector
+        self.response_word_vector  = response_word_vector
+        self.utterance_reference   = utterance_reference
+        self.response_reference    = response_reference
+        self.exchange_reference    = exchange_reference
         self.utterance_word_vector = utterance_word_vector
 
     def printout(
@@ -523,7 +523,8 @@ class Exchange(object):
             utterance = self.utterance
         ))
         print("response: {response}".format(
-            response = self.response))
+            response = self.response
+        ))
         print("utterance_time_UNIX: {utterance_time_UNIX}".format(
             utterance_time_UNIX = self.utterance_time_UNIX
         ))
@@ -559,6 +560,7 @@ def access_exchanges_Reddit(
     log.info("access subreddits {subreddits}".format(
         subreddits = subreddits
     ))
+    exchanges = []
     for subreddit in subreddits:
         log.info("access subreddit \"{subreddit}\"".format(
             subreddit = subreddit
@@ -569,7 +571,6 @@ def access_exchanges_Reddit(
             limit = int(number_of_utterances)
         )
         # Access each submission, its title and its top comment.
-        exchanges = []
         for submission in submissions:
             # Access the submission title.
             submission_title = submission.title.encode(

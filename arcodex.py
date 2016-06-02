@@ -47,7 +47,7 @@ Options:
 """
 
 name    = "arcodex"
-version = "2016-01-12T2014Z"
+version = "2016-06-02T1508Z"
 logo    = None
 
 import os
