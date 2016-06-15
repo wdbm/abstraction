@@ -30,7 +30,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-06-02T1540Z"
+version = "2016-06-15T1537Z"
 
 import csv
 import datetime
@@ -49,6 +49,9 @@ import dataset
 import datavision
 from gensim.models import Word2Vec
 import nltk
+import nltk.classify.util
+from nltk.classify import NaiveBayesClassifier
+from nltk.corpus import movie_reviews
 import matplotlib
 import matplotlib.pyplot
 import numpy
@@ -84,13 +87,30 @@ def setup():
 ################################################################################
 
 def generate_response(
-    utterance = None,
-    style     = "2016-05-20T0902Z"
+    utterance                      = None,
+    style                          = "2016-06-15T1456Z",
+    sentiment_utterance            = True,
+    confidence_sentiment_utterance = True
     ):
-    if style == "2016-05-20T0902Z":
-        return "hello world"
-    else:
-        return "hello world"
+    response = "hello world"
+    if sentiment_utterance:
+        sentiment_analysis = sentiment(
+            text       = utterance,
+            confidence = True
+        )
+        if confidence_sentiment_utterance:
+            sentiment_utterance_text =\
+                "utterance sentiment: {sentiment}, utterance sentiment confidence: {confidence}".format(
+                    sentiment  = sentiment_analysis[0],
+                    confidence = sentiment_analysis[1]
+                )
+        else:
+            sentiment_utterance_text =\
+                "utterance sentiment: {sentiment}".format(
+                    sentiment  = sentiment_analysis
+                )
+        response = response + " (" + sentiment_utterance_text + ")"
+    return response
 
 ################################################################################
 #                                                                              #
@@ -155,10 +175,10 @@ def database_metadata(
     if "metadata" in database.tables:
         for entry in database["metadata"].all():
             metadata = {
-                "name":                 entry["name"],
-                "description":          entry["description"],
-                "version":              entry["version"],
-                "lastModificationTime": entry["lastModificationTime"]
+                "name":                   entry["name"],
+                "description":            entry["description"],
+                "version":                entry["version"],
+                "last_modification_time": entry["last_modification_time"]
             }
     else:
         log.error("database metadata not found")
@@ -354,7 +374,7 @@ def load_HEP_data(
             )
             break
         print progress.add_datum(fraction = (index + 2) / number_of_events),
-    
+
         if select_event(event):
             index += 1
             #event.GetReadEntry()
@@ -465,7 +485,7 @@ def convert_HEP_datasets_from_datavision_datasets_to_abstraction_datasets(
                 #dataset.variable(index = index, name = "met"),
                 #dataset.variable(index = index, name = "met_phi"),
                 #dataset.variable(index = index, name = "Centrality_all"),
-                #dataset.variable(index = index, name = "Mbb_MindR"),            
+                #dataset.variable(index = index, name = "Mbb_MindR"),
                 #dataset.variable(index = index, name = "ljet_sd23"),
                 #dataset.variable(index = index, name = "ljet_tau21"),
                 #dataset.variable(index = index, name = "ljet_tau32"),
@@ -736,7 +756,7 @@ class Dataset(object):
 ################################################################################
 
 class ROOT_Variable(numpy.ndarray):
- 
+
     def __new__(
         cls,
         name                     = None,
@@ -756,7 +776,7 @@ class ROOT_Variable(numpy.ndarray):
         self.histogram           = None
         self._values             = [] # list of values
         return(self)
- 
+
     @shijian.timer
     def identify_variable(
         self,
@@ -800,7 +820,7 @@ class ROOT_Variable(numpy.ndarray):
             log.warning("set to default data type {data_type}".format(
                 data_type = self.data_type
             ))
- 
+
     @shijian.timer
     def load_variable_object(
         self,
@@ -811,7 +831,7 @@ class ROOT_Variable(numpy.ndarray):
         # Set the current event.
         self.tree.GetEntry(self.event_number)
         self.variable_object = getattr(self.tree, self._name)
- 
+
     @shijian.timer
     def load_variable(
         self,
@@ -851,14 +871,14 @@ class ROOT_Variable(numpy.ndarray):
                 else:
                     for value in self.variable_object:
                         self._values.append(value)
- 
+
     @shijian.timer
     def name(
         self,
         ):
         # return name
         return(self._name)
- 
+
     @shijian.timer
     def values(
         self,
@@ -1438,3 +1458,86 @@ def analyze_hypermap(
     #    bbox_inches = "tight",
     #    format      = "eps"
     #)
+
+################################################################################
+#                                                                              #
+# sentiment analysis                                                           #
+#                                                                              #
+################################################################################
+
+def word_features(words):
+    return dict([(word, True) for word in words])
+
+def train_and_save_naive_Bayes_classifier(
+    filename = "naive_Bayes_classifier"
+    ):
+
+    IDs_negative = movie_reviews.fileids("neg")
+    IDs_positive = movie_reviews.fileids("pos")
+
+    features_negative = [
+        (
+            word_features(movie_reviews.words(fileids = [ID])),
+            "neg"
+        ) for ID in IDs_negative
+    ]
+    features_positive = [
+        (
+            word_features(movie_reviews.words(fileids = [ID])),
+            "pos"
+        ) for ID in IDs_positive
+    ]
+
+    cutoff_negative = int(len(features_negative) * 3 / 4)
+    cutoff_positive = int(len(features_positive) * 3 / 4)
+
+    features_training =\
+        features_negative[:cutoff_negative] +\
+        features_positive[:cutoff_positive]
+    features_test =\
+        features_negative[cutoff_negative:] +\
+        features_positive[cutoff_positive:]
+    log.info("training sample size: {size}".format(
+        size = len(features_training)
+    ))
+    log.info("testing sample size: {size}".format(
+        size = len(features_test)
+    ))
+
+    log.info("train naive Bayes classifier")
+    classifier = NaiveBayesClassifier.train(features_training)
+
+    log.info("accuracy: {accuracy}".format(
+        accuracy = nltk.classify.util.accuracy(classifier, features_test)
+    ))
+    log.info("printout of most informative features:")
+    classifier.show_most_informative_features()
+    log.info("save model to {filename}".format(filename = filename))
+    pickle.dump(classifier, open(filename, "wb"))
+
+def load_naive_Bayes_classifier(
+    filename = "naive_Bayes_classifier"
+    ):
+    return pickle.load(open(filename, "rb"))
+
+def sentiment(
+    text       = None,
+    confidence = False
+    ):
+    """
+    This function accepts a string text input. It calculates the sentiment of
+    the text, "pos" or "neg". By default, it returns this calculated sentiment.
+    If selected, it returns a tuple of the calculated sentiment and the
+    classificaton confidence.
+    """
+    words = text.split(" ")
+    features = word_features(words)
+    classifier = load_naive_Bayes_classifier()
+    classification = classifier.classify(features)
+    if confidence:
+        return (
+            classification,
+            classifier.prob_classify(features).prob(classification)
+        )
+    else:
+        return classification

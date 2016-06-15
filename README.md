@@ -406,6 +406,12 @@ reducodex.py --inputdatabase="database.db"
 reducodex.py --inputdatabase="database.db" --outputdatabase="database_1.db"
 ```
 
+# fix_database: fix the data structures of database entries
+
+```Bash
+fix_database.py --verbose 2> >(grep -E -v "INFO|DEBUG")
+```
+
 # abstraction development testing
 
 ```Bash

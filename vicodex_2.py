@@ -40,8 +40,9 @@ Options:
     -v, --verbose            verbose logging
     -s, --silent             silent
     -u, --username=USERNAME  username
-    --database=FILE          database [default: database.db]
-    --table=NAME             table    [default: exchanges]
+    --database=FILE          database       [default: database.db]
+    --table=NAME             table          [default: exchanges]
+    --tablemetadata=NAME     metadata table [default: metadata]
     --rows=NUMBER            limit on number of table rows displayed
 """
 
@@ -79,9 +80,10 @@ def main(options):
     global log
     from propyte import log
 
-    filename_database = options["--database"]
-    name_table        = options["--table"]
-    rows_limit        = options["--rows"]
+    filename_database   = options["--database"]
+    name_table          = options["--table"]
+    name_table_metadata = options["--tablemetadata"]
+    rows_limit          = options["--rows"]
     if rows_limit is not None:
         rows_limit = int(rows_limit)
 
@@ -115,6 +117,16 @@ def main(options):
                                      "exchangeReference"
                                      ],
                 rows_limit         = rows_limit
+            )
+        )
+    )
+
+    log.info("database metadata:")
+
+    print(
+        pyprel.Table(
+            contents = pyprel.table_dataset_database_table(
+                table = database[name_table_metadata],
             )
         )
     )

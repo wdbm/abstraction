@@ -3,3 +3,4 @@ include README.md
 include setup.py
 include abstraction.py
 include abstraction_interface.py
+include naive_Bayes_classifier
