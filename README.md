@@ -10,6 +10,8 @@ The following Bash commands, that have been tested on Ubuntu 15.10, should insta
 
 ```Bash
 # Install ROOT.
+sudo apt-get -y install pylint
+sudo apt-get -y install snakefood
 sudo apt-get -y install sqlite
 sudo apt-get -y install python-nltk
 sudo python -m nltk.downloader all

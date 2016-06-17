@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ################################################################################
 #                                                                              #
 # abstraction                                                                  #
@@ -30,7 +31,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-06-15T1537Z"
+version = "2016-06-17T1558Z"
 
 import csv
 import datetime
@@ -45,6 +46,7 @@ import sys
 import subprocess
 import time
 
+from bs4 import BeautifulSoup
 import dataset
 import datavision
 from gensim.models import Word2Vec
@@ -58,6 +60,7 @@ import numpy
 import praw
 import propyte
 import pyprel
+import requests
 import skflow
 import sklearn
 import sklearn.cross_validation
@@ -506,7 +509,7 @@ def convert_HEP_datasets_from_datavision_datasets_to_abstraction_datasets(
 
 ################################################################################
 #                                                                              #
-# exchanges data                                                               #
+# expressions and exchanges data                                               #
 #                                                                              #
 ################################################################################
 
@@ -667,7 +670,10 @@ def save_exchanges_to_database(
     # Access each exchange. Check the database for the utterance of the
     # exchange. If the utterance of the exchange is not in the database, save
     # the exchange to the database.
-    for exchange in exchanges:
+    progress_extent = len(exchanges)
+    progress = shijian.Progress()
+    progress.engage_quick_calculation_mode()
+    for index, exchange in enumerate(exchanges):
         if database["exchanges"].find_one(
                 utterance = exchange.utterance
             ) is None:
@@ -687,6 +693,7 @@ def save_exchanges_to_database(
             log.debug("skip previously-saved exchange \"{utterance}\"".format(
                 utterance = exchange.utterance
             ))
+        print(progress.add_datum(fraction = (index + 1) / progress_extent))
 
 @shijian.timer
 def convert_exchange_datasets_from_datavision_datasets_to_abstraction_datasets(
@@ -713,6 +720,88 @@ def convert_exchange_datasets_from_datavision_datasets_to_abstraction_datasets(
                 ])
     return Dataset(data = _data)
 
+class Tweet(object):
+
+    def __init__(
+        self,
+        username                 = None,
+        text                     = None,
+        time                     = None,
+        calculate_sentiment      = True
+        ):
+        self.username            = str(username)
+        self.text                = str(text.encode("utf-8"))
+        self.time                = int(time)
+        self.sentiment           = None
+        self.calculate_sentiment = calculate_sentiment
+        if self.calculate_sentiment:
+            self.sentiment = sentiment(
+                text       = self.text,
+                confidence = False
+            )
+
+class Tweets(list):
+
+    def __init__(
+        self,
+        *args
+        ):
+        # list initialisation
+        if sys.version_info >= (3, 0):
+            super().__init__(self, *args)
+        else:
+            super(Tweets, self).__init__(*args)
+
+    def table(
+        self
+        ):
+        table_contents = [[
+                         "username",
+                         "text",
+                         "sentiment",
+                         "time"
+                         ]]
+        for tweet in self:
+            table_contents.append([
+                str(tweet.username),
+                str(tweet.text),
+                str(tweet.sentiment),
+                str(tweet.time)
+            ])
+        return pyprel.Table(
+            contents = table_contents
+        )
+
+def access_users_tweets(
+    usernames = [
+                "AndrewYNg",
+                "geoff_hinton",
+                "SamHarrisOrg",
+                "ylecun",
+                ]
+    ):
+    tweets = []
+    for username in usernames:
+        URL         = u"https://twitter.com/{username}".format(username = username)
+        request     = requests.get(URL)
+        page_source = request.text
+        soup        = BeautifulSoup(page_source, "lxml")
+
+        code_tweets_content = soup("p", {"class": "js-tweet-text"})
+        code_tweets_time = soup("span", {"class": "_timestamp"})
+
+        for code_tweet_content, code_tweet_time in zip(code_tweets_content, code_tweets_time):
+
+            tweets.append(
+                Tweet(
+                    username = username,
+                    text     = code_tweet_content.contents[0],
+                    time     = int(code_tweet_time.attrs["data-time-ms"])
+                )
+            )
+
+    return Tweets(tweets)
+
 ################################################################################
 #                                                                              #
 # neural networks data                                                         #
@@ -724,7 +813,7 @@ class Dataset(object):
     def __init__(
         self,
         data = None
-    ):
+        ):
         self._data = data
 
     def features(
@@ -1520,6 +1609,8 @@ def load_naive_Bayes_classifier(
     ):
     return pickle.load(open(filename, "rb"))
 
+global classifier
+classifier = load_naive_Bayes_classifier()
 def sentiment(
     text       = None,
     confidence = False
@@ -1530,14 +1621,20 @@ def sentiment(
     If selected, it returns a tuple of the calculated sentiment and the
     classificaton confidence.
     """
-    words = text.split(" ")
-    features = word_features(words)
-    classifier = load_naive_Bayes_classifier()
-    classification = classifier.classify(features)
+    try:
+        words = text.split(" ")
+        # Remove empty strings.
+        words = [word for word in words if word]
+        features = word_features(words)
+        classification = classifier.classify(features)
+        confidence_classification = classifier.prob_classify(features).prob(classification)
+    except:
+        classification = None
+        confidence_classification = None
     if confidence:
         return (
             classification,
-            classifier.prob_classify(features).prob(classification)
+            confidence_classification
         )
     else:
         return classification
