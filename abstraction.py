@@ -31,8 +31,9 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-06-17T1558Z"
+version = "2016-06-22T1658Z"
 
+import collections
 import csv
 import datetime
 import inspect
@@ -752,6 +753,79 @@ class Tweets(list):
         else:
             super(Tweets, self).__init__(*args)
 
+    def usernames(
+        self
+        ):
+        """
+        This function returns the list of unique usernames corresponding to the
+        tweets stored in self.
+        """
+        try:
+            return list(set([tweet.username for tweet in self]))
+        except:
+            log.error("error -- possibly a problem with tweets stored")
+
+    def user_sentiments(
+        self,
+        username = None
+        ):
+        """
+        This function returns a list of all sentiments of the tweets of a
+        specified user.
+        """
+        try:
+           return [tweet.sentiment for tweet in self if tweet.username == username]
+        except:
+            log.error("error -- possibly no username specified")
+            return None
+
+    def user_sentiments_most_frequent(
+        self,
+        username             = None,
+        single_most_frequent = True
+        ):
+        """
+        This function returns the most frequent calculated sentiments expressed
+        in tweets of a specified user. By default, the single most frequent
+        sentiment is returned. All sentiments with their corresponding
+        frequencies can be returned also.
+        """
+        try:
+            sentiment_frequencies = collections.Counter(self.user_sentiments(
+                username = username
+            ))
+            if single_most_frequent:
+                return sentiment_frequencies.most_common(1)[0][0]
+            else:
+                return dict(sentiment_frequencies)
+        except:
+            log.error("error -- possibly no username specified")
+            return None
+
+    def users_sentiments_single_most_frequent(
+        self,
+        usernames = None,
+        ):
+        """
+        This function returns the single most frequent calculated sentiment
+        expressed by all stored users or by a list of specified users as a
+        dictionary.
+        """
+        users_sentiments_single_most_frequent = dict()
+        if usernames is None:
+            usernames = self.usernames()
+        try:
+            for username in usernames:
+                sentiment = self.user_sentiments_most_frequent(
+                    username             = username,
+                    single_most_frequent = True
+                )
+                users_sentiments_single_most_frequent[username] = sentiment
+            return users_sentiments_single_most_frequent
+        except:
+            log.error("error -- possibly a problem with tweets stored")
+            return None
+
     def table(
         self
         ):
@@ -777,7 +851,7 @@ def access_users_tweets(
                 "AndrewYNg",
                 "geoff_hinton",
                 "SamHarrisOrg",
-                "ylecun",
+                "ylecun"
                 ]
     ):
     tweets = []
@@ -820,23 +894,23 @@ class Dataset(object):
         self,
         format_type = "ndarray"
         ):
-            if format_type == "ndarray":
-                return numpy.asarray(self._data[::2])
-            elif format_type == "list":
-                return self._data[::2]
-            else:
-                raise Exception("unknown format requested")
+        if format_type == "ndarray":
+            return numpy.asarray(self._data[::2])
+        elif format_type == "list":
+            return self._data[::2]
+        else:
+            raise Exception("unknown format requested")
 
     def targets(
         self,
         format_type = "ndarray"
         ):
-            if format_type == "ndarray":
-                return numpy.asarray(self._data[1::2])
-            elif format_type == "list":
-                return self._data[1::2]
-            else:
-                raise Exception("unknown format requested")
+        if format_type == "ndarray":
+            return numpy.asarray(self._data[1::2])
+        elif format_type == "list":
+            return self._data[1::2]
+        else:
+            raise Exception("unknown format requested")
 
 ################################################################################
 #                                                                              #
