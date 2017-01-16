@@ -31,7 +31,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2016-06-22T1658Z"
+version = "2017-01-16T1534Z"
 
 import collections
 import csv
@@ -925,7 +925,7 @@ class ROOT_Variable(numpy.ndarray):
         name                     = None,
         tree                     = None,
         ):
-        self = numpy.asarray([]).view(cls)
+        self                     = numpy.asarray([]).view(cls)
         # arguments
         self._name               = name
         self.tree                = tree
