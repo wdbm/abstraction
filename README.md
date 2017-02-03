@@ -37,6 +37,10 @@ Updating logging procedures is under consideration because of possible logging c
 python script.py 2> >(grep -E -v "INFO|DEBUG")
 ```
 
+# examining databases
+
+A database can be examined using [datavision](https://github.com/wdbm/datavision) [https://github.com/wdbm/datavision/blob/master/view_database_SQLite.py].
+
 # data
 
 ## feature scaling
