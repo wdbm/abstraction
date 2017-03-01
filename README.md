@@ -2,7 +2,7 @@
 
 # introduction
 
-Project abstraction a work-in-progress neural network project using similar algorithms for conversation modelling and physics event classification, featuring curated utterance-response data and word vector features.
+Project abstraction is a work-in-progress neural network project using similar algorithms for conversation modelling and physics event classification, featuring curated utterance-response data and word vector features.
 
 **Note: abstraction is a *project*, not a finished product.**
 
