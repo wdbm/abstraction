@@ -1,5 +1,23 @@
 # word vectors
 
+# What is a word vector?
+
+A word vector is a vector of weights. In a simple 1-of-N (or 'one hot') encoding, every element in the vector is associated with a word in the vocabulary. The encoding of a word is the vector in which the corresponding element is one and all other elements are zero.
+
+For example, consider a vocabulary of only five words: king, queen, man, woman, child. The word "queen" could be encoded in 1-of-N encoding as the following:
+
+![](media/1_of_N_encoding.png)
+
+Using such an encoding, there's no meaningful comparison we can make between word vectors other than equality testing. In word2vec, a *distributed* representation of a word is used. Consider a vector of several hundred dimensions (e.g. 1000). Each word is represented by a distribution of weights across those vectors' elements. So, instead of a one-to-one mapping between an element in the vector and a word, the representation of a word is spread across all of the elements in the vector, and each element in the vector contributes to the definition of many words.
+
+If the dimensions in a hypothetical word vector are labelled (there are no such preassigned labels in the algorithm), it could look like this:
+
+- upcoming diagram
+
+Such a vector comes to represent in some abstract way the "meaning" of a word. With a large corpus, it's possible to learn word vectors that are able to capture the relationships between words in a surprisingly expressive way. The vectors can be used also as inputs to a neural network.
+
+- upcoming documentation
+
 # bags of words, skip-grams and word vectors
 
 Word vectors are an efficient implementation of bag-of-words and skip-gram architectures for computing vector representations of words. These representations can be used in natural language processing applications and research.

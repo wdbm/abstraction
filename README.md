@@ -16,6 +16,8 @@ Project abstraction is a work-in-progress neural network project using similar a
 |[Torch](Torch.md)              |Torch framework                                                    |
 |[Caffe](Caffe.md)              |Caffe framework                                                    |
 
+[![A DARPA Perspective on Artificial Intelligence](http://img.youtube.com/vi/-O01G3tSYpU/0.jpg)](https://www.youtube.com/watch?v=-O01G3tSYpU)
+
 # upcoming
 
 Under consideration is a requirement for arcodex to ensure the existence of a response to an utterance before saving to database. Under consideration is changing from SkFlow to TF Learn.

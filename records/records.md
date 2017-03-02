@@ -6,17 +6,17 @@
 
 input:
 
-![](images/RPM_1_500x500.png)
+![](mediaRPM_1_500x500.png)
 
 output:
 
-![](images/2015-06-30T2030Z_500x500.png)
+![](media2015-06-30T2030Z_500x500.png)
 
 # 2015-06-20
 
 ## image
 
-![](images/2015-06-30T171020Z.png)
+![](media2015-06-30T171020Z.png)
 
 # 2015-06-19
 
