@@ -12,7 +12,7 @@ Using such an encoding, there's no meaningful comparison we can make between wor
 
 If the dimensions in a hypothetical word vector are labelled (there are no such preassigned labels in the algorithm), it could look like this:
 
-- upcoming diagram
+![](media/word_vector_1.png)
 
 Such a vector comes to represent in some abstract way the "meaning" of a word. With a large corpus, it's possible to learn word vectors that are able to capture the relationships between words in a surprisingly expressive way. The vectors can be used also as inputs to a neural network.
 
