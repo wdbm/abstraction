@@ -128,6 +128,19 @@ The NVIDIA CUDA Profiling Tools Interface (CUPTI) provides performance analysis 
 sudo apt-get install libcupti-dev
 ```
 
+# pip, Miniconda
+
+`pip` can install system-wide or locally. [Miniconda] can simplify the setup of Python, pip and other modules.
+
+To install Miniconda, follow a procedure like the following:
+
+```Bash
+wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+bash Miniconda2-latest-Linux-x86_64.sh
+```
+
+Following the prompts. The default install directory is `${HOME}/miniconda2` or `${HOME}/miniconda3`.
+
 # install TensorFlow
 
 ```Bash

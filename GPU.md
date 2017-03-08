@@ -5,7 +5,7 @@
 The NVIDIA System Management Interface (nvidia-smi) is a command line utility that uses the Nvidia Management Library (NVML) to aid in the management and monitoring of Nvidia GPU devices.
 
 ```Bash
->nvidia-smi
+>watch -n 0.5 nvidia-smi
 Sun Feb 26 22:42:48 2017       
 +-----------------------------------------------------------------------------+
 | NVIDIA-SMI 375.39                 Driver Version: 375.39                    |
@@ -25,6 +25,12 @@ Sun Feb 26 22:42:48 2017
 |    0      2308    G   /usr/bin/compiz                                126MiB |
 |    0     14404    G   ...sionActionRedesign/Enabled/GoogleBrandedC    27MiB |
 +-----------------------------------------------------------------------------+
+```
+
+[tmux-control](https://github.com/wdbm/tmux-control) can be used to display `htop` and `nvidia-smi` in the same terminal using `tmux`.
+
+```Bash
+tmux-control.py --nvidia
 ```
 
 # CUDA Samples

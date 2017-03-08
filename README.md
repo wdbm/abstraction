@@ -26,3 +26,7 @@ Under consideration is a requirement for arcodex to ensure the existence of a re
 
 - [distributed_wellbeing](https://github.com/wdbm/distributed_wellbeing)
 - [denarius](https://github.com/wdbm/denarius)
+
+# references
+
+- [An Interactive Node-Link Visualization of Convolutional Neural Networks -- Adam W. Harley](http://scs.ryerson.ca/~aharley/vis/conv/)
