@@ -120,6 +120,14 @@ ln -fs /usr/bin/gcc-4.9 /usr/bin/gcc
 ln -fs /usr/bin/g++-4.9 /usr/bin/g++
 ```
 
+## set OpenCL (2017-03-08T1827Z experimental)
+
+OpenCL is included with CUDA. Create a symbolic link to the Nvidia OpenCL headers at `/usr/include`.
+
+```Bash
+sudo ln -s /usr/include/nvidia-375/CL /usr/include
+```
+
 ## install CUPTI
 
 The NVIDIA CUDA Profiling Tools Interface (CUPTI) provides performance analysis tools with detailed information about how applications are using the GPUs of a system.
