@@ -1,5 +1,18 @@
 # records
 
+# 2016-02-13
+
+- [2016-02-13T223834Z variables comparisons](2016-02-13T223834Z)
+- [2016-02-13T223959Z analysis correlations](2016-02-13T223959Z)
+
+# 2016-02-12
+
+- [2016-02-12T051136Z hypermap](2016-02-12T051136Z)
+
+# 2015-12-17
+
+- [2015-12-17T162424Z ttbb/ttH MC](2015-12-17T162424Z)
+
 # 2015-06-30
 
 ## Raven's Progressive Matrices psychology test -- generation from training on RPM image

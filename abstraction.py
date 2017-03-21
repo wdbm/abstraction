@@ -31,7 +31,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2017-01-16T1534Z"
+version = "2017-03-21T1618Z"
 
 import collections
 import csv
@@ -62,7 +62,7 @@ import praw
 import propyte
 import pyprel
 import requests
-import skflow
+import tensorflow.contrib.learn
 import sklearn
 import sklearn.cross_validation
 import sklearn.metrics
@@ -925,7 +925,7 @@ class ROOT_Variable(numpy.ndarray):
         name                     = None,
         tree                     = None,
         ):
-        self                     = numpy.asarray([]).view(cls)
+        self = numpy.asarray([]).view(cls)
         # arguments
         self._name               = name
         self.tree                = tree
@@ -1231,12 +1231,7 @@ class Classification(object):
         self,
         number_of_classes   = None,
         hidden_nodes        = [10, 20, 10],
-        epochs              = 5000,
-        batch_size          = 32,
-        optimizer           = "SGD",
-        learning_rate       = 0.1,
-        seed                = 42,
-        continue_training   = True,
+        optimizer           = None,
         load_from_directory = None
     ):
         """
@@ -1246,15 +1241,10 @@ class Classification(object):
         batch_size: number of training examples to use per training step
         """
         if load_from_directory is None:
-            self._model = skflow.TensorFlowDNNClassifier(
+            self._model = tensorflow.contrib.learn.DNNClassifier(
                 n_classes         = number_of_classes,
                 hidden_units      = hidden_nodes,
-                steps             = epochs,
-                batch_size        = batch_size,
-                optimizer         = optimizer,
-                learning_rate     = learning_rate,
-                tf_random_seed    = seed,
-                continue_training = True
+                optimizer         = optimizer
             )
         else:
             self.load(
@@ -1286,7 +1276,7 @@ class Classification(object):
         log.info("load model from {directory}".format(
             directory = directory
         ))
-        self._model = skflow.TensorFlowEstimator.restore(directory)
+        self._model = tensorflow.contrib.learn.TensorFlowEstimator.restore(directory)
         # upcoming:
         # update model instance data attributes from loaded model
 
@@ -1312,7 +1302,7 @@ class Regression(object):
         """
         self.hidden_nodes = hidden_nodes
         if load_from_directory is None:
-            self._model = skflow.TensorFlowEstimator(
+            self._model = tensorflow.contrib.learn.Estimator(
                 model_fn          = self.tanh_dnn,
                 n_classes         = number_of_classes,
                 steps             = epochs,
@@ -1334,12 +1324,12 @@ class Regression(object):
     ):
         if hidden_nodes is None:
             hidden_nodes = self.hidden_nodes
-        features = skflow.ops.dnn(
+        features = tensorflow.contrib.learn.ops.dnn(
             features,
             hidden_units = hidden_nodes,
-            activation = skflow.tf.tanh
+            activation = tensorflow.contrib.learn.tf.tanh
         )
-        return skflow.models.linear_regression(features, targets)
+        return tensorflow.contrib.learn.models.linear_regression(features, targets)
 
     def model(self):
         return self._model
@@ -1366,7 +1356,7 @@ class Regression(object):
         log.info("load model from {directory}".format(
             directory = directory
         ))
-        self._model = skflow.TensorFlowEstimator.restore(directory)
+        self._model = tensorflow.contrib.learn.TensorFlowEstimator.restore(directory)
         # upcoming:
         # update model instance data attributes from loaded model
 

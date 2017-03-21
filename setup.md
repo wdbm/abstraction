@@ -120,7 +120,7 @@ ln -fs /usr/bin/gcc-4.9 /usr/bin/gcc
 ln -fs /usr/bin/g++-4.9 /usr/bin/g++
 ```
 
-## set OpenCL (2017-03-08T1827Z experimental)
+## set up OpenCL (2017-03-08T1827Z experimental)
 
 OpenCL is included with CUDA. Create a symbolic link to the Nvidia OpenCL headers at `/usr/include`.
 
@@ -151,6 +151,8 @@ Following the prompts. The default install directory is `${HOME}/miniconda2` or 
 
 # install TensorFlow
 
+Install TensorFlow 1.0.0.
+
 ```Bash
 sudo apt-get -y install python-pip
 sudo apt-get -y install python-dev
@@ -168,15 +170,22 @@ chmod 755 setup.sh
 rm setup.sh
 ```
 
+# set up other dependencies and abstraction (2017-03-21 upcoming)
+
 ```Bash
-sudo apt-get -y install festival
-sudo apt-get -y install pylint
-sudo apt-get -y install snakefood
-sudo apt-get -y install sqlite
-sudo apt-get -y install python-nltk
+sudo apt-get -y install festival    \
+                        pylint      \
+                        snakefood   \
+                        sqlite      \
+                        sqliteman   \
+                        python-nltk
+
 sudo python -m nltk.downloader all
+
 sudo easy_install -U gensim
+
 sudo pip install abstraction
+
 git clone https://github.com/wdbm/abstraction.git
 ```
 

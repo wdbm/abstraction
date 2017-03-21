@@ -9,9 +9,9 @@ def main():
 
     setuptools.setup(
         name             = "abstraction",
-        version          = "2017.03.01.0132",
+        version          = "2017.03.21.1618",
         description      = "machine learning framework",
-        long_description     = long_description(),
+        long_description = long_description(),
         url              = "https://github.com/wdbm/abstraction",
         author           = "Will Breaden Madden",
         author_email     = "wbm@protonmail.ch",
@@ -26,7 +26,7 @@ def main():
                            "flask",
                            "numpy",
                            "matplotlib",
-                           "praw",
+                           "praw==3.5.0",
                            "propyte",
                            "pyprel",
                            "shijian",
