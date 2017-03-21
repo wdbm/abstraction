@@ -2,12 +2,12 @@
 
 # 2016-02-13
 
-- [2016-02-13T223834Z variables comparisons](2016-02-13T223834Z)
-- [2016-02-13T223959Z analysis correlations](2016-02-13T223959Z)
+- [2016-02-13T223834Z variables comparisons](2016-02-13T223834Z/index.md)
+- [2016-02-13T223959Z analysis correlations](2016-02-13T223959Z/index.md)
 
 # 2016-02-12
 
-- [2016-02-12T051136Z hypermap](2016-02-12T051136Z)
+- [2016-02-12T051136Z hypermap](2016-02-12T051136Z/index.md)
 
 # 2015-12-17
 
@@ -19,17 +19,17 @@
 
 input:
 
-![](mediaRPM_1_500x500.png)
+![](media/RPM_1_500x500.png)
 
 output:
 
-![](media2015-06-30T2030Z_500x500.png)
+![](media/2015-06-30T2030Z_500x500.png)
 
 # 2015-06-20
 
 ## image
 
-![](media2015-06-30T171020Z.png)
+![](media/2015-06-30T171020Z.png)
 
 # 2015-06-19
 
