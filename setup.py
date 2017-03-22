@@ -24,6 +24,7 @@ def main():
                            "dataset",
                            "datavision",
                            "flask",
+                           "jupyter",
                            "numpy",
                            "matplotlib",
                            "praw==3.5.0",
