@@ -31,7 +31,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2017-03-21T1618Z"
+version = "2017-04-03T2335Z"
 
 import collections
 import csv
@@ -322,7 +322,7 @@ def load_exchange_word_vectors(
 def open_ROOT_file(
     filename,
     ):
-    ensure_file_existence(filename)
+    shijian.ensure_file_existence(filename)
     log.info("access file {filename}".format(
         filename = filename
     ))
