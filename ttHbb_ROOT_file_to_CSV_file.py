@@ -55,6 +55,8 @@ options:
 from __future__ import division
 import csv
 import docopt
+import os
+import textwrap
 
 import abstraction
 import propyte
@@ -63,7 +65,7 @@ with propyte.import_ganzfeld():
 import shijian
 
 name    = "ttHbb_ROOT_file_to_CSV_file"
-version = "2017-04-03T2333Z"
+version = "2017-04-04T1227Z"
 logo    = name
 
 def select_event(
@@ -110,6 +112,8 @@ def main(options):
     global log
     from propyte import log
 
+    print("")
+
     filename_ROOT            = options["--fileroot"]
     filename_CSV             = options["--filecsv"]
     selection                = options["--selection"]
@@ -118,12 +122,41 @@ def main(options):
     maximum_number_of_events = None if options["--maxevents"].lower() == "none"\
                                   else int(options["--maxevents"])
 
+    if not os.path.isfile(os.path.expandvars(filename_ROOT)):
+        log.error("file {filename} not found".format(
+            filename = filename_ROOT
+        ))
+        program.terminate()
+
+    if os.path.isfile(os.path.expandvars(filename_CSV)):
+        log.warning("CSV file {filename} exists -- *append* data to file".format(
+            filename = filename_CSV
+        ))
+        print("")
+        append = True
+    else:
+        append = False
+
     file_ROOT                = abstraction.open_ROOT_file(filename_ROOT)
     tree                     = file_ROOT.Get(name_tree)
     number_of_events         = tree.GetEntries()
 
-    file_CSV                 = open(filename_CSV, "w")
+    file_CSV                 = open(filename_CSV, "a")
     writer                   = csv.writer(file_CSV, delimiter = ",")
+
+    log.info(textwrap.dedent(
+        """
+        input ROOT file: {filename_ROOT}
+        output CSV file: {filename_CSV}
+        selection:       {selection}
+        class label:     {class_label}
+        """.format(
+            filename_ROOT = filename_ROOT,
+            filename_CSV  = filename_CSV,
+            selection     = selection,
+            class_label   = class_label
+        )
+    ))
 
     headings = [
         "eventNumber",
@@ -158,7 +191,18 @@ def main(options):
         "NBFricoNN_4jin4bin",
         "class"
     ]
-    writer.writerow(headings)
+
+    log.info("{number} variables to collate:\n\n{variables}".format(
+        number    = len(headings),
+        variables = ", ".join(headings)
+    ))
+
+    if not append:
+        writer.writerow(headings)
+
+    print("")
+    log.info("save variables of events to CSV")
+    print("")
 
     progress = shijian.Progress()
     progress.engage_quick_calculation_mode()
@@ -208,6 +252,8 @@ def main(options):
             ]
             writer.writerow(line)
         print(progress.add_datum(fraction = index / number_of_events))
+
+    print("")
 
     program.terminate()
 
