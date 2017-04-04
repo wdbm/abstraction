@@ -50,6 +50,7 @@ options:
 
     --tree=TEXT              tree name                           [default: nominal]
     --maxevents=INT          maximum number of events to collate [default: none]
+    --headings=BOOL          include headings at top of CSV file [default: true]
 """
 
 from __future__ import division
@@ -65,7 +66,7 @@ with propyte.import_ganzfeld():
 import shijian
 
 name    = "ttHbb_ROOT_file_to_CSV_file"
-version = "2017-04-04T1227Z"
+version = "2017-04-04T1815Z"
 logo    = name
 
 def select_event(
@@ -121,6 +122,7 @@ def main(options):
     name_tree                = options["--tree"]
     maximum_number_of_events = None if options["--maxevents"].lower() == "none"\
                                   else int(options["--maxevents"])
+    include_headings         = options["--headings"].lower() == "true"
 
     if not os.path.isfile(os.path.expandvars(filename_ROOT)):
         log.error("file {filename} not found".format(
@@ -159,7 +161,6 @@ def main(options):
     ))
 
     headings = [
-        "eventNumber",
         "el_1_pt",
         "el_1_eta",
         "el_1_phi",
@@ -179,16 +180,10 @@ def main(options):
         "met_phi",
         "Centrality_all",
         "Mbb_MindR",
-        "ljet_tau21",
-        "ljet_tau32",
+        #"ljet_tau21",
+        #"ljet_tau32",
         #"Aplan_bjets",
         "H4_all",
-        "NBFricoNN_6jin4bin",
-        "NBFricoNN_6jin3bex",
-        "NBFricoNN_5jex4bin",
-        "NBFricoNN_3jex3bex",
-        "NBFricoNN_4jin3bex",
-        "NBFricoNN_4jin4bin",
         "class"
     ]
 
@@ -197,7 +192,7 @@ def main(options):
         variables = ", ".join(headings)
     ))
 
-    if not append:
+    if not append and include_headings:
         writer.writerow(headings)
 
     print("")
@@ -218,7 +213,6 @@ def main(options):
                 index_selected > maximum_number_of_events:
                 break
             line = [
-                event.eventNumber,
                 event.el_pt[0],
                 event.el_eta[0],
                 event.el_phi[0],
@@ -238,20 +232,17 @@ def main(options):
                 event.met_phi,
                 event.Centrality_all,
                 event.Mbb_MindR,
-                event.ljet_tau21[0],
-                event.ljet_tau32[0],
+                #event.ljet_tau21[0],
+                #event.ljet_tau32[0],
                 #event.Aplan_bjets,
                 event.H4_all,
-                event.NBFricoNN_6jin4bin,
-                event.NBFricoNN_6jin3bex,
-                event.NBFricoNN_5jex4bin,
-                event.NBFricoNN_3jex3bex,
-                event.NBFricoNN_4jin3bex,
-                event.NBFricoNN_4jin4bin,
                 class_label
             ]
             writer.writerow(line)
         print(progress.add_datum(fraction = index / number_of_events))
+
+    print("")
+    log.info("saved {number} selected events".format(number = index_selected))
 
     print("")
 

@@ -115,3 +115,14 @@ fix_database.py --verbose 2> >(grep -E -v "INFO|DEBUG")
 # saving models
 
 Note that the file `checkpoint` in the saved model directory contains full paths.
+
+# ttHbb 2017-03
+
+```Python
+./ttHbb_ROOT_file_to_CSV_file.py --fileroot=output_ttH.root  --classlabel=1 --filecsv=output.csv --maxevents=1000
+./ttHbb_ROOT_file_to_CSV_file.py --fileroot=output_ttbb.root --classlabel=0 --filecsv=output.csv --maxevents=1000
+
+./ttHbb_histograms_of_CSV.py --infile=output.csv
+
+./ttHbb_preprocess_CSV_file.py --infile=output.csv --outfile=output_preprocessed.csv
+```
