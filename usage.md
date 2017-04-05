@@ -118,7 +118,7 @@ Note that the file `checkpoint` in the saved model directory contains full paths
 
 # ttHbb 2017-03
 
-```Python
+```Bash
 rm output.csv
 
 # plot (no headings in CSV)
