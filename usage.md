@@ -120,8 +120,7 @@ Note that the file `checkpoint` in the saved model directory contains full paths
 
 ```Bash
 rm output.csv
-
-# plot (no headings in CSV)
+rm output_preprocessed.csv
 
 ./ttHbb_ROOT_file_to_CSV_file.py                                   \
                                  --fileroot=output_ttH.root        \
