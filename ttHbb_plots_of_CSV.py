@@ -3,14 +3,13 @@
 """
 ################################################################################
 #                                                                              #
-# ttHbb_histograms_of_CSV                                                      #
+# ttHbb_plots_of_CSV                                                           #
 #                                                                              #
 ################################################################################
 #                                                                              #
 # LICENCE INFORMATION                                                          #
 #                                                                              #
-# This program accesses a CSV file and preprocesses the data in it to attempt  #
-# to make it suitable for machine learning algorithms.                         #
+# This program accesses a CSV file generates plots from it.                    #
 #                                                                              #
 # copyright (C) 2017 William Breaden Madden                                    #
 #                                                                              #
@@ -36,13 +35,16 @@ usage:
     program [options]
 
 options:
-    -h, --help               display help message
-    --version                display version and exit
-    -v, --verbose            verbose logging
-    -s, --silent             silent
-    -u, --username=USERNAME  username
+    -h, --help                   display help message
+    --version                    display version and exit
+    -v, --verbose                verbose logging
+    -s, --silent                 silent
+    -u, --username=USERNAME      username
 
-    --infile=FILENAME        CSV input file  [default: output.csv]
+    --infile=FILENAME            CSV input file                 [default: output.csv]
+
+    --histogramcomparisons=BOOL  generate histogram comparisons [default: true]
+    --scattermatrix=BOOL         generate scatter matrix        [default: true]
 """
 
 from __future__ import division
@@ -50,12 +52,13 @@ import docopt
 import os
 
 import datavision
+import matplotlib.pyplot as plt
 import pandas as pd
 import propyte
 import shijian
 
-name    = "ttHbb_histograms_of_CSV"
-version = "2017-04-04T1821Z"
+name    = "ttHbb_plots_of_CSV"
+version = "2017-04-05T1141Z"
 logo    = name
 
 def main(options):
@@ -74,6 +77,9 @@ def main(options):
 
     filename_CSV  = options["--infile"]
 
+    make_histogram_comparisons = options["--histogramcomparisons"].lower() == "true"
+    make_scatter_matrix        = options["--scattermatrix"].lower() == "true"
+
     if not os.path.isfile(os.path.expandvars(filename_CSV)):
         log.error("file {filename} not found".format(
             filename = filename_CSV
@@ -91,23 +97,52 @@ def main(options):
     data_class_0 = data.loc[data["class"] == 0]
     data_class_1 = data.loc[data["class"] == 1]
 
-    for feature_name in feature_names:
+    if make_histogram_comparisons:
 
-        filename = shijian.propose_filename(
-            filename = feature_name + "_ttbb_ttH.png"
+        for feature_name in feature_names:
+
+            filename = shijian.propose_filename(
+                filename = feature_name + "_ttbb_ttH.png"
+            )
+            log.info("save histogram {filename}".format(filename = filename))
+            datavision.save_histogram_comparison_matplotlib(
+                values_1      = list(data_class_0[feature_name]),
+                values_2      = list(data_class_1[feature_name]),
+                label_1       = "ttbb",
+                label_2       = "ttH",
+                label_ratio_x = "frequency",
+                label_y       = "",
+                title         = feature_name,
+                filename      = filename,
+                directory     = "comparisons"
+            )
+
+    if make_scatter_matrix:
+
+        filename = "scatter_matrix_ttbb_ttH.jpg"
+        log.info("save scatter matrix {filename}".format(filename = filename))
+        scatter_matrix = pd.scatter_matrix(
+            data,
+            figsize  = [15, 15],
+            marker   = ".",
+            s        = 0.2,
+            diagonal = "kde"
         )
-        log.info("save histogram {filename}".format(filename = filename))
-        datavision.save_histogram_comparison_matplotlib(
-            values_1      = list(data_class_0[feature_name]),
-            values_2      = list(data_class_1[feature_name]),
-            label_1       = "ttbb",
-            label_2       = "ttH",
-            label_ratio_x = "frequency",
-            label_y       = "",
-            title         = feature_name,
-            filename      = filename,
-            directory     = "comparisons"
-        )
+        for ax in scatter_matrix.ravel():
+            ax.set_xlabel(
+                ax.get_xlabel(),
+                fontsize = 15,
+                rotation = 90
+            )
+            ax.set_ylabel(
+                ax.get_ylabel(),
+                fontsize = 15,
+                rotation = 0,
+                labelpad = 60
+            )
+            ax.get_xaxis().set_ticks([])
+            ax.get_yaxis().set_ticks([])
+        plt.savefig(filename, dpi = 700)
 
     print("")
 

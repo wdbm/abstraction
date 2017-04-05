@@ -55,7 +55,7 @@ import propyte
 import sklearn.preprocessing
 
 name    = "ttHbb_preprocess_CSV_file"
-version = "2017-04-04T1647Z"
+version = "2017-04-05T1141Z"
 logo    = name
 
 def main(options):
@@ -94,7 +94,11 @@ def main(options):
     data[indices_of_feature_columns] = scaler.fit_transform(data[indices_of_feature_columns])
 
     log.info("save scaled CSV to {filename}".format(filename = filename_CSV_output))
-    data.to_csv(filename_CSV_output, index = False, header = False)
+    data.to_csv(
+        filename_CSV_output,
+        index  = False,
+        #header = False
+    )
 
     print("")
 

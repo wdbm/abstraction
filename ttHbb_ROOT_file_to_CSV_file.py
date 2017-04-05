@@ -66,7 +66,7 @@ with propyte.import_ganzfeld():
 import shijian
 
 name    = "ttHbb_ROOT_file_to_CSV_file"
-version = "2017-04-04T1815Z"
+version = "2017-04-05T1140Z"
 logo    = name
 
 def select_event(
@@ -196,7 +196,9 @@ def main(options):
         writer.writerow(headings)
 
     print("")
-    log.info("save variables of events to CSV")
+    log.info("save variables of events to CSV {filename}".format(
+        filename = filename_CSV
+    ))
     print("")
 
     progress = shijian.Progress()
@@ -242,7 +244,10 @@ def main(options):
         print(progress.add_datum(fraction = index / number_of_events))
 
     print("")
-    log.info("saved {number} selected events".format(number = index_selected))
+    log.info("{number_selected} events of {number_total} passed selection".format(
+        number_selected = index_selected,
+        number_total    = index
+    ))
 
     print("")
 
