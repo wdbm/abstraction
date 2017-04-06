@@ -1,5 +1,7 @@
 # word vectors
 
+![](https://pbs.twimg.com/media/C7jJxIjWkAA8E_s.jpg)
+
 # What is a word vector?
 
 A word vector is a vector of weights. In a simple 1-of-N (or 'one hot') encoding, every element in the vector is associated with a word in the vocabulary. The encoding of a word is the vector in which the corresponding element is one and all other elements are zero.
