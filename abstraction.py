@@ -31,7 +31,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2017-04-03T2335Z"
+version = "2017-04-10T2341Z"
 
 import collections
 import csv
@@ -728,11 +728,13 @@ class Tweet(object):
         username                 = None,
         text                     = None,
         time                     = None,
+        ID                       = None,
         calculate_sentiment      = True
         ):
         self.username            = str(username)
         self.text                = str(text.encode("utf-8"))
         self.time                = int(time)
+        self.ID                  = int(ID)
         self.sentiment           = None
         self.calculate_sentiment = calculate_sentiment
         if self.calculate_sentiment:
@@ -852,29 +854,83 @@ def access_users_tweets(
                 "geoff_hinton",
                 "SamHarrisOrg",
                 "ylecun"
-                ]
+                ],
+    detail    = False
     ):
+
     tweets = []
-    for username in usernames:
+    for index, username in enumerate(usernames):
+
+        if detail:
+            print("access user {username} ({index} of {number})".format(
+                username = username,
+                index    = index + 1,
+                number   = len(usernames)
+            ))
+
         URL         = u"https://twitter.com/{username}".format(username = username)
         request     = requests.get(URL)
         page_source = request.text
         soup        = BeautifulSoup(page_source, "lxml")
 
         code_tweets_content = soup("p", {"class": "js-tweet-text"})
-        code_tweets_time = soup("span", {"class": "_timestamp"})
+        code_tweets_time    = soup("span", {"class": "_timestamp"})
+        code_tweets_ID      = soup("a", {"tweet-timestamp"})
 
-        for code_tweet_content, code_tweet_time in zip(code_tweets_content, code_tweets_time):
+        for code_tweet_content, code_tweet_time, code_tweet_ID in zip(code_tweets_content, code_tweets_time, code_tweets_ID):
 
             tweets.append(
                 Tweet(
                     username = username,
                     text     = code_tweet_content.contents[0],
-                    time     = int(code_tweet_time.attrs["data-time-ms"])
+                    time     = int(code_tweet_time.attrs["data-time-ms"]),
+                    ID       = int(code_tweet_ID.attrs["data-conversation-id"])
                 )
             )
 
     return Tweets(tweets)
+
+def top_followed_users_Twitter():
+
+    URL         = "http://twittercounter.com/pages/100"
+    request     = requests.get(URL)
+    page_source = request.text
+    soup        = BeautifulSoup(page_source, "lxml")
+
+    usernames   = [str(result.get_text())[1:] for result in soup.find_all(itemprop = "alternateName")]
+
+    return usernames
+
+def save_tweets_of_top_followed_users_Twitter_to_database(
+    filename = "Twitter.db",
+    detail   = True
+    ):
+
+    usernames = top_followed_users_Twitter()
+
+    tweets    = access_users_tweets(
+                    usernames = usernames,
+                    detail    = detail
+                )
+
+    database  = access_database(filename = filename)
+    table     = database["Twitter"]
+
+    progress_extent = len(tweets)
+    progress = shijian.Progress()
+    progress.engage_quick_calculation_mode()
+
+    for index, tweet in enumerate(tweets):
+
+        table.insert(dict(
+            time_UNIX = str(tweet.time),
+            username  = str(tweet.username).decode("utf-8", "ignore").encode("ascii", "ignore"),
+            text      = str(tweet.text).decode("utf-8", "ignore").encode("ascii", "ignore"),
+            reference = str(tweet.ID),
+            sentiment = str(tweet.sentiment)
+        ))
+
+        print(progress.add_datum(fraction = (index + 1) / progress_extent))
 
 ################################################################################
 #                                                                              #
