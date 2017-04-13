@@ -159,7 +159,7 @@ sudo apt-get -y install python-dev
 sudo pip install tensorflow-gpu
 ```
 
-# set up abstraction 2017-02-28
+# set up ROOT 2017-02-28
 
 Install ROOT.
 
@@ -168,6 +168,19 @@ wget https://raw.githubusercontent.com/wdbm/soil/master/setup.sh
 chmod 755 setup.sh
 ./setup.sh
 rm setup.sh
+```
+
+# set up tmux-control
+
+```Bash
+sudo apt-get -y install cmus   \
+                        elinks \
+                        htop   \
+                        ranger \
+                        tmux
+```
+
+sudo pip install tmux_control
 ```
 
 # set up other dependencies and abstraction (2017-03-21 upcoming)
