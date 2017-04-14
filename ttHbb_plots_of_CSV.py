@@ -55,10 +55,11 @@ import datavision
 import matplotlib.pyplot as plt
 import pandas as pd
 import propyte
+import pyprel
 import shijian
 
 name    = "ttHbb_plots_of_CSV"
-version = "2017-04-05T1141Z"
+version = "2017-04-14T1848Z"
 logo    = name
 
 def main(options):
@@ -96,6 +97,41 @@ def main(options):
 
     data_class_0 = data.loc[data["class"] == 0]
     data_class_1 = data.loc[data["class"] == 1]
+
+    print("")
+    log.info("basic feature characteristics")
+    print("")
+
+    table_contents = [[
+        "feature",
+        "minimum value in class 0",
+        "minimum value in class 1",
+        "maximum value in class 0",
+        "maximum value in class 1",
+        "mean value in class 0",
+        "mean value in class 1"
+    ]]
+
+    for feature_name in feature_names:
+
+        values_class_0 = list(data_class_0[feature_name])
+        values_class_1 = list(data_class_1[feature_name])
+
+        table_contents.append([
+            feature_name,
+            min(values_class_0),
+            min(values_class_1),
+            max(values_class_0),
+            max(values_class_1),
+            sum(values_class_0)/len(values_class_0),
+            sum(values_class_1)/len(values_class_1)
+        ])
+
+    print(
+        pyprel.Table(
+            contents = table_contents
+        )
+    )
 
     if make_histogram_comparisons:
 

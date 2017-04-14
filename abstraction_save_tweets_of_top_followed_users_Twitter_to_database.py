@@ -1,0 +1,3 @@
+import abstraction
+
+abstraction.save_tweets_of_top_followed_users_Twitter_to_database()
