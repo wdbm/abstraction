@@ -48,7 +48,7 @@ options:
     --selection=TEXT         channel selection (ejets, mujets)   [default: ejets]
     --classlabel=TEXT        class label for last column
 
-    --tree=TEXT              tree name                           [default: nominal]
+    --tree=TEXT              tree name                           [default: nominal_Loose]
     --maxevents=INT          maximum number of events to collate [default: none]
     --headings=BOOL          include headings at top of CSV file [default: true]
 """
@@ -66,7 +66,7 @@ with propyte.import_ganzfeld():
 import shijian
 
 name    = "ttHbb_ROOT_file_to_CSV_file"
-version = "2017-04-05T1140Z"
+version = "2017-04-19T2221Z"
 logo    = name
 
 def select_event(
@@ -78,7 +78,7 @@ def select_event(
     Select a HEP event.
     """
 
-    if selection == "ejets":
+    if "ejets" in selection:
         # Require a number of leptons.
         # Require >= 4 jets.
         # Require a single large-R jet.
@@ -89,7 +89,7 @@ def select_event(
             return True
         else:
             return False
-    if selection == "mujets":
+    if "mujets" in selection:
         # Require a number of leptons.
         # Require >= 4 jets.
         # Require a single large-R jet.
