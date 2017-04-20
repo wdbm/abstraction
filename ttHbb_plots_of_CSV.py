@@ -41,10 +41,12 @@ options:
     -s, --silent                 silent
     -u, --username=USERNAME      username
 
-    --infile=FILENAME            CSV input file                 [default: output.csv]
+    --infile=FILENAME            CSV input file                  [default: output.csv]
 
-    --histogramcomparisons=BOOL  generate histogram comparisons [default: true]
-    --scattermatrix=BOOL         generate scatter matrix        [default: true]
+    --histogramcomparisons=BOOL  generate histogram comparisons  [default: true]
+    --scattermatrix=BOOL         generate scatter matrix         [default: true]
+
+    --directoryplots=DIRECTORY   directory for plots             [default: plots]
 """
 
 from __future__ import division
@@ -59,7 +61,7 @@ import pyprel
 import shijian
 
 name    = "ttHbb_plots_of_CSV"
-version = "2017-04-14T1848Z"
+version = "2017-04-19T2345Z"
 logo    = name
 
 def main(options):
@@ -76,10 +78,10 @@ def main(options):
 
     print("")
 
-    filename_CSV  = options["--infile"]
-
+    filename_CSV               = options["--infile"]
     make_histogram_comparisons = options["--histogramcomparisons"].lower() == "true"
     make_scatter_matrix        = options["--scattermatrix"].lower() == "true"
+    directoryname_plots        = options["--directoryplots"]
 
     if not os.path.isfile(os.path.expandvars(filename_CSV)):
         log.error("file {filename} not found".format(
@@ -150,7 +152,7 @@ def main(options):
                 label_y       = "",
                 title         = feature_name,
                 filename      = filename,
-                directory     = "comparisons"
+                directory     = directoryname_plots
             )
 
     if make_scatter_matrix:
@@ -178,7 +180,12 @@ def main(options):
             )
             ax.get_xaxis().set_ticks([])
             ax.get_yaxis().set_ticks([])
-        plt.savefig(filename, dpi = 700)
+        if not os.path.exists(directoryname_plots):
+            os.makedirs(directoryname_plots)
+        plt.savefig(
+            directoryname_plots + "/" + filename,
+            dpi = 700
+        )
 
     print("")
 
