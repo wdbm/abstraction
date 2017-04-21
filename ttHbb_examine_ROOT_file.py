@@ -57,7 +57,7 @@ with propyte.import_ganzfeld():
 import shijian
 
 name    = "ttHbb_examine_ROOT_file"
-version = "2017-04-19T2225Z"
+version = "2017-04-21T0117Z"
 logo    = name
 
 def main(options):
@@ -113,7 +113,11 @@ def main(options):
     for name_object in names_objects:
         log.info("    " + name_object)
 
-    print("")
+    #print("")
+    #log.info("tree printout:")
+    #print("")
+    #tree.Print()
+    #print("")
 
     program.terminate()
 

@@ -35,31 +35,33 @@ rm data_preprocessed.csv
 
 filename_ttH="ttH_group.phys-higgs.10205167._000002.out.root"
 filename_ttbb="ttbb_group.phys-higgs.10205185._000001.out.root"
+number_events="25000"
 
 ./ttHbb_examine_ROOT_file.py     --fileroot="${filename_ttH}"
+./ttHbb_examine_ROOT_file.py     --fileroot="${filename_ttbb}"
 
 ./ttHbb_ROOT_file_to_CSV_file.py                                     \
                                  --fileroot="${filename_ttH}"        \
                                  --classlabel=1                      \
                                  --filecsv=data.csv                  \
-                                 --maxevents=1000                    \
+                                 --maxevents="${number_events}"      \
                                  --headings=true
 
 ./ttHbb_ROOT_file_to_CSV_file.py                                     \
                                  --fileroot="${filename_ttbb}"       \
                                  --classlabel=0                      \
                                  --filecsv=data.csv                  \
-                                 --maxevents=1000                    \
+                                 --maxevents="${number_events}"      \
                                  --headings=true
+
+./ttHbb_preprocess_CSV_file.py   --infile=data.csv                   \
+                                 --outfile=data_preprocessed.csv
 
 ./ttHbb_plots_of_CSV.py                                              \
                                  --infile=data.csv                   \
                                  --histogramcomparisons=true         \
                                  --scattermatrix=true                \
                                  --directoryplots=plots_raw
-
-./ttHbb_preprocess_CSV_file.py   --infile=data.csv                   \
-                                 --outfile=data_preprocessed.csv
 
 ./ttHbb_plots_of_CSV.py                                              \
                                  --infile=data_preprocessed.csv      \
