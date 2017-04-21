@@ -30,6 +30,8 @@ rm output_preprocessed.csv
 # ttHbb 2017-04
 
 ```Bash
+export TF_CPP_MIN_LOG_LEVEL=2
+
 rm data.csv
 rm data_preprocessed.csv
 

@@ -138,7 +138,7 @@ sudo apt-get install libcupti-dev
 
 # pip, Miniconda
 
-`pip` can install system-wide or locally. [Miniconda] can simplify the setup of Python, pip and other modules.
+`pip` can install system-wide or locally. Miniconda can simplify the setup of Python, pip and other modules.
 
 To install Miniconda, follow a procedure like the following:
 
@@ -151,15 +151,26 @@ Following the prompts. The default install directory is `${HOME}/miniconda2` or 
 
 # install TensorFlow
 
-Install TensorFlow 1.0.0.
+Install TensorFlow.
 
 ```Bash
 sudo apt-get -y install python-pip
 sudo apt-get -y install python-dev
 sudo pip install tensorflow-gpu
+#sudo pip install tensorflow # CPU
 ```
 
-# set up ROOT 2017-02-28
+# set up ROOT 2017-04-21
+
+Install CMake.
+
+```Bash
+sudo apt-get remove cmake
+
+wget https://cmake.org/files/v3.8/cmake-3.8.0-Linux-x86_64.sh
+sudo sh cmake-3.8.0-Linux-x86_64.sh --prefix=/opt/cmake
+PATH="/opt/cmake/cmake-3.8.0-Linux-x86_64/bin:"${PATH}""
+```
 
 Install ROOT.
 
@@ -178,7 +189,6 @@ sudo apt-get -y install cmus   \
                         htop   \
                         ranger \
                         tmux
-```
 
 sudo pip install tmux_control
 ```

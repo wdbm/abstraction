@@ -8,6 +8,12 @@ Updating logging procedures is under consideration because of possible logging c
 python script.py 2> >(grep -E -v "INFO|DEBUG")
 ```
 
+TensorFlow log level can be changed to exclude warnings:
+
+```Bash
+export TF_CPP_MIN_LOG_LEVEL=2
+```
+
 # examining databases
 
 A database can be examined using [datavision](https://github.com/wdbm/datavision) [view_database_SQLite.py](https://github.com/wdbm/datavision/blob/master/view_database_SQLite.py).
@@ -36,12 +42,6 @@ The following example accesses 30 utterances from all of the listed subreddits w
 
 ```Bash
 arcodex.py --numberOfUtterances 30 --subreddits=askreddit,changemyview,lgbt,machinelearning,particlephysics,technology,worldnews --verbose
-```
-
-The standard run 2014-10-28T202832Z is as follows:
-
-```Bash
-arcodex.py --numberOfUtterances 200 --subreddits=askreddit,changemyview,lgbt,machinelearning,particlephysics,technology,worldnews --verbose
 ```
 
 # vicodex, vicodex_2: view collated exchanges
@@ -115,3 +115,14 @@ fix_database.py --verbose 2> >(grep -E -v "INFO|DEBUG")
 # saving models
 
 Note that the file `checkpoint` in the saved model directory contains full paths.
+
+# run_archive.sh
+
+This is a regular archiving script (for Reddit, Twitter etc.). It can be run every 24 hours using the following procedure:
+
+```Bash
+while true; do
+    ./run_archive.sh
+    sleep 86400
+done
+```

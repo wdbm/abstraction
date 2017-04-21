@@ -67,7 +67,7 @@ import pyprel
 import shijian
 
 name    = "ttHbb_ROOT_file_to_CSV_file"
-version = "2017-04-21T0117Z"
+version = "2017-04-21T1632Z"
 logo    = name
 
 def select_event(
@@ -162,35 +162,13 @@ def main(options):
     ))
 
     headings = [
-        #"Aplan_bjets",
+        #"Aplan_bjets", # NAN
         "Aplan_jets",
         "Centrality_all",
         "ClassifBDTOutput_6jsplit",
         "ClassifBDTOutput_basic",
         "ClassifBDTOutput_withReco_6jsplit",
         "ClassifBDTOutput_withReco_basic",
-        "ClassifHPLUS_Semilep_HF_BDT200_Output",
-        "ClassifHPLUS_Semilep_HF_BDT225_Output",
-        "ClassifHPLUS_Semilep_HF_BDT250_Output",
-        "ClassifHPLUS_Semilep_HF_BDT275_Output",
-        "ClassifHPLUS_Semilep_HF_BDT300_Output",
-        "ClassifHPLUS_Semilep_HF_BDT350_Output",
-        "ClassifHPLUS_Semilep_HF_BDT400_Output",
-        "ClassifHPLUS_Semilep_HF_BDT500_Output",
-        "ClassifHPLUS_Semilep_INC_BDT1000_Output",
-        "ClassifHPLUS_Semilep_INC_BDT2000_Output",
-        "ClassifHPLUS_Semilep_INC_BDT200_Output",
-        "ClassifHPLUS_Semilep_INC_BDT225_Output",
-        "ClassifHPLUS_Semilep_INC_BDT250_Output",
-        "ClassifHPLUS_Semilep_INC_BDT275_Output",
-        "ClassifHPLUS_Semilep_INC_BDT300_Output",
-        "ClassifHPLUS_Semilep_INC_BDT350_Output",
-        "ClassifHPLUS_Semilep_INC_BDT400_Output",
-        "ClassifHPLUS_Semilep_INC_BDT500_Output",
-        "ClassifHPLUS_Semilep_INC_BDT600_Output",
-        "ClassifHPLUS_Semilep_INC_BDT700_Output",
-        "ClassifHPLUS_Semilep_INC_BDT800_Output",
-        "ClassifHPLUS_Semilep_INC_BDT900_Output",
         "dEtajj_MaxdEta",
         "dRbb_avg",
         "dRbb_MaxM",
@@ -293,7 +271,6 @@ def main(options):
         "semilepMVAreco_ttH_Ht_withH",
         "ttHF_mva_discriminant",
 
-        "el1_charge",
         "el1_d0sig",
         "el1_delta_z0_sintheta",
         "el1_e",
@@ -411,7 +388,7 @@ def main(options):
                 index_selected > maximum_number_of_events:
                 break
             line = [
-                #event.Aplan_bjets,
+                #event.Aplan_bjets, # NAN
                 event.Aplan_jets,
                 event.Centrality_all,
                 event.ClassifBDTOutput_6jsplit,
@@ -419,27 +396,6 @@ def main(options):
                 event.ClassifBDTOutput_withReco_6jsplit,
                 event.ClassifBDTOutput_withReco_basic,
                 event.ClassifHPLUS_Semilep_HF_BDT200_Output,
-                event.ClassifHPLUS_Semilep_HF_BDT225_Output,
-                event.ClassifHPLUS_Semilep_HF_BDT250_Output,
-                event.ClassifHPLUS_Semilep_HF_BDT275_Output,
-                event.ClassifHPLUS_Semilep_HF_BDT300_Output,
-                event.ClassifHPLUS_Semilep_HF_BDT350_Output,
-                event.ClassifHPLUS_Semilep_HF_BDT400_Output,
-                event.ClassifHPLUS_Semilep_HF_BDT500_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT1000_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT2000_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT200_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT225_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT250_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT275_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT300_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT350_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT400_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT500_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT600_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT700_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT800_Output,
-                event.ClassifHPLUS_Semilep_INC_BDT900_Output,
                 event.dEtajj_MaxdEta,
                 event.dRbb_avg,
                 event.dRbb_MaxM,
@@ -542,7 +498,6 @@ def main(options):
                 event.semilepMVAreco_ttH_Ht_withH,
                 event.ttHF_mva_discriminant,
 
-                #event.el_charge[0],
                 event.el_d0sig[0],
                 event.el_delta_z0_sintheta[0],
                 event.el_e[0],
