@@ -9,7 +9,7 @@ def main():
 
     setuptools.setup(
         name             = "abstraction",
-        version          = "2017.03.21.1618",
+        version          = "2017.04.24.1405",
         description      = "machine learning framework",
         long_description = long_description(),
         url              = "https://github.com/wdbm/abstraction",
@@ -20,7 +20,7 @@ def main():
                            "abstraction"
                            ],
         install_requires = [
-                           "bs4",
+                           "beautifulsoup4",
                            "dataset",
                            "datavision",
                            "flask",

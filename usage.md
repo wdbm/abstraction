@@ -118,7 +118,7 @@ Note that the file `checkpoint` in the saved model directory contains full paths
 
 # run_archive.sh
 
-This is a regular archiving script (for Reddit, Twitter etc.). It can be run every 24 hours using the following procedure:
+This is a regular archiving script (for Reddit, Twitter etc.). It can be run every 24 hours using the following procedure, which is available using script `run_archive_loop_24_hours.sh`:
 
 ```Bash
 while true; do
