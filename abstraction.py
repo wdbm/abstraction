@@ -31,7 +31,7 @@
 ################################################################################
 from __future__ import division
 
-version = "2017-04-24T1405Z"
+version = "2017-04-24T1430Z"
 
 import collections
 import csv
@@ -62,6 +62,7 @@ import praw
 import propyte
 import pyprel
 import requests
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 import tensorflow.contrib.learn
 import sklearn
 import sklearn.cross_validation
