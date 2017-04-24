@@ -156,8 +156,8 @@ Install TensorFlow.
 ```Bash
 sudo apt-get -y install python-pip
 sudo apt-get -y install python-dev
-sudo pip install tensorflow-gpu
-#sudo pip install tensorflow # CPU
+pip install tensorflow-gpu
+#pip install tensorflow # CPU
 ```
 
 # set up ROOT 2017-04-21
@@ -190,7 +190,7 @@ sudo apt-get -y install cmus   \
                         ranger \
                         tmux
 
-sudo pip install tmux_control
+pip install tmux_control
 ```
 
 # set up other dependencies and abstraction (2017-03-21 upcoming)
@@ -203,11 +203,17 @@ sudo apt-get -y install festival    \
                         sqliteman   \
                         python-nltk
 
+pip install nltk
+
 sudo python -m nltk.downloader all
 
 sudo easy_install -U gensim
 
-sudo pip install abstraction
+pip install gensim
+
+pip install sklearn
+
+pip install abstraction
 
 git clone https://github.com/wdbm/abstraction.git
 ```
