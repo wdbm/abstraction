@@ -4,6 +4,22 @@
 
 Standardization of datasets is a common requirement for many machine learning estimators implemented in the scikit; they might behave badly if the individual features do not more or less look like standard normally-distributed data: Gaussian with zero mean and unit variance -- often called a standard scores. Many machine learning algorithms assume that all features are centered around zero and have variance of the same order. A feature with a variance that is orders of magnitude larger that others might dominate the objective function and make the estimator unable to learn from other features. The scikit function `scale` provides a quick way to perform this operation on a single array-like dataset.
 
+# imputation
+
+Imputation is the process of replacing missing data with substituted values. There are various methods to impute missing values. Sometimes it is better to remove null values directly and sometimes it is better to use sophisticated mining techniques to impute the values. Initially, why data is missing should be investigated, there should be an analysis of the distribution of missing data and then an imputation strategy should be selected that yields the least biased estimates.
+
+Listwise (complete case) deletion excludes an entire record from analysis if any single value of the record is missing. This affects the statistical power of the tests conducted because statistical power relies in part on sample size. Listwise deletion is problematic when the reasons for data being missing are not random and can result in a bias in data findings.
+
+A global constant can be used in place of a missing value. This makes the distinction between empty and missing values. Empty values can be vital for an analysis. If the missing values of a vital variable cannot be differentiated from "empty" then they can be categorized as a different value from the rest of the data set using a global constant such as "NA".
+
+Domain knowledge can be used to replace the missing value. Experts can suggest a reasonable value for missing data.
+
+Attribute mean or median (for numerical data) or mode (for categorical data) can be used to replace missing data. This reduces the variability of the data, which weakens the correlation estimates.
+
+An indicator variable can be used for missing values.
+
+A data-mining algorithm can be used to predict a probably value for the missing value.
+
 # data sets sources
 
 - <https://www.kaggle.com/>
