@@ -9,7 +9,7 @@ def main():
 
     setuptools.setup(
         name             = "abstraction",
-        version          = "2017.04.24.1543",
+        version          = "2017.04.27.2102",
         description      = "machine learning framework",
         long_description = long_description(),
         url              = "https://github.com/wdbm/abstraction",
@@ -37,7 +37,8 @@ def main():
                            "tonescale"
                            ],
         scripts          = [
-                           "abstraction_interface.py"
+                           "abstraction_interface.py",
+                           "gpudeets.py"
                            ],
         entry_points     = """
             [console_scripts]

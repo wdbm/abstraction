@@ -33,7 +33,11 @@ Sun Feb 26 22:42:48 2017
 tmux-control.py --nvidia
 ```
 
-[gpustat](https://github.com/wookayin/gpustat) is a simple command-line script (wrapper for `nvidia-smi` for querying and monitoring GPU status.
+The script `gpudeets.py` is a simple command-line script wrapper for `nvidia-smi` for querying and monitoring GPU status, as is [gpustat](https://github.com/wookayin/gpustat).
+
+```Python
+gpudeets.py --interval=3
+```
 
 # CUDA Samples
 
