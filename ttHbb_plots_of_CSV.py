@@ -44,8 +44,9 @@ options:
     --infile=FILENAME            CSV input file                  [default: output.csv]
 
     --histogramcomparisons=BOOL  generate histogram comparisons  [default: true]
-    --scattermatrix=BOOL         generate scatter matrix         [default: true]
+    --scattermatrix=BOOL         generate scatter matrix         [default: false]
     --eventimages=BOOL           generate event images           [default: true]
+    --numberofeventimages=INT    number of event images          [default: 100]
 
     --directoryplots=DIRECTORY   directory for plots             [default: plots]
 """
@@ -62,7 +63,7 @@ import pyprel
 import shijian
 
 name    = "ttHbb_plots_of_CSV"
-version = "2017-04-28T0705Z"
+version = "2017-04-28T1832Z"
 logo    = name
 
 def main(options):
@@ -83,6 +84,7 @@ def main(options):
     make_histogram_comparisons = options["--histogramcomparisons"].lower() == "true"
     make_scatter_matrix        = options["--scattermatrix"].lower() == "true"
     make_event_images          = options["--eventimages"].lower() == "true"
+    number_of_event_images     = int(options["--numberofeventimages"])
     directoryname_plots        = options["--directoryplots"]
 
     if not os.path.isfile(os.path.expandvars(filename_CSV)):
@@ -150,7 +152,7 @@ def main(options):
                 values_2      = list(data_class_1[feature_name]),
                 label_1       = "ttbb",
                 label_2       = "ttH",
-                label_ratio_x = "frequency",
+                label_ratio_x = "",
                 label_y       = "",
                 title         = feature_name,
                 filename      = filename,
@@ -196,13 +198,11 @@ def main(options):
         if not os.path.exists(directoryname):
             os.makedirs(directoryname)
 
-        number_of_images = 100
-
         for class_label in [0, 1]:
 
             data_class = data.loc[data["class"] == class_label]
 
-            for index, row in data_class[0:number_of_images].iterrows():
+            for index, row in data_class[0:number_of_event_images].iterrows():
                 image = datavision.NumPy_array_pad_square_shape(
                     array     = row.as_matrix(),
                     pad_value = -4

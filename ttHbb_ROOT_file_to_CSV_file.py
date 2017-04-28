@@ -45,7 +45,7 @@ options:
     --fileroot=FILENAME      ROOT file                           [default: output.root]
     --filecsv=FILENAME       CSV file                            [default: output.csv]
 
-    --selection=TEXT         channel selection (ejets, mujets)   [default: ejets]
+    --selection=TEXT         channel selection (ejets, mujets)   [default: all]
     --classlabel=TEXT        class label for last column
 
     --tree=TEXT              tree name                           [default: nominal_Loose]
@@ -68,7 +68,7 @@ import pyprel
 import shijian
 
 name    = "ttHbb_ROOT_file_to_CSV_file"
-version = "2017-04-28T1739Z"
+version = "2017-04-28T1810Z"
 logo    = name
 
 def select_event(
@@ -154,8 +154,9 @@ class Variable_ttHbb(object):
 
         if self._value is None:
             self._value = shijian.get_attribute(
-                object_instance = self._event,
-                name            = self._name
+                object_instance          = self._event,
+                name                     = self._name,
+                imputation_default_value = -4
             )
 
         if self._impude:
@@ -366,7 +367,7 @@ def main(options):
     for index, event in enumerate(tree):
         if select_event(
             event     = event,
-            selection = "ejets"
+            selection = selection
             ):
             index_selected = index_selected + 1
             if                                           \
@@ -482,14 +483,13 @@ def main(options):
                 Variable_ttHbb(event = event, name = "el_pt[0]"),
                 Variable_ttHbb(event = event, name = "el_topoetcone20[0]"),
 
-                #Variable_ttHbb(event = event, name = "mu_charge[0]"),
-                #Variable_ttHbb(event = event, name = "mu_d0sig[0]"),
-                #Variable_ttHbb(event = event, name = "mu_delta_z0_sintheta[0]"),
-                #Variable_ttHbb(event = event, name = "mu_e[0]"),
-                #Variable_ttHbb(event = event, name = "mu_eta[0]"),
-                #Variable_ttHbb(event = event, name = "mu_phi[0]"),
-                #Variable_ttHbb(event = event, name = "mu_pt[0]"),
-                #Variable_ttHbb(event = event, name = "mu_topoetcone20[0]"),
+                Variable_ttHbb(event = event, name = "mu_d0sig[0]"),
+                Variable_ttHbb(event = event, name = "mu_delta_z0_sintheta[0]"),
+                Variable_ttHbb(event = event, name = "mu_e[0]"),
+                Variable_ttHbb(event = event, name = "mu_eta[0]"),
+                Variable_ttHbb(event = event, name = "mu_phi[0]"),
+                Variable_ttHbb(event = event, name = "mu_pt[0]"),
+                Variable_ttHbb(event = event, name = "mu_topoetcone20[0]"),
 
                 Variable_ttHbb(event = event, name = "jet_e[0]"),
                 Variable_ttHbb(event = event, name = "jet_eta[0]"),
