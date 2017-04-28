@@ -45,6 +45,7 @@ options:
 
     --histogramcomparisons=BOOL  generate histogram comparisons  [default: true]
     --scattermatrix=BOOL         generate scatter matrix         [default: true]
+    --eventimages=BOOL           generate event images           [default: true]
 
     --directoryplots=DIRECTORY   directory for plots             [default: plots]
 """
@@ -61,7 +62,7 @@ import pyprel
 import shijian
 
 name    = "ttHbb_plots_of_CSV"
-version = "2017-04-19T2345Z"
+version = "2017-04-28T0705Z"
 logo    = name
 
 def main(options):
@@ -81,6 +82,7 @@ def main(options):
     filename_CSV               = options["--infile"]
     make_histogram_comparisons = options["--histogramcomparisons"].lower() == "true"
     make_scatter_matrix        = options["--scattermatrix"].lower() == "true"
+    make_event_images          = options["--eventimages"].lower() == "true"
     directoryname_plots        = options["--directoryplots"]
 
     if not os.path.isfile(os.path.expandvars(filename_CSV)):
@@ -186,6 +188,36 @@ def main(options):
             directoryname_plots + "/" + filename,
             dpi = 700
         )
+
+    if make_event_images:
+
+        directoryname = "event_images"
+
+        if not os.path.exists(directoryname):
+            os.makedirs(directoryname)
+
+        number_of_images = 100
+
+        for class_label in [0, 1]:
+
+            data_class = data.loc[data["class"] == class_label]
+
+            for index, row in data_class[0:number_of_images].iterrows():
+                image = datavision.NumPy_array_pad_square_shape(
+                    array     = row.as_matrix(),
+                    pad_value = -4
+                )
+                plt.imshow(
+                    image,
+                    cmap          = "Greys",
+                    interpolation = "nearest"
+                )
+                filename = "event_image_class_" + str(class_label) + "_index_" + str(index) + ".png"
+                log.info("save event image {filename}".format(filename = filename))
+                plt.savefig(
+                    directoryname + "/" + filename,
+                    dpi = 200
+                )
 
     print("")
 
