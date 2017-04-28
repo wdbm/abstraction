@@ -36,86 +36,122 @@ usage:
     program [options]
 
 options:
-    -h, --help      display help message
-    --version       display version and exit
-    --interval=INT  time between each loop (s) [default: 1]
-    --table         table display
+    -h, --help          display help message
+    --version           display version and exit
+    --interval=INT      time between each loop (s) [default: 1]
+    --graphpower        power graph display
+    --graphtemperature  temperature graph display
+    --table             table display
 """
 
 name    = "gpudeets"
-version = "2017-04-27T2058Z"
+version = "2017-04-28T1733Z"
 
 import datetime
 import docopt
 import time
 
+import datavision
 import pyprel
 import shijian
 
 def main(options):
 
-    interval = int(options["--interval"])
-    table    = options["--table"]
+    interval          = int(options["--interval"])
+    graph_power       = options["--graphpower"]
+    graph_temperature = options["--graphtemperature"]
+    table             = options["--table"]
 
-    command = "nvidia-smi "              \
-                  "--query-gpu="         \
-                      "name,"            \
-                      "temperature.gpu," \
-                      "utilization.gpu," \
-                      "memory.used,"     \
-                      "memory.total,"    \
-                      "pstate "          \
-                  "--format="            \
-                      "csv,"             \
-                      "noheader"
+    command_general     = "nvidia-smi "                      \
+                              "--query-gpu="                 \
+                                  "name,"                    \
+                                  "temperature.gpu,"         \
+                                  "power.draw,"              \
+                                  "memory.used,"             \
+                                  "memory.total,"            \
+                                  "utilization.gpu "         \
+                              "--format="                    \
+                                  "csv,"                     \
+                                  "noheader"
+
+    command_power       = "nvidia-smi "                      \
+                              "--query-gpu=power.draw "      \
+                              "--format=csv,noheader"
+
+    command_temperature = "nvidia-smi "                      \
+                              "--query-gpu=temperature.gpu " \
+                              "--format=csv,noheader"
+
+    measurements = []
 
     try:
 
         while True:
 
-            timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H%M%SZ")
-            result    = shijian.engage_command(command = command)
-            data      = [datum.strip() for datum in result.split(",")]
+            if not graph_power and not graph_temperature:
 
-            if table:
+                timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H%M%SZ")
+                result    = shijian.engage_command(command = command_general)
+                data      = [datum.strip() for datum in result.split(",")]
 
-                temperature       = str(data[1] + " °C")
-                utilization       = str(data[2])
-                memory_used       = str(data[3])
-                memory_total      = str(data[4])
-                performance_state = str(data[5])
+                temperature  = str(data[1] + " °C")
+                power_draw   = str(data[2])
+                utilization  = str(data[3])
+                memory_used  = str(data[4])
+                memory_total = str(data[5])
 
-                print(pyprel.Table(
-                contents = [[
-                               timestamp,
-                               temperature,
-                               utilization,
-                               memory_used,
-                               memory_total,
-                               performance_state
-                           ]]
-                ))
+                if table:
 
-            else:
+                    print(pyprel.Table(
+                    contents = [[
+                                   timestamp,
+                                   temperature,
+                                   utilization,
+                                   memory_used,
+                                   memory_total,
+                                   power_draw
+                               ]]
+                    ))
 
-                temperature       = str(data[1] + " °C").rjust(7)
-                utilization       = str(data[2]).rjust(5)
-                memory_used       = str(data[3]).rjust(8)
-                memory_total      = str(data[4]).rjust(8)
-                performance_state = str(data[5]).rjust(2)
+                else:
 
-                print(
-                    "|{timestamp}|{temperature}|{utilization}|{memory_used}|"\
-                    "{memory_total}|{performance_state}|".format(
-                    timestamp         = timestamp,
-                    temperature       = temperature,
-                    utilization       = utilization,
-                    memory_used       = memory_used,
-                    memory_total      = memory_total,
-                    performance_state = performance_state
-                ))
+                    temperature  = temperature.rjust(5)
+                    power_draw   = power_draw.rjust(7)
+                    utilization  = utilization.rjust(8)
+                    memory_used  = memory_used.rjust(8)
+                    memory_total = memory_total.rjust(5)
 
-            time.sleep(interval)
+                    print(
+                        "|{timestamp}|{temperature}|{power_draw}"\
+                        "|{utilization}|{memory_used}|{memory_total}|".format(
+                        timestamp    = timestamp,
+                        temperature  = temperature,
+                        power_draw   = power_draw,
+                        utilization  = utilization,
+                        memory_used  = memory_used,
+                        memory_total = memory_total
+                    ))
+
+                time.sleep(interval)
+
+            elif graph_power or graph_temperature:
+
+                if graph_power:
+                    result = shijian.engage_command(command = command_power)
+                    result = result.strip().strip(" W")
+                elif graph_temperature:
+                    result = shijian.engage_command(command = command_temperature)
+                measurements.append(float(result.strip()))
+                measurements = measurements[-20:]
+
+                y = measurements
+                x = range(0, len(y))
+                plot = datavision.TTYFigure()
+                tmp = plot.plot(x, y, marker = "_o")
+                print(tmp)
+
+                time.sleep(interval)
+                print(chr(27) + "[2J")
 
     except KeyboardInterrupt:
 

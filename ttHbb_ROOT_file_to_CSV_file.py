@@ -68,12 +68,12 @@ import pyprel
 import shijian
 
 name    = "ttHbb_ROOT_file_to_CSV_file"
-version = "2017-04-27T1150Z"
+version = "2017-04-28T1739Z"
 logo    = name
 
 def select_event(
     event     = None,
-    selection = "ejets"
+    selection = "all"
     ):
 
     """
@@ -83,9 +83,9 @@ def select_event(
     if "ejets" in selection:
 
         conditions = [
-            event.nElectrons == 1, # Require 1 electron.
-            event.nJets >= 4,      # Require >= 4 jets.
-            #event.nLjets >= 1     # Require a single large-R jet.
+            event.nElectrons == 1,                      # Require 1 electron.
+            event.nJets >= 4,                           # Require >= 4 jets.
+            #event.nLjets >= 1                          # Require a single large-R jet.
         ]
 
         if all(conditions):
@@ -96,9 +96,22 @@ def select_event(
     elif "mujets" in selection:
 
         conditions = [
-            event.nMuons,          # Require 1 muon.
-            event.nJets >= 4,      # Require >= 4 jets.
-            #event.nLjets >= 1     # Require a single large-R jet.
+            event.nMuons == 1,                          # Require 1 muon.
+            event.nJets >= 4,                           # Require >= 4 jets.
+            #event.nLjets >= 1                          # Require a single large-R jet.
+        ]
+
+        if all(conditions):
+            return True
+        else:
+            return False
+
+    elif "all" in selection:
+
+        conditions = [
+            event.nElectrons == 1 or event.nMuons == 1, # Require 1 electron or 1 muon.
+            event.nJets >= 4,                           # Require >= 4 jets.
+            #event.nLjets >= 1                          # Require a single large-R jet.
         ]
 
         if all(conditions):
@@ -128,7 +141,8 @@ class Variable_ttHbb(object):
                          -2:   -4,
                          -3:   -4,
                          -9:   -4,
-                         -999: -4
+                         -999: -4,
+                         None: -4
                      }
         ):
 
@@ -139,12 +153,10 @@ class Variable_ttHbb(object):
         self._imputation = imputation
 
         if self._value is None:
-            if "[" in self._name and "]" in self._name:
-                index = int(self._name.split("[")[1].split("]")[0])
-                attribute = self._name.split("[")[0]
-                self._value = getattr(self._event, attribute)[index]
-            else:
-                self._value = getattr(self._event, self._name)
+            self._value = shijian.get_attribute(
+                object_instance = self._event,
+                name            = self._name
+            )
 
         if self._impude:
             self.impude()
@@ -165,8 +177,9 @@ class Variable_ttHbb(object):
         self
         ):
 
-        if self._impude:
-            if any(element in self._name for element in [
+        if\
+            self._impude and\
+            any(element in self._name for element in [
                 "Aplan_jets",
                 "Aplan_bjets",
                 "Centrality_all",

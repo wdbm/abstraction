@@ -39,6 +39,10 @@ The script `gpudeets.py` is a simple command-line script wrapper for `nvidia-smi
 gpudeets.py --interval=3
 ```
 
+```Python
+gpudeets.py --graphpower
+```
+
 # CUDA Samples
 
 ```Bash
