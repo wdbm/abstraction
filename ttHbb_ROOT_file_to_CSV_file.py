@@ -68,7 +68,7 @@ import pyprel
 import shijian
 
 name    = "ttHbb_ROOT_file_to_CSV_file"
-version = "2017-04-28T1810Z"
+version = "2017-05-02T1641Z"
 logo    = name
 
 def select_event(
@@ -131,32 +131,33 @@ class Variable_ttHbb(object):
 
     def __init__(
         self,
-        name       = None,
-        value      = None,
-        event      = None,
-        impude     = True,
-        imputation = {
-                          0:   -4,
-                         -1:   -4,
-                         -2:   -4,
-                         -3:   -4,
-                         -9:   -4,
-                         -999: -4,
-                         None: -4
-                     }
+        name                    = None,
+        value                   = None,
+        event                   = None,
+        impude                  = True,
+        imputation_value_global = None#-4
         ):
 
-        self._name       = name
-        self._value      = value
-        self._event      = event
-        self._impude     = impude
-        self._imputation = imputation
+        self._name                    = name
+        self._value                   = value
+        self._event                   = event
+        self._impude                  = impude
+        self._imputation_value_global = imputation_value_global
+        self._imputation              = {
+                                             0:   self._imputation_value_global,
+                                            -1:   self._imputation_value_global,
+                                            -2:   self._imputation_value_global,
+                                            -3:   self._imputation_value_global,
+                                            -9:   self._imputation_value_global,
+                                            -999: self._imputation_value_global,
+                                            None: self._imputation_value_global
+                                        }
 
         if self._value is None:
             self._value = shijian.get_attribute(
                 object_instance          = self._event,
                 name                     = self._name,
-                imputation_default_value = -4
+                imputation_default_value = self._imputation_value_global
             )
 
         if self._impude:
@@ -289,8 +290,11 @@ class Variable_ttHbb(object):
                 "ljet_tau32",
                 "ljet_tau32_wta"
             ]):
-                if math.isnan(self._value):
-                    self._value = -4
+                if self._value is None:
+                    self._value = self._imputation_value_global
+                if isinstance(self._value, int) or isinstance(self._value, float):
+                    if math.isnan(self._value):
+                        self._value = self._imputation_value_global
                 if self._value in self._imputation:
                     self._value = self._imputation[self._value]
 

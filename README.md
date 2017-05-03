@@ -13,7 +13,7 @@ Project abstraction is a work-in-progress neural network project using similar a
 |[data](data.md)                |data preprocessing and standardization, HEP data, conversation data|
 |[word vectors](word_vectors.md)|word vectors and related language modeling                         |
 |[usage](usage.md)              |usage of abstraction and related utilities                         |
-|[ttHbb](ttHbb.md)              |ttH, H to bb analysis                                              |
+|[ttHbb](ttHbb.ipynb)           |ttH, H to bb analysis                                              |
 |[TensorFlow](TensorFlow.ipynb) |TensorFlow framework                                               |
 |[Torch](Torch.md)              |Torch framework                                                    |
 |[Caffe](Caffe.md)              |Caffe framework                                                    |
@@ -22,7 +22,7 @@ Project abstraction is a work-in-progress neural network project using similar a
 
 # upcoming
 
-Under consideration is a requirement for arcodex to ensure the existence of a response to an utterance before saving to database. Under consideration is changing from SkFlow to TF Learn.
+Under consideration is a requirement for arcodex to ensure the existence of a response to an utterance before saving to database. In progress is changing from SkFlow to TF Learn.
 
 # related projects
 
