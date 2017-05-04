@@ -13,7 +13,7 @@ Project abstraction is a work-in-progress neural network project using similar a
 |[data](data.md)                |data preprocessing and standardization, HEP data, conversation data|
 |[word vectors](word_vectors.md)|word vectors and related language modeling                         |
 |[usage](usage.md)              |usage of abstraction and related utilities                         |
-|[ttHbb](ttHbb.ipynb)           |${t\bar{t}H\left(b\bar{b}\right)}$ analysis                        |
+|[ttHbb](ttHbb.ipynb)           |ttHbb analysis                                                     |
 |[TensorFlow](TensorFlow.ipynb) |TensorFlow framework                                               |
 |[Torch](Torch.md)              |Torch framework                                                    |
 |[Caffe](Caffe.md)              |Caffe framework                                                    |
