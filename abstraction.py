@@ -71,7 +71,7 @@ with propyte.import_ganzfeld():
     from ROOT import *
 
 name    = "abstraction"
-version = "2017-05-18T1544Z"
+version = "2017-05-18T1550Z"
 
 log = logging.getLogger(__name__)
 

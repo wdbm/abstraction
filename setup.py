@@ -9,7 +9,7 @@ def main():
 
     setuptools.setup(
         name             = "abstraction",
-        version          = "2017.04.27.2102",
+        version          = "2017.05.18.1550",
         description      = "machine learning framework",
         long_description = long_description(),
         url              = "https://github.com/wdbm/abstraction",
@@ -23,6 +23,7 @@ def main():
                            "beautifulsoup4",
                            "dataset",
                            "datavision",
+                           "docopt",
                            "flask",
                            "jupyter",
                            "numpy",
@@ -41,9 +42,9 @@ def main():
                            "gpudeets.py"
                            ],
         entry_points     = """
-            [console_scripts]
-            abstraction = abstraction:abstraction
-        """
+                           [console_scripts]
+                           abstraction = abstraction:abstraction
+                           """
     )
 
 def long_description(
