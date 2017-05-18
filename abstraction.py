@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 ################################################################################
 #                                                                              #
 # abstraction                                                                  #
@@ -29,10 +30,8 @@
 # <http://www.gnu.org/licenses/>.                                              #
 #                                                                              #
 ################################################################################
+
 from __future__ import division
-
-version = "2017-04-24T1543Z"
-
 import collections
 import csv
 import datetime
@@ -70,6 +69,9 @@ import sklearn.metrics
 import shijian
 with propyte.import_ganzfeld():
     from ROOT import *
+
+name    = "abstraction"
+version = "2017-05-18T1544Z"
 
 log = logging.getLogger(__name__)
 
@@ -909,6 +911,10 @@ def save_tweets_of_top_followed_users_Twitter_to_database(
 
     usernames = top_followed_users_Twitter()
 
+    user_rankings = {}
+    for index, username in enumerate(usernames):
+        user_rankings[username] = index + 1
+
     tweets    = access_users_tweets(
                     usernames = usernames,
                     detail    = detail
@@ -926,6 +932,7 @@ def save_tweets_of_top_followed_users_Twitter_to_database(
         table.insert(dict(
             time_UNIX = str(tweet.time),
             username  = str(tweet.username).decode("utf-8", "ignore").encode("ascii", "ignore"),
+            rank      = str(user_rankings[tweet.username]),
             text      = str(tweet.text).decode("utf-8", "ignore").encode("ascii", "ignore"),
             reference = str(tweet.ID),
             sentiment = str(tweet.sentiment)
