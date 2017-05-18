@@ -39,6 +39,7 @@ import inspect
 import itertools
 import logging
 import math
+import operator
 import os
 import pickle
 import re
@@ -71,7 +72,7 @@ with propyte.import_ganzfeld():
     from ROOT import *
 
 name    = "abstraction"
-version = "2017-05-18T1726Z"
+version = "2017-05-18T2050Z"
 
 log = logging.getLogger(__name__)
 
@@ -93,30 +94,73 @@ def setup():
 #                                                                              #
 ################################################################################
 
+@shijian.timer
 def generate_response(
     utterance                      = None,
-    style                          = "2016-06-15T1456Z",
+    style                          = "2017-05-18T2017Z",
     sentiment_utterance            = True,
     confidence_sentiment_utterance = True
     ):
-    response = "hello world"
-    if sentiment_utterance:
-        sentiment_analysis = sentiment(
-            text       = utterance,
-            confidence = True
+
+    response = "unable to generate response"
+
+    if style == "2016-06-15T1456Z":
+
+        response = "hello world"
+        if sentiment_utterance:
+            sentiment_analysis = sentiment(
+                text       = utterance,
+                confidence = True
+            )
+            if confidence_sentiment_utterance:
+                sentiment_utterance_text =\
+                    "utterance sentiment: {sentiment}, utterance sentiment confidence: {confidence}".format(
+                        sentiment  = sentiment_analysis[0],
+                        confidence = sentiment_analysis[1]
+                    )
+            else:
+                sentiment_utterance_text =\
+                    "utterance sentiment: {sentiment}".format(
+                        sentiment  = sentiment_analysis
+                    )
+            response = response + " (" + sentiment_utterance_text + ")"
+
+    if style == "2017-05-18T2017Z":
+
+        database = dataset.connect(
+            "sqlite:///{filename_database}".format(
+                filename_database = "database.db"
+            )
         )
-        if confidence_sentiment_utterance:
-            sentiment_utterance_text =\
-                "utterance sentiment: {sentiment}, utterance sentiment confidence: {confidence}".format(
-                    sentiment  = sentiment_analysis[0],
-                    confidence = sentiment_analysis[1]
+        table = database["exchanges"]
+        model_word2vec = load_word_vector_model(
+            filename = "Brown_corpus.wvm"
+        )
+
+        matches = []
+        for row in table:
+            if match_sentence(
+                utterance,
+                row["utterance"],
+                model_word2vec = model_word2vec
+                ):
+                angle = match_sentence(
+                    utterance,
+                    row["utterance"],
+                    model_word2vec = model_word2vec,
+                    return_angle   = True
                 )
-        else:
-            sentiment_utterance_text =\
-                "utterance sentiment: {sentiment}".format(
-                    sentiment  = sentiment_analysis
+                row.angle = angle
+                matches.append(row)
+        if matches:
+            match = max(matches, key = operator.attrgetter("angle"))
+            response = match["response"]
+            if sentiment_utterance:
+                sentiment_analysis = sentiment(
+                    text = response
                 )
-        response = response + " (" + sentiment_utterance_text + ")"
+                response = response + " (sentiment: " + sentiment_analysis + ")"
+
     return response
 
 ################################################################################
@@ -851,6 +895,7 @@ class Tweets(list):
             contents = table_contents
         )
 
+@shijian.timer
 def access_users_tweets(
     usernames = [
                 "AndrewYNg",
@@ -893,6 +938,7 @@ def access_users_tweets(
 
     return Tweets(tweets)
 
+@shijian.timer
 def top_followed_users_Twitter():
 
     URL         = "http://twittercounter.com/pages/100"
@@ -904,6 +950,7 @@ def top_followed_users_Twitter():
 
     return usernames
 
+@shijian.timer
 def save_tweets_of_top_followed_users_Twitter_to_database(
     filename = "Twitter.db",
     detail   = True
@@ -939,6 +986,44 @@ def save_tweets_of_top_followed_users_Twitter_to_database(
         ))
 
         print(progress.add_datum(fraction = (index + 1) / progress_extent))
+
+@shijian.timer
+def distance_Levenshtein(source, target):
+
+    if len(source) < len(target):
+        return distance_Levenshtein(target, source)
+
+    if len(target) == 0:
+        return len(source)
+
+    # Use tuples to force strings to be used as sequences.
+    source = numpy.array(tuple(source))
+    target = numpy.array(tuple(target))
+
+    # Use a dynamic programming algorithm, but with the optimization that the
+    # last two rows only of the matrix are needed.
+    previous_row = numpy.arange(target.size + 1)
+    for s in source:
+        # insertion:
+        # The target grows longer than the source.
+        current_row = previous_row + 1
+
+        # substitution or matching:
+        # The target and source items are aligned, and either are different
+        # (with a cost of 1) or are the same (with cost of 0).
+        current_row[1:] = numpy.minimum(
+                current_row[1:],
+                numpy.add(previous_row[:-1], target != s))
+
+        # deletion:
+        # The target grows shorter than the source.
+        current_row[1:] = numpy.minimum(
+                current_row[1:],
+                current_row[0:-1] + 1)
+
+        previous_row = current_row
+
+    return previous_row[-1]
 
 ################################################################################
 #                                                                              #
@@ -1198,6 +1283,80 @@ def convert_sentence_string_to_word_vector(
     # Combine all of the word vectors into one word vector by summation.
     sentence_word_vector = sum(word_vectors)
     return sentence_word_vector
+
+@shijian.timer
+def match_sentence(
+    source              = None,
+    target              = None,
+    number_word_matches = 3,
+    angle_limit         = 1.02,
+    model_word2vec      = None,
+    return_angle        = False
+    ):
+
+    try:
+        model_word2vec
+    except:
+        model_word2vec = load_word_vector_model(
+            filename = "Brown_corpus.wvm"
+        )
+
+    # Split text into words.
+
+    source_words = source.split()
+    target_words = target.split()
+
+    # Remove common words.
+
+    remove_words = [
+        ".",
+        ",",
+        "-",
+        "?",
+        "a",
+        "the",
+        "are"
+    ]
+    source_words = [element for element in source_words if element.lower() not in remove_words]
+    target_words = [element for element in target_words if element.lower() not in remove_words]
+
+    # Ensure some word matches or that the longest word is present.
+
+    if len(list(set(source_words).intersection(target_words))) < number_word_matches or max(source_words, key = len) not in target_words:
+
+        return False
+
+    # Make word vector comparison.
+
+    source_WV =\
+        convert_sentence_string_to_word_vector(
+            sentence_string = source,
+            model_word2vec  = model_word2vec
+        )
+
+    target_WV =\
+        convert_sentence_string_to_word_vector(
+            sentence_string = target,
+            model_word2vec  = model_word2vec
+        )
+
+    #magnitude_source_WV = datavision.magnitude(source_WV)
+    #magnitude_target_WV = datavision.magnitude(target_WV)
+
+    #magnitude_difference = abs(magnitude_source_WV - magnitude_target_WV)
+    angle                = datavision.angle(source_WV, target_WV)
+
+    if angle <= angle_limit:
+
+        if return_angle:
+
+            return angle
+
+        else:
+
+            return True
+
+    return False
 
 ################################################################################
 #                                                                              #
@@ -1526,6 +1685,7 @@ def hypersearch(
         print(progress.add_datum(fraction = (index + 1) / len(hyperpoints)))
         pyprel.print_line()
 
+@shijian.timer
 def analyze_hypermap(
     hypermap                    = None,
     number_of_best_score_models = 6
@@ -1682,9 +1842,11 @@ def analyze_hypermap(
 #                                                                              #
 ################################################################################
 
+@shijian.timer
 def word_features(words):
     return dict([(word, True) for word in words])
 
+@shijian.timer
 def train_and_save_naive_Bayes_classifier(
     filename = "naive_Bayes_classifier"
     ):
@@ -1732,6 +1894,7 @@ def train_and_save_naive_Bayes_classifier(
     log.info("save model to {filename}".format(filename = filename))
     pickle.dump(classifier, open(filename, "wb"))
 
+@shijian.timer
 def load_naive_Bayes_classifier(
     filename = "naive_Bayes_classifier"
     ):
@@ -1739,6 +1902,7 @@ def load_naive_Bayes_classifier(
 
 global classifier
 classifier = load_naive_Bayes_classifier()
+@shijian.timer
 def sentiment(
     text       = None,
     confidence = False
