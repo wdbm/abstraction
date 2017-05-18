@@ -71,7 +71,7 @@ with propyte.import_ganzfeld():
     from ROOT import *
 
 name    = "abstraction"
-version = "2017-05-18T1550Z"
+version = "2017-05-18T1717Z"
 
 log = logging.getLogger(__name__)
 
@@ -868,7 +868,7 @@ def access_users_tweets(
             print("access user {username} ({index} of {number})".format(
                 username = username,
                 index    = index + 1,
-                number   = len(usernames)
+                number   = len(usernames) + 1
             ))
 
         URL         = u"https://twitter.com/{username}".format(username = username)
