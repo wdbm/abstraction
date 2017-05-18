@@ -9,7 +9,7 @@ def main():
 
     setuptools.setup(
         name             = "abstraction",
-        version          = "2017.05.18.1550",
+        version          = "2017.05.18.1726",
         description      = "machine learning framework",
         long_description = long_description(),
         url              = "https://github.com/wdbm/abstraction",
@@ -26,6 +26,7 @@ def main():
                            "docopt",
                            "flask",
                            "jupyter",
+                           "lxml",
                            "numpy",
                            "matplotlib",
                            "praw==3.5.0",
