@@ -72,7 +72,7 @@ with propyte.import_ganzfeld():
     from ROOT import *
 
 name    = "abstraction"
-version = "2017-05-18T2050Z"
+version = "2017-05-19T1323Z"
 
 log = logging.getLogger(__name__)
 
@@ -99,7 +99,8 @@ def generate_response(
     utterance                      = None,
     style                          = "2017-05-18T2017Z",
     sentiment_utterance            = True,
-    confidence_sentiment_utterance = True
+    confidence_sentiment_utterance = True,
+    detail                         = False
     ):
 
     response = "unable to generate response"
@@ -154,6 +155,9 @@ def generate_response(
                 matches.append(row)
         if matches:
             match = max(matches, key = operator.attrgetter("angle"))
+            utterance_lookup = match["utterance"]
+            if detail:
+                log.info("utterance lookup: {utterance}".format(utterance = utterance_lookup))
             response = match["response"]
             if sentiment_utterance:
                 sentiment_analysis = sentiment(
