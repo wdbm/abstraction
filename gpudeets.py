@@ -45,7 +45,7 @@ options:
 """
 
 name    = "gpudeets"
-version = "2017-04-28T1733Z"
+version = "2017-06-02T0050Z"
 
 import datetime
 import docopt
@@ -116,7 +116,7 @@ def main(options):
                 else:
 
                     temperature  = temperature.rjust(5)
-                    power_draw   = power_draw.rjust(7)
+                    power_draw   = power_draw.rjust(8)
                     utilization  = utilization.rjust(8)
                     memory_used  = memory_used.rjust(8)
                     memory_total = memory_total.rjust(5)
