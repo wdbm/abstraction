@@ -57,7 +57,7 @@ from nltk.classify import NaiveBayesClassifier
 from nltk.corpus import movie_reviews
 import matplotlib
 import matplotlib.pyplot
-import numpy
+import numpy as np
 import praw
 import propyte
 import pyprel
@@ -72,7 +72,7 @@ with propyte.import_ganzfeld():
     from ROOT import *
 
 name    = "abstraction"
-version = "2017-05-19T1323Z"
+version = "2017-06-14T1200Z"
 
 log = logging.getLogger(__name__)
 
@@ -236,7 +236,7 @@ def database_metadata(
                 "last_modification_time": entry["last_modification_time"]
             }
     else:
-        log.error("database metadata not found")
+        log.error("error -- database metadata not found")
         program.terminate()
         raise Exception
     return metadata
@@ -275,13 +275,13 @@ def add_exchange_word_vectors_to_database(
         # Create word vector representations of utterances and responses and
         # add them or update them in the database.
         try:
-            utterance_word_vector_NumPy_array = numpy.array_repr(
+            utterance_word_vector_NumPy_array = np.array_repr(
                 convert_sentence_string_to_word_vector(
                     sentence_string = str(entry["utterance"]),
                     model_word2vec  = model_word2vec
                 )
             )
-            response_word_vector_NumPy_array = numpy.array_repr(
+            response_word_vector_NumPy_array = np.array_repr(
                 convert_sentence_string_to_word_vector(
                     sentence_string = str(entry["response"]),
                     model_word2vec  = model_word2vec
@@ -348,13 +348,13 @@ def load_exchange_word_vectors(
         if utteranceWordVector != "None" and responseWordVector != "None":
             index += 1
 
-            utteranceWordVector = eval("numpy." + utteranceWordVector.replace("float32", "numpy.float32"))
-            responseWordVector  = eval("numpy." + responseWordVector.replace("float32", "numpy.float32"))
+            utteranceWordVector = eval("np." + utteranceWordVector.replace("float32", "np.float32"))
+            responseWordVector  = eval("np." + responseWordVector.replace("float32", "np.float32"))
             data.variable(index = index, name = "utteranceWordVector", value = utteranceWordVector)
             data.variable(index = index, name = "responseWordVector",  value = responseWordVector )
 
-            #utteranceWordVector = list(eval("numpy." + utteranceWordVector.replace("float32", "numpy.float32")))
-            #responseWordVector  = list(eval("numpy." + responseWordVector.replace("float32", "numpy.float32")))
+            #utteranceWordVector = list(eval("np." + utteranceWordVector.replace("float32", "np.float32")))
+            #responseWordVector  = list(eval("np." + responseWordVector.replace("float32", "np.float32")))
             #for index_component, component in enumerate(utteranceWordVector):
             #    data.variable(index = index, name = "uwv" + str(index_component), value = component)
             #for index_component, component in enumerate(responseWordVector):
@@ -1001,12 +1001,12 @@ def distance_Levenshtein(source, target):
         return len(source)
 
     # Use tuples to force strings to be used as sequences.
-    source = numpy.array(tuple(source))
-    target = numpy.array(tuple(target))
+    source = np.array(tuple(source))
+    target = np.array(tuple(target))
 
     # Use a dynamic programming algorithm, but with the optimization that the
     # last two rows only of the matrix are needed.
-    previous_row = numpy.arange(target.size + 1)
+    previous_row = np.arange(target.size + 1)
     for s in source:
         # insertion:
         # The target grows longer than the source.
@@ -1015,13 +1015,13 @@ def distance_Levenshtein(source, target):
         # substitution or matching:
         # The target and source items are aligned, and either are different
         # (with a cost of 1) or are the same (with cost of 0).
-        current_row[1:] = numpy.minimum(
+        current_row[1:] = np.minimum(
                 current_row[1:],
-                numpy.add(previous_row[:-1], target != s))
+                np.add(previous_row[:-1], target != s))
 
         # deletion:
         # The target grows shorter than the source.
-        current_row[1:] = numpy.minimum(
+        current_row[1:] = np.minimum(
                 current_row[1:],
                 current_row[0:-1] + 1)
 
@@ -1048,7 +1048,7 @@ class Dataset(object):
         format_type = "ndarray"
         ):
         if format_type == "ndarray":
-            return numpy.asarray(self._data[::2])
+            return np.asarray(self._data[::2])
         elif format_type == "list":
             return self._data[::2]
         else:
@@ -1059,7 +1059,7 @@ class Dataset(object):
         format_type = "ndarray"
         ):
         if format_type == "ndarray":
-            return numpy.asarray(self._data[1::2])
+            return np.asarray(self._data[1::2])
         elif format_type == "list":
             return self._data[1::2]
         else:
@@ -1071,14 +1071,14 @@ class Dataset(object):
 #                                                                              #
 ################################################################################
 
-class ROOT_Variable(numpy.ndarray):
+class ROOT_Variable(np.ndarray):
 
     def __new__(
         cls,
         name                     = None,
         tree                     = None,
         ):
-        self = numpy.asarray([]).view(cls)
+        self = np.asarray([]).view(cls)
         # arguments
         self._name               = name
         self.tree                = tree
@@ -1142,7 +1142,7 @@ class ROOT_Variable(numpy.ndarray):
         self,
         ):
         if self.tree is None:
-            log.error("no tree specified")
+            log.error("error -- no tree specified")
             raise(Exception)
         # Set the current event.
         self.tree.GetEntry(self.event_number)
@@ -1238,7 +1238,7 @@ def load_word_vector_model(
     ):
     # If an existing word vector model file does not exist, create it.
     if not os.path.isfile(os.path.expandvars(filename)):
-        log.error("file {filename} does not exist".format(
+        log.error("error -- file {filename} does not exist".format(
             filename = filename
         ))
         log.info("create word vector model and save to file {filename}".format(
