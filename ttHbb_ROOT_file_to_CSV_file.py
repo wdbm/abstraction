@@ -68,19 +68,192 @@ import pyprel
 import shijian
 
 name    = "ttHbb_ROOT_file_to_CSV_file"
-version = "2017-05-02T1641Z"
+version = "2017-06-14T2057Z"
 logo    = name
 
 def select_event(
-    event     = None,
-    selection = "all"
+    event                             = None,
+    selection                         = "all",
+    required_variables                = None,
+    ensure_required_variables_present = False,
+    verbose                           = True
     ):
 
     """
     Select a HEP event.
     """
 
-    if "ejets" in selection:
+    if required_variables is None:
+        required_variables = [
+            "Aplan_bjets",
+            "Aplan_jets",
+            "Centrality_all",
+            "ClassifBDTOutput_6jsplit",
+            "ClassifBDTOutput_basic",
+            "ClassifBDTOutput_withReco_6jsplit",
+            "ClassifBDTOutput_withReco_basic",
+            "ClassifHPLUS_Semilep_HF_BDT200_Output",
+            "dEtajj_MaxdEta",
+            "dRbb_avg",
+            "dRbb_MaxM",
+            "dRbb_MaxPt",
+            "dRbb_min",
+            "dRbj_Wmass",
+            "dRHl_MaxdR",
+            "dRHl_MindR",
+            "dRjj_min",
+            "dRlepbb_MindR",
+            "dRlj_MindR",
+            "dRuu_MindR",
+            "H1_all",
+            "H4_all",
+            "HhadT_nJets",
+            "HiggsbbM",
+            "HiggsjjM",
+            "HT_all",
+            "HT_jets",
+            "Mbb_MaxM",
+            "Mbb_MaxPt",
+            "Mbb_MindR",
+            "Mbj_MaxPt",
+            "Mbj_MindR",
+            "Mbj_Wmass",
+            "met_met",
+            "met_phi",
+            "MHiggs",
+            "Mjj_HiggsMass",
+            "Mjjj_MaxPt",
+            "Mjj_MaxPt",
+            "Mjj_MindR",
+            "Mjj_MinM",
+            "mu",
+            "Muu_MindR",
+            "NBFricoNN_dil",
+            "nBTags",
+            "nBTags30",
+            "nBTags50",
+            "nBTags60",
+            "nBTags70",
+            "nBTags77",
+            "nBTags80",
+            "nBTags85",
+            "nBTags90",
+            "nBTagsFlatBEff_30",
+            "nBTagsFlatBEff_40",
+            "nBTagsFlatBEff_50",
+            "nBTagsFlatBEff_60",
+            "nBTagsFlatBEff_70",
+            "nBTagsFlatBEff_77",
+            "nBTagsFlatBEff_85",
+            "nElectrons",
+            "nHFJets",
+            "NHiggs_30",
+            "Njet_pt40",
+            "Njet_pt40",
+            "nJets",
+            "nMuons",
+            "nPrimaryVtx",
+            "pT_jet3",
+            "pT_jet5",
+            "pTuu_MindR",
+            "semilepMVAreco_b1higgsbhadtop_dR",
+            "semilepMVAreco_bbhiggs_dR",
+            "semilepMVAreco_BDT_output",
+            "semilepMVAreco_BDT_output_6jsplit",
+            "semilepMVAreco_BDT_output_truthMatchPattern",
+            "semilepMVAreco_BDT_withH_output",
+            "semilepMVAreco_BDT_withH_output_6jsplit",
+            "semilepMVAreco_BDT_withH_output_truthMatchPattern",
+            "semilepMVAreco_hadWb1Higgs_mass",
+            "semilepMVAreco_higgsbhadtop_withH_dR",
+            "semilepMVAreco_higgsbleptop_mass",
+            "semilepMVAreco_higgsbleptop_withH_dR",
+            "semilepMVAreco_higgslep_dR",
+            "semilepMVAreco_higgsleptop_dR",
+            "semilepMVAreco_higgs_mass",
+            "semilepMVAreco_higgsq1hadW_mass",
+            "semilepMVAreco_higgsttbar_withH_dR",
+            "semilepMVAreco_leptophadtop_dR",
+            "semilepMVAreco_leptophadtop_withH_dR",
+            "semilepMVAreco_Ncombinations",
+            "semilepMVAreco_nuApprox_recoBDT",
+            "semilepMVAreco_nuApprox_recoBDT_6jsplit",
+            "semilepMVAreco_nuApprox_recoBDT_withH",
+            "semilepMVAreco_nuApprox_recoBDT_withH_6jsplit",
+            "semilepMVAreco_ttH_Ht_withH",
+            #"ttHF_mva_discriminant",
+            "el_d0sig[0]",
+            "el_delta_z0_sintheta[0]",
+            "el_e[0]",
+            "el_eta[0]",
+            "el_phi[0]",
+            "el_pt[0]",
+            "el_topoetcone20[0]",
+            #"mu_d0sig[0]",
+            #"mu_delta_z0_sintheta[0]",
+            #"mu_e[0]",
+            #"mu_eta[0]",
+            #"mu_phi[0]",
+            #"mu_pt[0]",
+            "mu_topoetcone20[0]",
+            "jet_e[0]",
+            "jet_eta[0]",
+            "jet_jvt[0]",
+            "jet_mv2c10[0]",
+            "jet_mv2c20[0]",
+            "jet_phi[0]",
+            "jet_pt[0]",
+            "jet_semilepMVAreco_recoBDT_cand[0]",
+            "jet_semilepMVAreco_recoBDT_cand_6jsplit[0]",
+            "jet_semilepMVAreco_recoBDT_withH_cand[0]",
+            "jet_semilepMVAreco_recoBDT_withH_cand_6jsplit[0]",
+            "jet_e[1]",
+            "jet_eta[1]",
+            "jet_jvt[1]",
+            "jet_mv2c10[1]",
+            "jet_mv2c20[1]",
+            "jet_phi[1]",
+            "jet_pt[1]",
+            "jet_semilepMVAreco_recoBDT_cand[1]",
+            "jet_semilepMVAreco_recoBDT_cand_6jsplit[1]",
+            "jet_semilepMVAreco_recoBDT_withH_cand[1]",
+            "jet_semilepMVAreco_recoBDT_withH_cand_6jsplit[1]",
+            "jet_e[2]",
+            "jet_eta[2]",
+            "jet_jvt[2]",
+            "jet_mv2c10[2]",
+            "jet_mv2c20[2]",
+            "jet_phi[2]",
+            "jet_pt[2]",
+            "jet_semilepMVAreco_recoBDT_cand[2]",
+            "jet_semilepMVAreco_recoBDT_cand_6jsplit[2]",
+            "jet_semilepMVAreco_recoBDT_withH_cand[2]",
+            "jet_semilepMVAreco_recoBDT_withH_cand_6jsplit[2]",
+            "jet_e[3]",
+            "jet_eta[3]",
+            "jet_jvt[3]",
+            "jet_mv2c10[3]",
+            "jet_mv2c20[3]",
+            "jet_phi[3]",
+            "jet_pt[3]",
+            "jet_semilepMVAreco_recoBDT_cand[3]",
+            "jet_semilepMVAreco_recoBDT_cand_6jsplit[3]",
+            "jet_semilepMVAreco_recoBDT_withH_cand[3]",
+            "jet_semilepMVAreco_recoBDT_withH_cand_6jsplit[3]"
+        ]
+
+    if ensure_required_variables_present and not all([hasattr(event, variable) for variable in required_variables]):
+
+        return False
+
+    #for variable in required_variables:
+    #    if not hasattr(event, variable):
+    #        print("missing {variable}".format(variable = variable))
+
+    # By default, do not pass.
+    conditions = [False]
+
+    if selection == "ejets":
 
         conditions = [
             event.nElectrons == 1,                      # Require 1 electron.
@@ -88,12 +261,7 @@ def select_event(
             #event.nLjets >= 1                          # Require a single large-R jet.
         ]
 
-        if all(conditions):
-            return True
-        else:
-            return False
-
-    elif "mujets" in selection:
+    elif selection == "mujets":
 
         conditions = [
             event.nMuons == 1,                          # Require 1 muon.
@@ -101,12 +269,25 @@ def select_event(
             #event.nLjets >= 1                          # Require a single large-R jet.
         ]
 
-        if all(conditions):
-            return True
-        else:
-            return False
+    if selection == "ejets_5JE4BI":
 
-    elif "all" in selection:
+        conditions = [
+            event.nElectrons == 1,                      # Require 1 electron.
+            event.nJets == 5,                           # Require 5 jets.
+            event.nBTags >= 4                           # Require >= 4 b tags.
+            #event.nLjets >= 1                          # Require a single large-R jet.
+        ]
+
+    if selection == "ejets_6JI4BI":
+
+        conditions = [
+            event.nElectrons == 1,                      # Require 1 electron.
+            event.nJets >= 6,                           # Require >=6 jets.
+            event.nBTags >= 4                           # Require >= 4 b tags.
+            #event.nLjets >= 1                          # Require a single large-R jet.
+        ]
+
+    elif selection == "all":
 
         conditions = [
             event.nElectrons == 1 or event.nMuons == 1, # Require 1 electron or 1 muon.
@@ -114,10 +295,19 @@ def select_event(
             #event.nLjets >= 1                          # Require a single large-R jet.
         ]
 
-        if all(conditions):
-            return True
-        else:
-            return False
+    if all(conditions):
+
+        if verbose:
+            log.info("event number {event_number} passed selection {selection}".format(
+                event_number = event.eventNumber,
+                selection    = selection
+            ))
+
+        return True
+
+    else:
+
+        return False
 
 class Variable_ttHbb(object):
 
@@ -379,169 +569,169 @@ def main(options):
                 index_selected > maximum_number_of_events:
                 break
             line = [
-                Variable_ttHbb(event = event, name = "Aplan_bjets"),
-                Variable_ttHbb(event = event, name = "Aplan_jets"),
-                Variable_ttHbb(event = event, name = "Centrality_all"),
-                Variable_ttHbb(event = event, name = "ClassifBDTOutput_6jsplit"),
-                Variable_ttHbb(event = event, name = "ClassifBDTOutput_basic"),
-                Variable_ttHbb(event = event, name = "ClassifBDTOutput_withReco_6jsplit"),
-                Variable_ttHbb(event = event, name = "ClassifBDTOutput_withReco_basic"),
-                Variable_ttHbb(event = event, name = "ClassifHPLUS_Semilep_HF_BDT200_Output"),
-                Variable_ttHbb(event = event, name = "dEtajj_MaxdEta"),
-                Variable_ttHbb(event = event, name = "dRbb_avg"),
-                Variable_ttHbb(event = event, name = "dRbb_MaxM"),
-                Variable_ttHbb(event = event, name = "dRbb_MaxPt"),
-                Variable_ttHbb(event = event, name = "dRbb_min"),
-                Variable_ttHbb(event = event, name = "dRbj_Wmass"),
-                Variable_ttHbb(event = event, name = "dRHl_MaxdR"),
-                Variable_ttHbb(event = event, name = "dRHl_MindR"),
-                Variable_ttHbb(event = event, name = "dRjj_min"),
-                Variable_ttHbb(event = event, name = "dRlepbb_MindR"),
-                Variable_ttHbb(event = event, name = "dRlj_MindR"),
-                Variable_ttHbb(event = event, name = "dRuu_MindR"),
-                Variable_ttHbb(event = event, name = "H1_all"),
-                Variable_ttHbb(event = event, name = "H4_all"),
-                Variable_ttHbb(event = event, name = "HhadT_nJets"),
-                Variable_ttHbb(event = event, name = "HiggsbbM"),
-                Variable_ttHbb(event = event, name = "HiggsjjM"),
-                Variable_ttHbb(event = event, name = "HT_all"),
-                Variable_ttHbb(event = event, name = "HT_jets"),
-                Variable_ttHbb(event = event, name = "Mbb_MaxM"),
-                Variable_ttHbb(event = event, name = "Mbb_MaxPt"),
-                Variable_ttHbb(event = event, name = "Mbb_MindR"),
-                Variable_ttHbb(event = event, name = "Mbj_MaxPt"),
-                Variable_ttHbb(event = event, name = "Mbj_MindR"),
-                Variable_ttHbb(event = event, name = "Mbj_Wmass"),
-                Variable_ttHbb(event = event, name = "met_met"),
-                Variable_ttHbb(event = event, name = "met_phi"),
-                Variable_ttHbb(event = event, name = "MHiggs"),
-                Variable_ttHbb(event = event, name = "Mjj_HiggsMass"),
-                Variable_ttHbb(event = event, name = "Mjjj_MaxPt"),
-                Variable_ttHbb(event = event, name = "Mjj_MaxPt"),
-                Variable_ttHbb(event = event, name = "Mjj_MindR"),
-                Variable_ttHbb(event = event, name = "Mjj_MinM"),
-                Variable_ttHbb(event = event, name = "mu"),
-                Variable_ttHbb(event = event, name = "Muu_MindR"),
-                Variable_ttHbb(event = event, name = "NBFricoNN_dil"),
-                Variable_ttHbb(event = event, name = "nBTags"),
-                Variable_ttHbb(event = event, name = "nBTags30"),
-                Variable_ttHbb(event = event, name = "nBTags50"),
-                Variable_ttHbb(event = event, name = "nBTags60"),
-                Variable_ttHbb(event = event, name = "nBTags70"),
-                Variable_ttHbb(event = event, name = "nBTags77"),
-                Variable_ttHbb(event = event, name = "nBTags80"),
-                Variable_ttHbb(event = event, name = "nBTags85"),
-                Variable_ttHbb(event = event, name = "nBTags90"),
-                Variable_ttHbb(event = event, name = "nBTagsFlatBEff_30"),
-                Variable_ttHbb(event = event, name = "nBTagsFlatBEff_40"),
-                Variable_ttHbb(event = event, name = "nBTagsFlatBEff_50"),
-                Variable_ttHbb(event = event, name = "nBTagsFlatBEff_60"),
-                Variable_ttHbb(event = event, name = "nBTagsFlatBEff_70"),
-                Variable_ttHbb(event = event, name = "nBTagsFlatBEff_77"),
-                Variable_ttHbb(event = event, name = "nBTagsFlatBEff_85"),
+                #Variable_ttHbb(event = event, name = "Aplan_bjets"),
+                Variable_ttHbb(event = event, name = "Aplan_jets"), #
+                Variable_ttHbb(event = event, name = "Centrality_all"), #
+                #Variable_ttHbb(event = event, name = "ClassifBDTOutput_6jsplit"),
+                #Variable_ttHbb(event = event, name = "ClassifBDTOutput_basic"),
+                #Variable_ttHbb(event = event, name = "ClassifBDTOutput_withReco_6jsplit"),
+                #Variable_ttHbb(event = event, name = "ClassifBDTOutput_withReco_basic"),
+                #Variable_ttHbb(event = event, name = "ClassifHPLUS_Semilep_HF_BDT200_Output"),
+                Variable_ttHbb(event = event, name = "dEtajj_MaxdEta"), #
+                Variable_ttHbb(event = event, name = "dRbb_avg"), #
+                #Variable_ttHbb(event = event, name = "dRbb_MaxM"),
+                Variable_ttHbb(event = event, name = "dRbb_MaxPt"), #
+                #Variable_ttHbb(event = event, name = "dRbb_min"),
+                #Variable_ttHbb(event = event, name = "dRbj_Wmass"),
+                #Variable_ttHbb(event = event, name = "dRHl_MaxdR"),
+                #Variable_ttHbb(event = event, name = "dRHl_MindR"),
+                #Variable_ttHbb(event = event, name = "dRjj_min"),
+                #Variable_ttHbb(event = event, name = "dRlepbb_MindR"),
+                #Variable_ttHbb(event = event, name = "dRlj_MindR"),
+                #Variable_ttHbb(event = event, name = "dRuu_MindR"),
+                Variable_ttHbb(event = event, name = "H1_all"), #
+                #Variable_ttHbb(event = event, name = "H4_all"),
+                #Variable_ttHbb(event = event, name = "HhadT_nJets"),
+                #Variable_ttHbb(event = event, name = "HiggsbbM"),
+                #Variable_ttHbb(event = event, name = "HiggsjjM"),
+                #Variable_ttHbb(event = event, name = "HT_all"),
+                #Variable_ttHbb(event = event, name = "HT_jets"),
+                #Variable_ttHbb(event = event, name = "Mbb_MaxM"),
+                #Variable_ttHbb(event = event, name = "Mbb_MaxPt"),
+                Variable_ttHbb(event = event, name = "Mbb_MindR"), #
+                #Variable_ttHbb(event = event, name = "Mbj_MaxPt"),
+                #Variable_ttHbb(event = event, name = "Mbj_MindR"),
+                #Variable_ttHbb(event = event, name = "Mbj_Wmass"),
+                #Variable_ttHbb(event = event, name = "met_met"),
+                #Variable_ttHbb(event = event, name = "met_phi"),
+                #Variable_ttHbb(event = event, name = "MHiggs"),
+                #Variable_ttHbb(event = event, name = "Mjj_HiggsMass"),
+                #Variable_ttHbb(event = event, name = "Mjjj_MaxPt"),
+                #Variable_ttHbb(event = event, name = "Mjj_MaxPt"),
+                #Variable_ttHbb(event = event, name = "Mjj_MindR"),
+                #Variable_ttHbb(event = event, name = "Mjj_MinM"),
+                #Variable_ttHbb(event = event, name = "mu"),
+                #Variable_ttHbb(event = event, name = "Muu_MindR"),
+                #Variable_ttHbb(event = event, name = "NBFricoNN_dil"),
+                #Variable_ttHbb(event = event, name = "nBTags"),
+                #Variable_ttHbb(event = event, name = "nBTags30"),
+                #Variable_ttHbb(event = event, name = "nBTags50"),
+                #Variable_ttHbb(event = event, name = "nBTags60"),
+                #Variable_ttHbb(event = event, name = "nBTags70"),
+                #Variable_ttHbb(event = event, name = "nBTags77"),
+                #Variable_ttHbb(event = event, name = "nBTags80"),
+                #Variable_ttHbb(event = event, name = "nBTags85"),
+                #Variable_ttHbb(event = event, name = "nBTags90"),
+                #Variable_ttHbb(event = event, name = "nBTagsFlatBEff_30"),
+                #Variable_ttHbb(event = event, name = "nBTagsFlatBEff_40"),
+                #Variable_ttHbb(event = event, name = "nBTagsFlatBEff_50"),
+                #Variable_ttHbb(event = event, name = "nBTagsFlatBEff_60"),
+                #Variable_ttHbb(event = event, name = "nBTagsFlatBEff_70"),
+                #Variable_ttHbb(event = event, name = "nBTagsFlatBEff_77"),
+                #Variable_ttHbb(event = event, name = "nBTagsFlatBEff_85"),
 
-                Variable_ttHbb(event = event, name = "nElectrons"),
-                Variable_ttHbb(event = event, name = "nHFJets"),
-                Variable_ttHbb(event = event, name = "NHiggs_30"),
-                Variable_ttHbb(event = event, name = "Njet_pt40"),
-                Variable_ttHbb(event = event, name = "Njet_pt40"),
-                Variable_ttHbb(event = event, name = "nJets"),
-                Variable_ttHbb(event = event, name = "nMuons"),
-                Variable_ttHbb(event = event, name = "nPrimaryVtx"),
+                #Variable_ttHbb(event = event, name = "nElectrons"),
+                #Variable_ttHbb(event = event, name = "nHFJets"),
+                Variable_ttHbb(event = event, name = "NHiggs_30"), #
+                #Variable_ttHbb(event = event, name = "Njet_pt40"),
+                #Variable_ttHbb(event = event, name = "Njet_pt40"),
+                #Variable_ttHbb(event = event, name = "nJets"),
+                #Variable_ttHbb(event = event, name = "nMuons"),
+                #Variable_ttHbb(event = event, name = "nPrimaryVtx"),
 
-                Variable_ttHbb(event = event, name = "pT_jet3"),
-                Variable_ttHbb(event = event, name = "pT_jet5"),
-                Variable_ttHbb(event = event, name = "pTuu_MindR"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_b1higgsbhadtop_dR"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_bbhiggs_dR"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_BDT_output"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_BDT_output_6jsplit"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_BDT_output_truthMatchPattern"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_BDT_withH_output"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_BDT_withH_output_6jsplit"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_BDT_withH_output_truthMatchPattern"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_hadWb1Higgs_mass"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_higgsbhadtop_withH_dR"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_higgsbleptop_mass"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_higgsbleptop_withH_dR"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_higgslep_dR"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_higgsleptop_dR"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_higgs_mass"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_higgsq1hadW_mass"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_higgsttbar_withH_dR"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_leptophadtop_dR"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_leptophadtop_withH_dR"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_Ncombinations"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_nuApprox_recoBDT"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_nuApprox_recoBDT_6jsplit"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_nuApprox_recoBDT_withH"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_nuApprox_recoBDT_withH_6jsplit"),
-                Variable_ttHbb(event = event, name = "semilepMVAreco_ttH_Ht_withH"),
-                Variable_ttHbb(event = event, name = "ttHF_mva_discriminant"),
+                #Variable_ttHbb(event = event, name = "pT_jet3"),
+                Variable_ttHbb(event = event, name = "pT_jet5"), #
+                #Variable_ttHbb(event = event, name = "pTuu_MindR"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_b1higgsbhadtop_dR"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_bbhiggs_dR"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_BDT_output"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_BDT_output_6jsplit"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_BDT_output_truthMatchPattern"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_BDT_withH_output"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_BDT_withH_output_6jsplit"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_BDT_withH_output_truthMatchPattern"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_hadWb1Higgs_mass"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_higgsbhadtop_withH_dR"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_higgsbleptop_mass"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_higgsbleptop_withH_dR"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_higgslep_dR"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_higgsleptop_dR"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_higgs_mass"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_higgsq1hadW_mass"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_higgsttbar_withH_dR"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_leptophadtop_dR"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_leptophadtop_withH_dR"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_Ncombinations"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_nuApprox_recoBDT"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_nuApprox_recoBDT_6jsplit"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_nuApprox_recoBDT_withH"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_nuApprox_recoBDT_withH_6jsplit"),
+                #Variable_ttHbb(event = event, name = "semilepMVAreco_ttH_Ht_withH"),
+                #Variable_ttHbb(event = event, name = "ttHF_mva_discriminant"),
 
-                Variable_ttHbb(event = event, name = "el_d0sig[0]"),
-                Variable_ttHbb(event = event, name = "el_delta_z0_sintheta[0]"),
-                Variable_ttHbb(event = event, name = "el_e[0]"),
-                Variable_ttHbb(event = event, name = "el_eta[0]"),
-                Variable_ttHbb(event = event, name = "el_phi[0]"),
-                Variable_ttHbb(event = event, name = "el_pt[0]"),
-                Variable_ttHbb(event = event, name = "el_topoetcone20[0]"),
+                #Variable_ttHbb(event = event, name = "el_d0sig[0]"),
+                #Variable_ttHbb(event = event, name = "el_delta_z0_sintheta[0]"),
+                #Variable_ttHbb(event = event, name = "el_e[0]"),
+                #Variable_ttHbb(event = event, name = "el_eta[0]"),
+                #Variable_ttHbb(event = event, name = "el_phi[0]"),
+                #Variable_ttHbb(event = event, name = "el_pt[0]"),
+                #Variable_ttHbb(event = event, name = "el_topoetcone20[0]"),
 
-                Variable_ttHbb(event = event, name = "mu_d0sig[0]"),
-                Variable_ttHbb(event = event, name = "mu_delta_z0_sintheta[0]"),
-                Variable_ttHbb(event = event, name = "mu_e[0]"),
-                Variable_ttHbb(event = event, name = "mu_eta[0]"),
-                Variable_ttHbb(event = event, name = "mu_phi[0]"),
-                Variable_ttHbb(event = event, name = "mu_pt[0]"),
-                Variable_ttHbb(event = event, name = "mu_topoetcone20[0]"),
+                #Variable_ttHbb(event = event, name = "mu_d0sig[0]"),
+                #Variable_ttHbb(event = event, name = "mu_delta_z0_sintheta[0]"),
+                #Variable_ttHbb(event = event, name = "mu_e[0]"),
+                #Variable_ttHbb(event = event, name = "mu_eta[0]"),
+                #Variable_ttHbb(event = event, name = "mu_phi[0]"),
+                #Variable_ttHbb(event = event, name = "mu_pt[0]"),
+                #Variable_ttHbb(event = event, name = "mu_topoetcone20[0]"),
 
-                Variable_ttHbb(event = event, name = "jet_e[0]"),
-                Variable_ttHbb(event = event, name = "jet_eta[0]"),
-                Variable_ttHbb(event = event, name = "jet_jvt[0]"),
-                Variable_ttHbb(event = event, name = "jet_mv2c10[0]"),
-                Variable_ttHbb(event = event, name = "jet_mv2c20[0]"),
-                Variable_ttHbb(event = event, name = "jet_phi[0]"),
-                Variable_ttHbb(event = event, name = "jet_pt[0]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand[0]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand_6jsplit[0]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand[0]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand_6jsplit[0]"),
+                #Variable_ttHbb(event = event, name = "jet_e[0]"),
+                #Variable_ttHbb(event = event, name = "jet_eta[0]"),
+                #Variable_ttHbb(event = event, name = "jet_jvt[0]"),
+                #Variable_ttHbb(event = event, name = "jet_mv2c10[0]"),
+                #Variable_ttHbb(event = event, name = "jet_mv2c20[0]"),
+                #Variable_ttHbb(event = event, name = "jet_phi[0]"),
+                #Variable_ttHbb(event = event, name = "jet_pt[0]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand[0]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand_6jsplit[0]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand[0]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand_6jsplit[0]"),
 
-                Variable_ttHbb(event = event, name = "jet_e[1]"),
-                Variable_ttHbb(event = event, name = "jet_eta[1]"),
-                Variable_ttHbb(event = event, name = "jet_jvt[1]"),
-                Variable_ttHbb(event = event, name = "jet_mv2c10[1]"),
-                Variable_ttHbb(event = event, name = "jet_mv2c20[1]"),
-                Variable_ttHbb(event = event, name = "jet_phi[1]"),
-                Variable_ttHbb(event = event, name = "jet_pt[1]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand[1]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand_6jsplit[1]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand[1]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand_6jsplit[1]"),
+                #Variable_ttHbb(event = event, name = "jet_e[1]"),
+                #Variable_ttHbb(event = event, name = "jet_eta[1]"),
+                #Variable_ttHbb(event = event, name = "jet_jvt[1]"),
+                #Variable_ttHbb(event = event, name = "jet_mv2c10[1]"),
+                #Variable_ttHbb(event = event, name = "jet_mv2c20[1]"),
+                #Variable_ttHbb(event = event, name = "jet_phi[1]"),
+                #Variable_ttHbb(event = event, name = "jet_pt[1]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand[1]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand_6jsplit[1]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand[1]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand_6jsplit[1]"),
 
-                Variable_ttHbb(event = event, name = "jet_e[2]"),
-                Variable_ttHbb(event = event, name = "jet_eta[2]"),
-                Variable_ttHbb(event = event, name = "jet_jvt[2]"),
-                Variable_ttHbb(event = event, name = "jet_mv2c10[2]"),
-                Variable_ttHbb(event = event, name = "jet_mv2c20[2]"),
-                Variable_ttHbb(event = event, name = "jet_phi[2]"),
-                Variable_ttHbb(event = event, name = "jet_pt[2]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand[2]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand_6jsplit[2]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand[2]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand_6jsplit[2]"),
+                #Variable_ttHbb(event = event, name = "jet_e[2]"),
+                #Variable_ttHbb(event = event, name = "jet_eta[2]"),
+                #Variable_ttHbb(event = event, name = "jet_jvt[2]"),
+                #Variable_ttHbb(event = event, name = "jet_mv2c10[2]"),
+                #Variable_ttHbb(event = event, name = "jet_mv2c20[2]"),
+                #Variable_ttHbb(event = event, name = "jet_phi[2]"),
+                #Variable_ttHbb(event = event, name = "jet_pt[2]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand[2]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand_6jsplit[2]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand[2]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand_6jsplit[2]"),
 
-                Variable_ttHbb(event = event, name = "jet_e[3]"),
-                Variable_ttHbb(event = event, name = "jet_eta[3]"),
-                Variable_ttHbb(event = event, name = "jet_jvt[3]"),
-                Variable_ttHbb(event = event, name = "jet_mv2c10[3]"),
-                Variable_ttHbb(event = event, name = "jet_mv2c20[3]"),
-                Variable_ttHbb(event = event, name = "jet_phi[3]"),
-                Variable_ttHbb(event = event, name = "jet_pt[3]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand[3]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand_6jsplit[3]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand[3]"),
-                Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand_6jsplit[3]"),
+                #Variable_ttHbb(event = event, name = "jet_e[3]"),
+                #Variable_ttHbb(event = event, name = "jet_eta[3]"),
+                #Variable_ttHbb(event = event, name = "jet_jvt[3]"),
+                #Variable_ttHbb(event = event, name = "jet_mv2c10[3]"),
+                #Variable_ttHbb(event = event, name = "jet_mv2c20[3]"),
+                #Variable_ttHbb(event = event, name = "jet_phi[3]"),
+                #Variable_ttHbb(event = event, name = "jet_pt[3]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand[3]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_cand_6jsplit[3]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand[3]"),
+                #Variable_ttHbb(event = event, name = "jet_semilepMVAreco_recoBDT_withH_cand_6jsplit[3]"),
 
                 # large-R jets
                 #Variable_ttHbb(event = event, name = "FirstLjetM"),
