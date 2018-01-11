@@ -9,7 +9,7 @@ def main():
 
     setuptools.setup(
         name             = "abstraction",
-        version          = "2017.05.18.2050",
+        version          = "2018.01.11.2110",
         description      = "machine learning framework",
         long_description = long_description(),
         url              = "https://github.com/wdbm/abstraction",
@@ -29,7 +29,7 @@ def main():
                            "lxml",
                            "numpy",
                            "matplotlib",
-                           "praw==3.5.0",
+                           "praw",
                            "propyte",
                            "pyprel",
                            "shijian",

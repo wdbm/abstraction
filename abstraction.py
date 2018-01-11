@@ -72,7 +72,7 @@ with propyte.import_ganzfeld():
     from ROOT import *
 
 name    = "abstraction"
-version = "2017-06-14T1200Z"
+version = "2018-01-11T2110Z"
 
 log = logging.getLogger(__name__)
 
@@ -624,13 +624,31 @@ class Exchange(object):
 
 @shijian.timer
 def access_exchanges_Reddit(
-    user_agent           = "scriptwire",
     subreddits           = None,
     number_of_utterances = 200
     ):
+    # Access Reddit application credentials.
+    filepath_Reddit_credentials = "~/.reddit"
+    filepath_Reddit_credentials = os.path.expanduser(filepath_Reddit_credentials)
+    if not os.path.isfile(filepath_Reddit_credentials):
+        print("no secrets file {filepath_secrets} found".format(
+            filepath_secrets = filepath_secrets)
+        )
+        sys.exit()
+    with open(filepath_Reddit_credentials, "r") as file_Reddit_credentials:
+        file_string = file_Reddit_credentials.read()
+        Reddit_credentials = {}
+        exec(file_string, Reddit_credentials)
+        user_agent    = Reddit_credentials["user_agent"]
+        client_id     = Reddit_credentials["client_id"]
+        client_secret = Reddit_credentials["client_secret"]
     # Access Reddit.
     log.info("access Reddit API")
-    r = praw.Reddit(user_agent = user_agent)
+    r = praw.Reddit(
+        user_agent    = user_agent,
+        client_id     = client_id,
+        client_secret = client_secret,
+    )
     # Access each subreddit.
     log.info("access subreddits {subreddits}".format(
         subreddits = subreddits
@@ -640,51 +658,38 @@ def access_exchanges_Reddit(
         log.info("access subreddit \"{subreddit}\"".format(
             subreddit = subreddit
         ))
-        submissions = r.get_subreddit(
-            subreddit
-        ).get_top(
-            limit = int(number_of_utterances)
-        )
+        submissions = r.subreddit(subreddit).top(limit = int(number_of_utterances))
         # Access each submission, its title and its top comment.
         for submission in submissions:
-            # Access the submission title.
-            submission_title = submission.title.encode(
-                "ascii",
-                "ignore"
-            )
-            # Access the submission URL.
-            submission_URL = submission.permalink.encode(
-                "ascii",
-                "ignore"
-            )
-            # Access the submission time.
-            submission_time_UNIX = str(submission.created_utc).encode(
-                "ascii",
-                "ignore"
-            )
+
+            submission_title     = submission.title.encode("ascii", "ignore")
+            submission_URL       = submission.permalink.encode("ascii", "ignore")
+            submission_time_UNIX = str(submission.created_utc).encode("ascii", "ignore")
+
             log.debug(
                 "access submission \"{submission_title}\"".format(
-                subreddit = subreddit,
+                subreddit        = subreddit,
                 submission_title = submission_title
             ))
-            comments = praw.helpers.flatten_tree(submission.comments)
+            comments = submission.comments.list()
             # Save the exchange only if there is a response.
             if comments:
-                # Access the submission top comment.
-                comment_top_text = comments[0].body.encode(
-                    "ascii",
-                    "ignore"
-                )
-                # Access the submission top comment URL.
-                comment_top_URL = comments[0].permalink.encode(
-                    "ascii",
-                    "ignore"
-                )
-                # Access the submission top comment time.
-                comment_top_time_UNIX = str(comments[0].created_utc).encode(
-                    "ascii",
-                    "ignore"
-                )
+                comment_top_text      = comments[0].body.encode("ascii", "ignore")
+                comment_top_URL       = comments[0].permalink.encode("ascii", "ignore")
+                comment_top_time_UNIX = str(comments[0].created_utc).encode("ascii", "ignore")
+
+                print("--------------------------------------------------------------------------------")
+                print(submission_time_UNIX)
+                print(submission_title)
+                print(submission_URL)
+                print("")
+                print(comment_top_time_UNIX)
+                print(comment_top_text)
+                print(comment_top_URL)
+                print("")
+                print(subreddit)
+                print("--------------------------------------------------------------------------------")
+
                 # Create a new exchange object for the current exchange data and
                 # append it to the list of exchanges.
                 exchange = Exchange(
@@ -697,6 +702,7 @@ def access_exchanges_Reddit(
                     exchange_reference  = subreddit
                 )
                 exchanges.append(exchange)
+            comments = []
             # Pause to avoid overtaxing Reddit.
             #time.sleep(2)
     return exchanges

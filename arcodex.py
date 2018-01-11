@@ -46,22 +46,23 @@ Options:
     -d, --database=FILE          database [default: database.db]
 """
 
-name    = "arcodex"
-version = "2016-06-02T1508Z"
-logo    = None
-
-import os
-import sys
-import subprocess
-import time
 import datetime
-import logging
-import inspect
 import docopt
+import inspect
+import logging
+import os
+import subprocess
+import sys
+import time
+
+import abstraction
 import dataset
 import praw
 import propyte
-import abstraction
+
+name    = "arcodex"
+version = "2018-01-11T2042Z"
+logo    = None
 
 def main(options):
 
@@ -82,7 +83,6 @@ def main(options):
 
     log.info("access exchanges")
     exchanges_Reddit = abstraction.access_exchanges_Reddit(
-        user_agent           = name,
         subreddits           = subreddits,
         number_of_utterances = number_of_utterances
     )
