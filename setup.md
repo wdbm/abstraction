@@ -195,6 +195,8 @@ pip install tmux_control
 
 # set up other dependencies and abstraction (2017-03-21 upcoming)
 
+- Install [tonescale](https://github.com/wdbm/tonescale).
+
 ```Bash
 sudo apt-get -y install festival    \
                         pylint      \
