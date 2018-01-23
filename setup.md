@@ -218,4 +218,12 @@ pip install abstraction
 git clone https://github.com/wdbm/abstraction.git
 ```
 
+Create a PRAW credentials file `~/.reddit`. Its contents should have the following form:
+
+```Python
+client_id     = "xxxxxxxxxxxxxx"
+client_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxx"
+user_agent    = "xxxxxxxxxx"
+```
+
 The function `abstraction.setup()` should be run.
