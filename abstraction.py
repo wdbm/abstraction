@@ -50,7 +50,6 @@ import time
 from bs4 import BeautifulSoup
 import dataset
 import datavision
-from gensim.models import Word2Vec
 import nltk
 import nltk.classify.util
 from nltk.classify import NaiveBayesClassifier
@@ -72,7 +71,7 @@ with propyte.import_ganzfeld():
     from ROOT import *
 
 name    = "abstraction"
-version = "2018-01-11T2110Z"
+version = "2018-01-23T1320Z"
 
 log = logging.getLogger(__name__)
 
@@ -1235,6 +1234,7 @@ def select_event(
 
 @shijian.timer
 def model_word2vec_Brown_Corpus():
+    from gensim.models import Word2Vec
     model_word2vec = Word2Vec(nltk.corpus.brown.sents())
     return model_word2vec
 
