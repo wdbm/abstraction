@@ -50,6 +50,10 @@ import time
 from bs4 import BeautifulSoup
 import dataset
 import datavision
+try:
+    from gensim.models import Word2Vec
+except:
+    pass
 import nltk
 import nltk.classify.util
 from nltk.classify import NaiveBayesClassifier
@@ -62,16 +66,22 @@ import propyte
 import pyprel
 import requests
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-import tensorflow.contrib.learn
+try:
+    import tensorflow.contrib.learn
+except:
+    pass
 import sklearn
 import sklearn.cross_validation
 import sklearn.metrics
 import shijian
 with propyte.import_ganzfeld():
-    from ROOT import *
+    try:
+        from ROOT import *
+    except:
+        pass
 
 name    = "abstraction"
-version = "2018-01-23T1320Z"
+version = "2018-01-23T1330Z"
 
 log = logging.getLogger(__name__)
 
@@ -1234,7 +1244,6 @@ def select_event(
 
 @shijian.timer
 def model_word2vec_Brown_Corpus():
-    from gensim.models import Word2Vec
     model_word2vec = Word2Vec(nltk.corpus.brown.sents())
     return model_word2vec
 
