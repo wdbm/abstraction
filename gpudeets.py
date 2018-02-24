@@ -62,7 +62,7 @@ import shijian
 import technicolor
 
 name    = "gpudeets"
-version = "2018-02-23T2158Z"
+version = "2018-02-24T1606Z"
 
 log = logging.getLogger(name)
 log.addHandler(technicolor.ColorisingStreamHandler())
@@ -140,7 +140,7 @@ def main(options):
                             "power_draw_W"           : power_draw[:-2],
                             "utilization_MiB"        : utilization[:-4],
                             "memory_used_MiB"        : memory_used[:-4],
-                            "memory_total_percentage": memory_total
+                            "memory_total_percentage": memory_total[:-2]
                         },
                         ignore_index = True
                     )
