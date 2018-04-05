@@ -81,7 +81,7 @@ with propyte.import_ganzfeld():
         pass
 
 name    = "abstraction"
-version = "2018-01-23T1330Z"
+version = "2018-04-05T2313Z"
 
 log = logging.getLogger(__name__)
 
@@ -916,13 +916,14 @@ class Tweets(list):
 
 @shijian.timer
 def access_users_tweets(
-    usernames = [
-                "AndrewYNg",
-                "geoff_hinton",
-                "SamHarrisOrg",
-                "ylecun"
-                ],
-    detail    = False
+    usernames             = [
+                            "AndrewYNg",
+                            "geoff_hinton",
+                            "SamHarrisOrg",
+                            "ylecun"
+                            ],
+    detail                = False,
+    limit_connection_rate = True
     ):
 
     tweets = []
@@ -954,6 +955,10 @@ def access_users_tweets(
                     ID       = int(code_tweet_ID.attrs["data-conversation-id"])
                 )
             )
+
+        if limit_connection_rate:
+            print("sleep 20 s")
+            time.sleep(20)
 
     return Tweets(tweets)
 
