@@ -36,7 +36,7 @@ Install Ubuntu. Following installation, Ubuntu boots to a flawed interface of ju
 ```Bash
 sudo add-apt-repository ppa:graphics-drivers/ppa
 sudo apt update
-sudo apt install nvidia-367 nvidia-prime
+sudo apt install nvidia-384 nvidia-prime
 ```
 
 Verify the driver version.
@@ -96,7 +96,7 @@ sudo cp cuda/include/cudnn.h /usr/local/cuda-8.0/include/
 sudo cp cuda/lib64/* /usr/local/cuda-8.0/lib64/
 ```
 
-## set up GCC
+## set up GCC (2018-04-12T0135Z possibly unnecessary)
 
 Install and change to GCC 4.9 for CUDA.
 
