@@ -369,3 +369,50 @@ user_agent    = "xxxxxxxxxx"
 ```
 
 The function `abstraction.setup()` should be run.
+
+---
+
+# uninstall
+
+## uninstall TensorFlow
+
+```Bash
+sudo pip2 uninstall tensorflow-cpu
+sudo pip3 uninstall tensorflow-cpu
+
+sudo pip2 uninstall tensorflow-gpu
+sudo pip3 uninstall tensorflow-gpu
+```
+
+For TensorFlow 1.0.1 CPU, the procedure is as follows:
+
+```Bash
+sudo pip2 uninstall tensorflow
+sudo pip3 uninstall tensorflow
+```
+
+## uninstall CUPTI
+
+```Bash
+sudo apt remove libcupti-dev
+```
+
+## uninstall cuDNN and CUDA 8.0
+
+There is no need to explicitly remove cuDNN in isolation, as it is removed along with CUDA 8.0.
+
+```Bash
+sudo apt remove cuda
+sudo apt autoremove
+sudo apt remove --purge cuda
+```
+
+The `autoremove` step removes about 2 GB for CUDA 8.0. The CUDA 8.0 directory (`/usr/local/cuda-8.0/`) should be removed now.
+
+```Bash
+sudo apt remove cuda-repo-ubuntu1604-8-0-local-ga2
+sudo apt clean
+sudo apt autoclean
+```
+
+The `remove cuda-repo-ubuntu1604-8-0-local-ga2` step removes about 2 GB for CUDA 8.0.
