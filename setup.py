@@ -32,6 +32,7 @@ def main():
                            "praw",
                            "propyte",
                            "pyprel",
+                           "seaborn",
                            "shijian",
                            "sklearn",
                            "technicolor",
