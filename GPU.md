@@ -27,6 +27,15 @@ Sun Feb 26 22:42:48 2017
 +-----------------------------------------------------------------------------+
 ```
 
+Data on the GPU can be displayed in a loop in a way like the following:
+
+```Bash
+while true; do
+    nvidia-smi --query-gpu=temperature.gpu,power.draw --format=csv
+    sleep 5
+done
+```
+
 [tmux-control](https://github.com/wdbm/tmux-control) can be used to display `htop` and `nvidia-smi` in the same terminal using `tmux`.
 
 ```Bash
