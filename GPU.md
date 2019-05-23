@@ -52,6 +52,20 @@ gpudeets.py --interval=3
 gpudeets.py --graphpower
 ```
 
+The program `nvtop` is a `htop`-like task monitor for Nvidia GPUs.
+
+```Bash
+git clone https://github.com/Syllo/nvtop.git
+mkdir -p nvtop/build
+cd nvtop/build
+cmake ..
+make
+sudo make install
+cd ../..
+rm -rf nvtop
+nvtop
+```
+
 # CUDA Samples
 
 ```Bash
