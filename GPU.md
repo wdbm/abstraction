@@ -27,6 +27,29 @@ Sun Feb 26 22:42:48 2017
 +-----------------------------------------------------------------------------+
 ```
 
+Datetimestamped data on the GPU can be recorded to a CSV in a way like the following:
+
+```Bash
+#!/bin/bash
+filepath="record.log"
+while true; do
+    output=""$(date "+%Y-%m-%dT%H%M%SZ" --utc)", "$(nvidia-smi --query-gpu=name,temperature.gpu,power.draw,memory.used,memory.total,utilization.gpu --format=csv,noheader)$""
+    echo "${output}" | tee -a "${filepath}"
+    sleep 5
+done
+```
+
+This results in a log file containing data of the following form:
+
+```CSV
+2019-06-21T153248Z, GeForce GTX 1070, 35, 5.07 W, 103 MiB, 8119 MiB, 0 %
+2019-06-21T153249Z, GeForce GTX 1070, 35, 5.23 W, 103 MiB, 8119 MiB, 0 %
+2019-06-21T153250Z, GeForce GTX 1070, 35, 5.39 W, 103 MiB, 8119 MiB, 0 %
+2019-06-21T153251Z, GeForce GTX 1070, 35, 5.22 W, 103 MiB, 8119 MiB, 0 %
+```
+
+- <GPU_monitoring.ipynb>
+
 Data on the GPU can be displayed in a loop in a way like the following:
 
 ```Bash
