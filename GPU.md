@@ -171,3 +171,12 @@ Result = PASS
 
 NOTE: The CUDA Samples are not meant for performance measurements. Results may vary when GPU Boost is enabled.
 ```
+
+# benchmarks
+
+```Bash
+sudo apt install glmark2
+glmark2
+```
+
+So, an example from 2019-07-04 on an XMG P507 Nvidia 1070 was a glmark2 score of 410 where the test took ~5:32 minutes.
