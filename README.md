@@ -8,7 +8,6 @@ Project abstraction is a work-in-progress neural network project using similar a
 
 |**documentation**              |**description**                                                    |
 |-------------------------------|-------------------------------------------------------------------|
-|[setup](setup.md)              |setup procedures for ROOT, abstraction and reference hardware P507 |
 |[GPU](GPU.md)                  |GPU utilities and tests                                            |
 |[benchmarks](benchmarks.md)    |GPU benchmarks                                                     |
 |[data](data.md)                |data preprocessing and standardization, HEP data, conversation data|
