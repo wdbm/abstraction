@@ -79,24 +79,24 @@ def main(options):
 
     if CSV_logging: log.info("logging to CSV " + filepath_CSV)
 
-    command_general     = "nvidia-smi "                      \
-                              "--query-gpu="                 \
-                                  "name,"                    \
-                                  "temperature.gpu,"         \
-                                  "power.draw,"              \
-                                  "memory.used,"             \
-                                  "memory.total,"            \
-                                  "utilization.gpu "         \
-                              "--format="                    \
-                                  "csv,"                     \
+    command_general     = "nvidia-smi "                     \
+                              "--query-gpu="                \
+                                  "name,"                   \
+                                  "temperature.gpu,"        \
+                                  "power.draw,"             \
+                                  "memory.used,"            \
+                                  "memory.total,"           \
+                                  "utilization.gpu "        \
+                              "--format="                   \
+                                  "csv,"                    \
                                   "noheader"
 
-    command_power       = "nvidia-smi "                      \
-                              "--query-gpu=power.draw "      \
+    command_power       = "nvidia-smi "                     \
+                              "--query-gpu=power.draw "     \
                               "--format=csv,noheader"
 
-    command_temperature = "nvidia-smi "                      \
-                              "--query-gpu=temperature.gpu " \
+    command_temperature = "nvidia-smi "                     \
+                              "--query-gpu=temperature.gpu "\
                               "--format=csv,noheader"
 
     measurements = []
@@ -105,7 +105,7 @@ def main(options):
             if not graph_power and not graph_temperature:
                 timestamp          = datetime.datetime.utcnow()
                 timestamp_string   = timestamp.strftime("%Y-%m-%dT%H%M%SZ")
-                result             = shijian.engage_command(command = command_general)
+                result             = shijian.engage_command(command=command_general)
                 data               = [datum.strip() for datum in result.split(",")]
                 temperature        = str(data[1])
                 temperature_string = temperature + " °C"
@@ -142,10 +142,10 @@ def main(options):
                             "memory_used_MiB"        : memory_used[:-4],
                             "memory_total_percentage": memory_total[:-2]
                         },
-                        ignore_index = True
+                        ignore_index=True
                     )
                     log.info(timestamp_string + " log to CSV " + filepath_CSV)
-                    df.to_csv(filepath_CSV, header = not os.path.isfile(filepath_CSV), index = False, mode = "a")
+                    df.to_csv(filepath_CSV, header=not os.path.isfile(filepath_CSV), index=False, mode="a")
                 else:
                     temperature_string = temperature_string.rjust(5)
                     power_draw         = power_draw.rjust(8)
@@ -165,16 +165,16 @@ def main(options):
                 time.sleep(interval)
             elif graph_power or graph_temperature:
                 if graph_power:
-                    result = shijian.engage_command(command = command_power)
+                    result = shijian.engage_command(command=command_power)
                     result = result.strip().strip(" W")
                 elif graph_temperature:
-                    result = shijian.engage_command(command = command_temperature)
+                    result = shijian.engage_command(command=command_temperature)
                 measurements.append(float(result.strip()))
                 measurements = measurements[-20:]
                 y = measurements
                 x = range(0, len(y))
                 plot = datavision.TTYFigure()
-                tmp = plot.plot(x, y, marker = "_o")
+                tmp = plot.plot(x, y, marker="_o")
                 print(tmp)
                 time.sleep(interval)
                 print(chr(27) + "[2J")
