@@ -55,10 +55,11 @@ import logging
 import os
 import time
 
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import datavision
 import pandas as pd
 import pyprel
-import shijian
+import subprocess
 import technicolor
 
 name    = "gpudeets"
@@ -105,7 +106,7 @@ def main(options):
             if not graph_power and not graph_temperature:
                 timestamp          = datetime.datetime.utcnow()
                 timestamp_string   = timestamp.strftime("%Y-%m-%dT%H%M%SZ")
-                result             = shijian.engage_command(command=command_general)
+                result             = subprocess.check_output(command_general.split(' ')).decode('utf-8')
                 data               = [datum.strip() for datum in result.split(",")]
                 temperature        = str(data[1])
                 temperature_string = temperature + " °C"
@@ -165,10 +166,10 @@ def main(options):
                 time.sleep(interval)
             elif graph_power or graph_temperature:
                 if graph_power:
-                    result = shijian.engage_command(command=command_power)
+                    result = subprocess.check_output(command_power.split(' ')).decode('utf-8')
                     result = result.strip().strip(" W")
                 elif graph_temperature:
-                    result = shijian.engage_command(command=command_temperature)
+                    result = subprocess.check_output(command_temperature.split(' ')).decode('utf-8')
                 measurements.append(float(result.strip()))
                 measurements = measurements[-20:]
                 y = measurements
