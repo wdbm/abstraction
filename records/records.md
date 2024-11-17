@@ -25,12 +25,6 @@ output:
 
 ![](media/2015-06-30T2030Z_500x500.png)
 
-# 2015-06-20
-
-## image
-
-![](media/2015-06-30T171020Z.png)
-
 # 2015-06-19
 
 ## "Simulated the Hofbräuhaus": text generation by a recurrent neural network trained on Mein Kampf
