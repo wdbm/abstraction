@@ -2,7 +2,7 @@
 
 # feature scaling
 
-Standardization of datasets is a common requirement for many machine learning estimators implemented in the scikit; they might behave badly if the individual features do not more or less look like standard normally-distributed data: Gaussian with zero mean and unit variance -- often called a standard scores. Many machine learning algorithms assume that all features are centered around zero and have variance of the same order. A feature with a variance that is orders of magnitude larger that others might dominate the objective function and make the estimator unable to learn from other features. The scikit function `scale` provides a quick way to perform this operation on a single array-like dataset.
+Standardisation of datasets is a common requirement for many machine learning estimators implemented in the scikit; they might behave badly if the individual features do not more or less look like standard normally-distributed data: Gaussian with zero mean and unit variance -- often called a standard scores. Many machine learning algorithms assume that all features are centered around zero and have variance of the same order. A feature with a variance that is orders of magnitude larger that others might dominate the objective function and make the estimator unable to learn from other features. The scikit function `scale` provides a quick way to perform this operation on a single array-like dataset.
 
 # imputation
 
@@ -10,7 +10,7 @@ Imputation is the process of replacing missing data with substituted values. The
 
 Listwise (complete case) deletion excludes an entire record from analysis if any single value of the record is missing. This affects the statistical power of the tests conducted because statistical power relies in part on sample size. Listwise deletion is problematic when the reasons for data being missing are not random and can result in a bias in data findings.
 
-A global constant can be used in place of a missing value. This makes the distinction between empty and missing values. Empty values can be vital for an analysis. If the missing values of a vital variable cannot be differentiated from "empty" then they can be categorized as a different value from the rest of the data set using a global constant such as "NA".
+A global constant can be used in place of a missing value. This makes the distinction between empty and missing values. Empty values can be vital for an analysis. If the missing values of a vital variable cannot be differentiated from "empty" then they can be categorised as a different value from the rest of the data set using a global constant such as "NA".
 
 Domain knowledge can be used to replace the missing value. Experts can suggest a reasonable value for missing data.
 
@@ -19,11 +19,6 @@ Attribute mean or median (for numerical data) or mode (for categorical data) can
 An indicator variable can be used for missing values.
 
 A data-mining algorithm can be used to predict a probably value for the missing value.
-
-# data sets sources
-
-- <https://www.kaggle.com/>
-- <https://www.reddit.com/r/datasets/>
 
 # SUSY Data Set
 
@@ -55,4 +50,4 @@ This data has been produced by MadGraph5 Monte Carlo simulations of 8 TeV proton
 
 # curated conversation data
 
-Curated conversation data sourced from Reddit is used for the conversation analysis and modelling. Specifically, conversational exchanges on Reddit are recorded. An exchange consists of an utterance and a response to the utterance, together with associated data, such as references and timestamps. A submission to Reddit is considered as an utterance and a comment on the submission is considered as a response to the utterance. The utterance is assumed to be of good quality and the response is assumed to be appropriate to the utterance based on the crowd-curated quality assessment inherent in Reddit.
+Curated conversation exchange data sourced from Reddit is used for the conversation analysis and modelling. An exchange consists of an utterance and a response to the utterance, together with associated data, such as references and timestamps. A submission to Reddit is considered as an utterance and a comment on the submission is considered as a response to the utterance. The utterance is assumed to be of good quality and the response is assumed to be appropriate to the utterance based on the crowd-curated quality assessment inherent in Reddit.
